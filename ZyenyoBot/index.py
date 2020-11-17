@@ -17,7 +17,7 @@ def replace_line(file_name, line_num, text):
     out.close()
 
 def zbauto(server_name, channel_name):
-    temp = open('./GroupCC/ZBA.json')
+    temp = open('../ZBotData/GroupCC/ZBA.json')
     zba = json.loads(temp.readline())
     temp.close()
     entry = f'{server_name} - {channel_name}'
@@ -25,10 +25,10 @@ def zbauto(server_name, channel_name):
     if entry in zba:
         zba[entry] = zba[entry] + 1
         file_number = zba[entry]
-        replace_line("./GroupCC/ZBA.json", 0, json.dumps(zba))
+        replace_line("../ZBotData/GroupCC/ZBA.json", 0, json.dumps(zba))
     else:
         zba[entry] = 1
-        replace_line("./GroupCC/ZBA.json", 0, json.dumps(zba))
+        replace_line("../ZBotData/GroupCC/ZBA.json", 0, json.dumps(zba))
         file_number = 1
 
 temp = open('../ZBotData/char_count_DB.json')
@@ -100,9 +100,8 @@ async def carch(ctx, arg1, arg2):
     arh = sub("<#|>", "", arg1)
     channel = client.get_channel(int(arh))
     server = ctx.message.guild.name
-    os.chdir("../ZBotdata")
-    copyfile('cccopy.json', 'c.json')
-    temper = open('c.json')
+    copyfile('../ZBotData/cccopy.json', '../ZBotData/c.json')
+    temper = open('../ZBotData/c.json')
     global bchc
     bchc = json.loads(temper.readline())
     temper.close()
@@ -115,14 +114,13 @@ async def carch(ctx, arg1, arg2):
             if f'{un}_tmc' in bchc:
                 bchc[f'{un}'] = bchc[f'{un}'] + char_count
                 bchc[f'{un}_tmc'] = bchc[f'{un}_tmc'] + 1
-                replace_line("c.json", 0, json.dumps(bchc))
+                replace_line("../ZBotData/c.json", 0, json.dumps(bchc))
             else:
                 bchc[f'{un}'] = char_count
                 bchc[f'{un}_tmc'] = 1
-                replace_line("c.json", 0, json.dumps(bchc))
+                replace_line("../ZBotData/c.json", 0, json.dumps(bchc))
     zbauto(server, channel)
-    os.rename('c.json', f'./GroupCC/{server} - {channel} ({file_number}).json')
-    os.chdir("../ZyenyoBot")
+    os.rename('../ZBotData/c.json', f'../ZBotData/GroupCC/{server} - {channel} ({file_number}).json')
     await ctx.send("Done!")
 
 
