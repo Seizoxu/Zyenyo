@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+    zyenyo:
+        name: zyenyo
+        image: zyenyo:0.1
+        stop_signal: SIGINT
+        restart: unless_stopped
