@@ -17,7 +17,8 @@ client.add_cog(ping(client))
 ###################
 ###[DEFINITIONS]###
 ###################
-def replace_line(file_name, line_num, text): 
+
+def REPLACE_LINE(file_name, line_num, text):
     lines = open(file_name, "r").readlines()
     lines[line_num] = text
     out = open(file_name, "w")
@@ -25,25 +26,22 @@ def replace_line(file_name, line_num, text):
     out.close()
 
 
-def zbauto(server_name, channel_name): # FIXME: There's something fishy about this name :P, three guesses as to what.
-    temp = open("ZBotData/GroupCC/ZBA.json")
-    zba = json.loads(temp.readline())
+def ARCHIVE_NAME(server_name, channel_name):
+    temp = open("ZBotData/GroupCC/archive-index-json")
+    archiveCount = json.loads(temp.readline())
     temp.close()
     entry = f"{server_name} - {channel_name}"
-    global file_number
-    if entry in zba:
-        zba[entry] = zba[entry] + 1
-        file_number = zba[entry]
-        replace_line("ZBotData/GroupCC/ZBA.json", 0, json.dumps(zba))
+    global ARCHIVE_NUMBER
+    if entry in archiveCount:
+        archiveCount[entry] = archiveCount[entry] + 1
+        ARCHIVE_NUMBER = archiveCount[entry]
+        REPLACE_LINE("ZBotData/GroupCC/archive-index-json", 0, json.dumps(archiveCount))
     else:
-        zba[entry] = 1
-        replace_line("ZBotData/GroupCC/ZBA.json", 0, json.dumps(zba))
-        file_number = 1
+        archiveCount[entry] = 1
+        REPLACE_LINE("ZBotData/GroupCC/archive-index-json", 0, json.dumps(archiveCount))
+        ARCHIVE_NUMBER = 1
 
 
-# FIXME: Ideally, you'd want this on the top of the file, right after your imports.
-# Why? There's something known as global variables, and usually they're defined at the top of the file.
-# They're also usually FULL CAPITALS with underscores to make them obvious.
 
 # FIXME(A BETTER WAY): There's a better way to do this: Python Docs on the following:
 # https://docs.python.org/3/reference/compound_stmts.html#the-with-statement
@@ -53,21 +51,21 @@ temp.close()
 
 
 @client.command()
-async def load(ctx, extension): #FIXME(Naming): Load What exactly? 
+async def load(ctx, extension): #FIXME(Naming): Load What exactly?
     if ctx.author.id == 642193466876493829:
         client.load_extension(f"cogs.{extension}")
         await ctx.send("Successfully loaded the module.")
     else:
-        await ctx.send("Please don't try to break me.")
+        await ctx.send("Please don't try to break me. :(")
 
 
 @client.command()
-async def unload(ctx, extension): #FIXME(Naming): unload What exactly? 
+async def unload(ctx, extension): #FIXME(Naming): unload What exactly?
     if ctx.author.id == 642193466876493829:
         client.unload_extension(f"cogs.{extension}")
         await ctx.send("Successfully unloaded the module.")
     else:
-        await ctx.send("Don't try to break me.")
+        await ctx.send("Please don't try to break me. :(")
 
 
 # FIXME(DO NOT DO THIS): And for good reason, while this is what you'd call a quick hack (and it works),
@@ -92,11 +90,11 @@ async def on_message(message):
     if f"{un}_tmc" in chc:
         chc[f"{un}"] = chc[f"{un}"] + char_count
         chc[f"{un}_tmc"] = chc[f"{un}_tmc"] + 1
-        replace_line("ZBotData/char_count_DB.json", 0, json.dumps(chc))
+        REPLACE_LINE("ZBotData/char_count_DB.json", 0, json.dumps(chc))
     else:
         chc[f"{un}"] = char_count
         chc[f"{un}_tmc"] = 1
-        replace_line("ZBotData/char_count_DB.json", 0, json.dumps(chc))
+        REPLACE_LINE("ZBotData/char_count_DB.json", 0, json.dumps(chc))
     await client.process_commands(message)
 
 # FIXME(READABILITY) While I love the usage of template strings, it's best used when it's a smaller sentence.
@@ -145,13 +143,13 @@ async def carch(ctx, arg1, arg2): #FIXME(Naming) What *is* carch.
             if f"{un}_tmc" in bchc:
                 bchc[f"{un}"] = bchc[f"{un}"] + char_count
                 bchc[f"{un}_tmc"] = bchc[f"{un}_tmc"] + 1
-                replace_line("ZBotData/c.json", 0, json.dumps(bchc))
+                REPLACE_LINE("ZBotData/c.json", 0, json.dumps(bchc))
             else:
                 bchc[f"{un}"] = char_count
                 bchc[f"{un}_tmc"] = 1
-                replace_line("ZBotData/c.json", 0, json.dumps(bchc))
-    zbauto(server, channel)
+                REPLACE_LINE("ZBotData/c.json", 0, json.dumps(bchc))
+    ARCHIVE_NAME(server, channel)
     os.rename(
-        "ZBotData/c.json", f"ZBotData/GroupCC/{server} - {channel} ({file_number}).json"
+        "ZBotData/c.json", f"ZBotData/GroupCC/{server} - {channel} ({ARCHIVE_NUMBER}).json"
     )
     await ctx.send("Done!")
