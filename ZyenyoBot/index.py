@@ -2,22 +2,23 @@ import discord, os, json, ast
 from discord.ext import commands
 from shutil import copyfile
 from re import sub
-from . import botconfig
 
-# I'm importing something here, the fix-me at line 72 should tell you why,
+from . import botconfig
 from .cogs.ping import ping
 
 
 client = commands.Bot(command_prefix=botconfig.PREFIX)
 
-# This is usually how you'd want to register cogs, not using load_extensions (load_extensions is messy.)
-# Also Documentation Time: https://discordpy.readthedocs.io/en/latest/ext/commands/cogs.html#cog-registration
+
 client.add_cog(ping(client))
+
 
 ###################
 ###[DEFINITIONS]###
 ###################
-def replace_line(file_name, line_num, text): 
+
+
+def REPLACE_LINE(file_name, line_num, text):
     lines = open(file_name, "r").readlines()
     lines[line_num] = text
     out = open(file_name, "w")
@@ -25,133 +26,115 @@ def replace_line(file_name, line_num, text):
     out.close()
 
 
-def zbauto(server_name, channel_name): # FIXME: There's something fishy about this name :P, three guesses as to what.
-    temp = open("ZBotData/GroupCC/ZBA.json")
-    zba = json.loads(temp.readline())
-    temp.close()
+def ARCHIVE_NAME(server_name, channel_name):
+    with open("ZBotData/GroupCC/archive-index.json") as temp:
+        archiveCount = json.loads(temp.readline())
     entry = f"{server_name} - {channel_name}"
-    global file_number
-    if entry in zba:
-        zba[entry] = zba[entry] + 1
-        file_number = zba[entry]
-        replace_line("ZBotData/GroupCC/ZBA.json", 0, json.dumps(zba))
+    global ARCHIVE_NUMBER
+    if entry in archiveCount:
+        archiveCount[entry] = archiveCount[entry] + 1
+        ARCHIVE_NUMBER = archiveCount[entry]
     else:
-        zba[entry] = 1
-        replace_line("ZBotData/GroupCC/ZBA.json", 0, json.dumps(zba))
-        file_number = 1
+        archiveCount[entry] = 1
+        ARCHIVE_NUMBER = 1
+    REPLACE_LINE("ZBotData/GroupCC/archive-index.json", 0, json.dumps(archiveCount))
 
 
-# FIXME: Ideally, you'd want this on the top of the file, right after your imports.
-# Why? There's something known as global variables, and usually they're defined at the top of the file.
-# They're also usually FULL CAPITALS with underscores to make them obvious.
+with open("ZBotData/char_count_DB.json") as temp:
+    CHARACTER_INDEX = json.loads(temp.readline())
 
-# FIXME(A BETTER WAY): There's a better way to do this: Python Docs on the following:
-# https://docs.python.org/3/reference/compound_stmts.html#the-with-statement
-temp = open("ZBotData/char_count_DB.json")
-chc = json.loads(temp.readline())
-temp.close()
-
-
+# loadcog and unloadcog aren't meant to be used regularly; they exist for testing purposes.
 @client.command()
-async def load(ctx, extension): #FIXME(Naming): Load What exactly? 
+async def loadcog(ctx, extension):
     if ctx.author.id == 642193466876493829:
         client.load_extension(f"cogs.{extension}")
-        await ctx.send("Successfully loaded the module.")
+        await ctx.send("Successfully loaded the cog.")
     else:
-        await ctx.send("Please don't try to break me.")
+        await ctx.send("Please don't try to break me. :(")
 
 
 @client.command()
-async def unload(ctx, extension): #FIXME(Naming): unload What exactly? 
+async def unloadcog(ctx, extension):
     if ctx.author.id == 642193466876493829:
         client.unload_extension(f"cogs.{extension}")
-        await ctx.send("Successfully unloaded the module.")
+        await ctx.send("Successfully unloaded the cog.")
     else:
-        await ctx.send("Don't try to break me.")
+        await ctx.send("Please don't try to break me. :(")
 
-
-# FIXME(DO NOT DO THIS): And for good reason, while this is what you'd call a quick hack (and it works),
-# It's a very bad thing to do. This one is a freebie, from me :)
-# for filename in os.listdir('./cogs'):
-#     if filename.endswith('.py'):
-#         client.load_extension(f'cogs.{filename[:-3]}')
 
 
 ####################
 #####[COMMANDS]#####
 ####################
 
-#FIXME(Style, Flow): So, there's one line that you're doing regardless of condition.
-# So why put them in both blocks? Seperate them.
+
 @client.event
 async def on_message(message):
     if message.author.bot:
         return
     char_count = len(message.content)
-    un = message.author.id
-    if f"{un}_tmc" in chc:
-        chc[f"{un}"] = chc[f"{un}"] + char_count
-        chc[f"{un}_tmc"] = chc[f"{un}_tmc"] + 1
-        replace_line("ZBotData/char_count_DB.json", 0, json.dumps(chc))
+    username = message.author.id
+    if f"{username}_tmc" in CHARACTER_INDEX:
+        CHARACTER_INDEX[f"{username}"] = CHARACTER_INDEX[f"{username}"] + char_count
+        CHARACTER_INDEX[f"{username}_tmc"] = CHARACTER_INDEX[f"{username}_tmc"] + 1
     else:
-        chc[f"{un}"] = char_count
-        chc[f"{un}_tmc"] = 1
-        replace_line("ZBotData/char_count_DB.json", 0, json.dumps(chc))
+        CHARACTER_INDEX[f"{username}"] = char_count
+        CHARACTER_INDEX[f"{username}_tmc"] = 1
+    REPLACE_LINE("ZBotData/char_count_DB.json", 0, json.dumps(CHARACTER_INDEX))
     await client.process_commands(message)
 
-# FIXME(READABILITY) While I love the usage of template strings, it's best used when it's a smaller sentence.
-# The Old += and \n at the end of a string is far more readable.
-@client.command()
-async def stats(message):
-    un = message.author.id
-    totalChars = chc[f"{un}"]
-    totalMsgs = chc[f"{un}_tmc"]
+#mstats are whatever data the bot has collected passively (lines 71-84).
+@client.command(aliases=["mstats"])
+async def messagestatistics(message):
+    username = message.author.id
+    totalChars = CHARACTER_INDEX[f"{username}"]
+    totalMsgs = CHARACTER_INDEX[f"{username}_tmc"]
     tAvgChar = round(totalChars / totalMsgs, 2)
     await message.channel.send(
-        f"Average character count: . . . . . . . . . . **`{tAvgChar}`**\nTotal character count: . . . . . . . . . . . . . **`{totalChars}`**\nTotal messages sent: . . . . . . . . . . . . . . **`{totalMsgs}`**"
+        f"Average character count: . . . . . . . . . . **`{tAvgChar}`**\n"
+        f"Total character count: . . . . . . . . . . . . . **`{totalChars}`**\n"
+        f"Total messages sent: . . . . . . . . . . . . . . **`{totalMsgs}`**"
+    )
+
+# starch is whatever data has been actively scraped from a server (lines 113-140).
+@client.command(aliases=["starch","astats"])
+async def archivestatistics(message):
+    username = message.author.id
+    totalChars = SCRAPER_CHAR_INDEX[f"{username}"]
+    totalMsgs = SCRAPER_CHAR_INDEX[f"{username}_tmc"]
+    tAvgChar = round(totalChars / totalMsgs, 2)
+    await message.channel.send(
+        f"Average character count: . . . . . . . . . . **`{tAvgChar}`**\n"
+        f"Total character count: . . . . . . . . . . . . . **`{totalChars}`**\n"
+        f"Total messages sent: . . . . . . . . . . . . . . **`{totalMsgs}`**"
     )
 
 
-@client.command()
-async def cstats(message):
-    un = message.author.id
-    totalChars = bchc[f"{un}"]
-    totalMsgs = bchc[f"{un}_tmc"]
-    tAvgChar = round(totalChars / totalMsgs, 2)
-    await message.channel.send(
-        f"Average character count: . . . . . . . . . . **`{tAvgChar}`**\nTotal character count: . . . . . . . . . . . . . **`{totalChars}`**\nTotal messages sent: . . . . . . . . . . . . . . **`{totalMsgs}`**"
-    )
-
-
-## bchc is Big-CHaracter-Count.
-
-
-@client.command()
-async def carch(ctx, arg1, arg2): #FIXME(Naming) What *is* carch.
-    arh = sub("<#|>", "", arg1)
-    channel = client.get_channel(int(arh))
+@client.command(aliases=["march"])
+async def messagearchive(ctx, channelName, scrapeLimit):
+    nakedID = sub("<#|>", "", channelName)
+    channel = client.get_channel(int(nakedID))
     server = ctx.message.guild.name
     copyfile("ZBotData/cccopy.json", "ZBotData/c.json")
-    temper = open("ZBotData/c.json")
-    global bchc
-    bchc = json.loads(temper.readline())
-    temper.close()
-    async for message in channel.history(limit=int(arg2)):
+    global SCRAPER_CHAR_INDEX
+    with open("ZBotData/c.json") as temp:
+        SCRAPER_CHAR_INDEX = json.loads(temp.readline())
+    async for message in channel.history(limit=int(scrapeLimit)):
         if message.author.bot:
             pass
         else:
             char_count = len(message.content)
-            un = message.author.id
-            if f"{un}_tmc" in bchc:
-                bchc[f"{un}"] = bchc[f"{un}"] + char_count
-                bchc[f"{un}_tmc"] = bchc[f"{un}_tmc"] + 1
-                replace_line("ZBotData/c.json", 0, json.dumps(bchc))
+            username = message.author.id
+            if f"{username}_tmc" in SCRAPER_CHAR_INDEX:
+                SCRAPER_CHAR_INDEX[f"{username}"] = SCRAPER_CHAR_INDEX[f"{username}"] + char_count
+                SCRAPER_CHAR_INDEX[f"{username}_tmc"] = SCRAPER_CHAR_INDEX[f"{username}_tmc"] + 1
+                REPLACE_LINE("ZBotData/c.json", 0, json.dumps(SCRAPER_CHAR_INDEX))
             else:
-                bchc[f"{un}"] = char_count
-                bchc[f"{un}_tmc"] = 1
-                replace_line("ZBotData/c.json", 0, json.dumps(bchc))
-    zbauto(server, channel)
+                SCRAPER_CHAR_INDEX[f"{username}"] = char_count
+                SCRAPER_CHAR_INDEX[f"{username}_tmc"] = 1
+                REPLACE_LINE("ZBotData/c.json", 0, json.dumps(SCRAPER_CHAR_INDEX))
+    ARCHIVE_NAME(server, channel)
     os.rename(
-        "ZBotData/c.json", f"ZBotData/GroupCC/{server} - {channel} ({file_number}).json"
+        "ZBotData/c.json", f"ZBotData/GroupCC/{server} - {channel} ({ARCHIVE_NUMBER}).json"
     )
     await ctx.send("Done!")
