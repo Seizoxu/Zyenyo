@@ -44,23 +44,27 @@ with open("ZBotData/char_count_DB.json") as temp:
     CHARACTER_INDEX = json.loads(temp.readline())
 
 # loadcog and unloadcog aren't meant to be used regularly; they exist for testing purposes.
-@client.command()
-async def loadcog(ctx, extension):
-    if ctx.author.id == 642193466876493829:
-        client.load_extension(f"cogs.{extension}")
+coglist = {
+    "ping" : ping
+}
+@client.command(aliases=["load"], hidden=True)
+@commands.is_owner()
+async def loadcog(ctx, cog):
+    if cog in coglist:
+        client.add_cog(coglist[cog](client))
         await ctx.send("Successfully loaded the cog.")
     else:
-        await ctx.send("Please don't try to break me. :(")
+        await ctx.send("The specified cog does not exist.")
 
 
-@client.command()
-async def unloadcog(ctx, extension):
-    if ctx.author.id == 642193466876493829:
-        client.unload_extension(f"cogs.{extension}")
+@client.command(aliases=["unload"], hidden=True)
+@commands.is_owner()
+async def unloadcog(ctx, cog):
+    if cog in coglist:
+        client.remove_cog(cog)
         await ctx.send("Successfully unloaded the cog.")
     else:
-        await ctx.send("Please don't try to break me. :(")
-
+        await ctx.send("The specified cog does not exist.")
 
 
 ####################
