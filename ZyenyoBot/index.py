@@ -3,7 +3,6 @@ from discord.ext import commands
 from shutil import copyfile
 from re import sub
 
-
 from . import botconfig
 from .cogs.ping import ping
 
@@ -12,7 +11,6 @@ client = commands.Bot(command_prefix=botconfig.PREFIX)
 
 
 client.add_cog(ping(client))
-
 
 
 ###################
@@ -29,29 +27,28 @@ def REPLACE_LINE(file_name, line_num, text):
 
 
 def ARCHIVE_NAME(server_name, channel_name):
-    with open("ZBotData/GroupCC/archive-index-json") as temp:
+    with open("ZBotData/GroupCC/archive-index.json") as temp:
         archiveCount = json.loads(temp.readline())
     entry = f"{server_name} - {channel_name}"
     global ARCHIVE_NUMBER
     if entry in archiveCount:
         archiveCount[entry] = archiveCount[entry] + 1
         ARCHIVE_NUMBER = archiveCount[entry]
-        REPLACE_LINE("ZBotData/GroupCC/archive-index-json", 0, json.dumps(archiveCount))
     else:
         archiveCount[entry] = 1
-        REPLACE_LINE("ZBotData/GroupCC/archive-index-json", 0, json.dumps(archiveCount))
         ARCHIVE_NUMBER = 1
+    REPLACE_LINE("ZBotData/GroupCC/archive-index.json", 0, json.dumps(archiveCount))
 
 
 with open("ZBotData/char_count_DB.json") as temp:
     CHARACTER_INDEX = json.loads(temp.readline())
 
-
+# loadcog and unloadcog aren't meant to be used regularly; they exist for testing purposes.
 @client.command()
 async def loadcog(ctx, extension):
     if ctx.author.id == 642193466876493829:
         client.load_extension(f"cogs.{extension}")
-        await ctx.send("Successfully loaded the module.")
+        await ctx.send("Successfully loaded the cog.")
     else:
         await ctx.send("Please don't try to break me. :(")
 
@@ -60,7 +57,7 @@ async def loadcog(ctx, extension):
 async def unloadcog(ctx, extension):
     if ctx.author.id == 642193466876493829:
         client.unload_extension(f"cogs.{extension}")
-        await ctx.send("Successfully unloaded the module.")
+        await ctx.send("Successfully unloaded the cog.")
     else:
         await ctx.send("Please don't try to break me. :(")
 
@@ -86,43 +83,43 @@ async def on_message(message):
     REPLACE_LINE("ZBotData/char_count_DB.json", 0, json.dumps(CHARACTER_INDEX))
     await client.process_commands(message)
 
-
-@client.command(alias=["mstats"])
+#mstats are whatever data the bot has collected passively (lines 71-84).
+@client.command(aliases=["mstats"])
 async def messagestatistics(message):
     username = message.author.id
     totalChars = CHARACTER_INDEX[f"{username}"]
     totalMsgs = CHARACTER_INDEX[f"{username}_tmc"]
     tAvgChar = round(totalChars / totalMsgs, 2)
     await message.channel.send(
-        f"Average character count: . . . . . . . . . . **`{tAvgChar}`**\n"+=
-        f"Total character count: . . . . . . . . . . . . . **`{totalChars}`**\n"+=
+        f"Average character count: . . . . . . . . . . **`{tAvgChar}`**\n"
+        f"Total character count: . . . . . . . . . . . . . **`{totalChars}`**\n"
         f"Total messages sent: . . . . . . . . . . . . . . **`{totalMsgs}`**"
     )
 
-
-@client.command(alias=["starch","astats"])
+# starch is whatever data has been actively scraped from a server (lines 113-140).
+@client.command(aliases=["starch","astats"])
 async def archivestatistics(message):
     username = message.author.id
     totalChars = SCRAPER_CHAR_INDEX[f"{username}"]
     totalMsgs = SCRAPER_CHAR_INDEX[f"{username}_tmc"]
     tAvgChar = round(totalChars / totalMsgs, 2)
     await message.channel.send(
-        f"Average character count: . . . . . . . . . . **`{tAvgChar}`**\n"+=
-        f"Total character count: . . . . . . . . . . . . . **`{totalChars}`**\n"+=
+        f"Average character count: . . . . . . . . . . **`{tAvgChar}`**\n"
+        f"Total character count: . . . . . . . . . . . . . **`{totalChars}`**\n"
         f"Total messages sent: . . . . . . . . . . . . . . **`{totalMsgs}`**"
     )
 
 
-@client.command(alias=["march"])
-async def messagearchive(ctx, arg1, arg2):
-    arh = sub("<#|>", "", arg1)
-    channel = client.get_channel(int(arh))
+@client.command(aliases=["march"])
+async def messagearchive(ctx, channelName, scrapeLimit):
+    nakedID = sub("<#|>", "", channelName)
+    channel = client.get_channel(int(nakedID))
     server = ctx.message.guild.name
     copyfile("ZBotData/cccopy.json", "ZBotData/c.json")
     global SCRAPER_CHAR_INDEX
     with open("ZBotData/c.json") as temp:
         SCRAPER_CHAR_INDEX = json.loads(temp.readline())
-    async for message in channel.history(limit=int(arg2)):
+    async for message in channel.history(limit=int(scrapeLimit)):
         if message.author.bot:
             pass
         else:
