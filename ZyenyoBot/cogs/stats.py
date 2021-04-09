@@ -182,9 +182,8 @@ class Statistics(commands.Cog):
         
         # Format the message, and send it.
         for i in range((page * 20 - 20), (page * 20)):
-            if i < (page * 20) and i >= (page * 20 - 20):
-                username = usernames[i - ((page - 1) * 20)]
-                lbMessage = lbMessage + f"{i + 1}. {username}: **`{charValues[i]}`**\n"
+            username = usernames[i - ((page - 1) * 20)]
+            lbMessage = lbMessage + f"{i + 1}. {username}: **`{charValues[i]}`**\n"
         await ctx.send(lbMessage)
     
     
@@ -192,15 +191,25 @@ class Statistics(commands.Cog):
     async def activityleaderboard(self, ctx, page):
         activityLB = {}
         activityKeys = list(ACTIVITY_INDEX.keys())
+        activityValues = list(ACTIVITY_INDEX.values())
         page = int(page)
         if page > 10: page = 10
-        
+
         # Edit and sort the dictionary.
         for i in range(len(ACTIVITY_INDEX)):
             if (i % 2) == 0:
-                activityLB.update({activityKeys[i]: ACTIVITY_INDEX[activityKeys[i]]})
+                activityLB.update({activityKeys[i].strip("_as"): ACTIVITY_INDEX[activityKeys[i]]})
         activityLB = dict(sorted(activityLB.items(), key = lambda kv: kv[1], reverse=True))
-        del activityLB["tas"]
+        
+        activityKeys = list(activityLB.keys())
+        activityValues = list(activityLB.values())
+        
+        for i in range(len(activityLB)):
+            activityHours = round(activityValues[i] / 3600, 3)
+            activityMinutes = round((activityHours - int(activityHours)) * 60, 3)
+            activitySeconds = (activityMinutes - int(activityMinutes)) * 60
+            formattedTime = f"{int(activityHours)}h {int(activityMinutes)}min {int(activitySeconds)}s."
+            activityLB[activityKeys[i]] = formattedTime
         
         # Getting ready to format the message.
         activityKeys = list(activityLB.keys())
@@ -217,7 +226,6 @@ class Statistics(commands.Cog):
         
         # Format the message, and send it.
         for i in range((page * 20 - 20), (page * 20)):
-            if i < (page * 20) and i >= (page * 20 - 20):
-                username = usernames[i - ((page - 1) * 20)]
-                lbMessage = lbMessage + f"{i + 1}. {username}: **`{activityValues[i]}`**\n"
+            username = usernames[i - ((page - 1) * 20)]
+            lbMessage = lbMessage + f"{i + 1}. {username}: **`{activityValues[i]}`**\n"
         await ctx.send(lbMessage)
