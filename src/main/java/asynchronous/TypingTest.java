@@ -31,7 +31,7 @@ public class TypingTest extends ListenerAdapter implements Runnable
 	private TypingTest thisInstance = this;
 	private TypingTestLeaderboard submissions = new TypingTestLeaderboard();
 	
-	private final static String TEST_PROMPTS_FILEPATH = "ZBotData/TypingPrompts/";
+	private final static String TEST_PROMPTS_FILEPATH = "ZBotData\\TypingPrompts\\";
 	private final static short PROMPT_COUNT = 12;
 	private final static short WPM_EASY = 30;
 	private final static short WPM_MEDIUM = 60;
@@ -212,8 +212,8 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		submissions.addSubmission(submission);
 		
 		channel.sendMessage(
-				String.format("<@%s> has completed the prompt in **`%.3f` seconds `[%.2f WPM]`**, with an accuracy of **`%.2f%%`.**",
-				submission.getUserID(), timeTakenMillis/1000, submission.getWPM(), submission.getAccuracy()))
+				String.format("<@%s> has completed the prompt in **`%.3f` seconds `[%.2f WPM]`**, with an accuracy of **`%.2f%s`.**",
+				submission.getUserID(), timeTakenMillis/1000, submission.getWPM(), submission.getAccuracy(), "%."))
 				.queue();
 	}
 	

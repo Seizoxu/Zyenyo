@@ -17,6 +17,7 @@ public final class Aliases
 	public final static Set<String> TYPESTART = new HashSet<>();
 	public final static Set<String> TYPEQUIT = new HashSet<>();
 	public final static Set<String> TYPESTATS = new HashSet<>();
+	public final static Set<String> CLEARTESTS = new HashSet<>();
 	
 	public final static Set<String> DPICONVERTER = new HashSet<>();
 	
@@ -50,6 +51,9 @@ public final class Aliases
 		TYPESTATS.add(Zyenyo.PREFIX + "typestats");
 		TYPESTATS.add(Zyenyo.PREFIX + "tstats");
 		TYPESTATS.add(Zyenyo.PREFIX + "ts");
+
+		CLEARTESTS.add(Zyenyo.PREFIX + "cleartests");
+
 		
 		DPICONVERTER.add(Zyenyo.PREFIX + "dpiconverter");
 		DPICONVERTER.add(Zyenyo.PREFIX + "dpiconv");
