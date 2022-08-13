@@ -25,7 +25,7 @@ public class Scraper implements Runnable
 	private int limit;
 	private MessageReceivedEvent event;
 	
-	private final String filepath = "ZBotData\\";
+	private final String filepath = "ZBotData/";
 	private final String indexCountsName = "COUNTS.zbif"; //ZBIF = ZyenyoBotIndexFile.
 	private final String indexIDsName = "IDs.zbif";
 	
