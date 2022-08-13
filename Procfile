@@ -1,1 +1,1 @@
-worker: java -Dserver.port=8080 -cp target/zyenyo-0.1.0.jar zyenyo.Zyenyo $BOT_TOKEN
+web: java -Dserver.port=8080 -cp target/zyenyo-0.1.0.jar zyenyo.Zyenyo $BOT_TOKEN
