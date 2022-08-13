@@ -43,7 +43,7 @@ public class Reader implements Runnable
 			if (idTable.get(msRecallID) != null)
 			{
 				String filename = String.format("%s.zbsf", idTable.get(msRecallID));
-				ObjectInputStream scrapeFileOIS = new ObjectInputStream(new FileInputStream(new File(String.format("ZBotData\\%s", filename))));
+				ObjectInputStream scrapeFileOIS = new ObjectInputStream(new FileInputStream(new File(String.format("ZBotData/%s", filename))));
 				Hashtable<String, Integer> scrapeData = (Hashtable<String, Integer>) scrapeFileOIS.readObject();
 				
 				Hashtable<Long, Integer> charCounts = new Hashtable<>();
