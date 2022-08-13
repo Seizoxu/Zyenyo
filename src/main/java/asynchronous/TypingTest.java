@@ -31,7 +31,7 @@ public class TypingTest extends ListenerAdapter implements Runnable
 	private TypingTest thisInstance = this;
 	private TypingTestLeaderboard submissions = new TypingTestLeaderboard();
 	
-	private final static String TEST_PROMPTS_FILEPATH = "ZBotData/TypingPrompts/";
+	private final static String TEST_PROMPTS_FILEPATH = "ZBotData\\TypingPrompts\\";
 	private final static short PROMPT_COUNT = 12;
 	private final static short WPM_EASY = 30;
 	private final static short WPM_MEDIUM = 60;
