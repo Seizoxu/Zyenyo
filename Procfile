@@ -1,0 +1,1 @@
+web: C:\Users\ammumol\Desktop\Zyenyo\ZyenyoBot>java -cp target/zyenyo-0.1.0.jar zyenyo.Zyenyo BOT_TOKEN
