@@ -21,7 +21,7 @@ public class Reader implements Runnable
 	private MessageReceivedEvent event;
 	private JDA jda;
 	
-	private String idFile = "ZBotData\\IDs.zbif";
+	private String idFile = "ZBotData/IDs.zbif";
 	
 	public Reader(int msRecallID, MessageReceivedEvent event, JDA jda)
 	{
