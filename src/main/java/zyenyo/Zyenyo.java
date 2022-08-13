@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.entities.Activity;
 public class Zyenyo
 {
 	public static boolean isTypeTestRunning = false;
-	public static final String PREFIX = "\\";
+	public static final String PREFIX = "~";
 	public static final Long BOT_USER_ID = 696614233944752130L;
 	
 	

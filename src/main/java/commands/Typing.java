@@ -3,6 +3,7 @@ package commands;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import asynchronous.ClearTests;
 import asynchronous.TypeStats;
 import asynchronous.TypingTest;
 import dataStructures.Aliases;
@@ -16,8 +17,7 @@ import zyenyo.Zyenyo;
 public class Typing extends ListenerAdapter
 {
 	private TypingTest typingTest;
-	@Override
-	public void onMessageReceived(MessageReceivedEvent event)
+	@Override public void onMessageReceived(MessageReceivedEvent event)
 	{
 		if (event.getAuthor().isBot()) {return;}
 		
@@ -99,5 +99,19 @@ public class Typing extends ListenerAdapter
 				channel.sendMessageEmbeds(info.build()).queue();
 			}
 		}
+		else if (Aliases.CLEARTESTS.contains(args[0].toLowerCase()))
+                {
+                  
+			if (args.length == 1 || !(args[1].equalsIgnoreCase("help")))
+                        {
+                              try {pool.submit(new ClearTests(event));}
+                              catch (NumberFormatException e)
+                              {
+                                      EmbedBuilder syntax = InfoCard.TypingStatsSyntax(new EmbedBuilder());
+                                      channel.sendMessageEmbeds(syntax.build()).queue();
+                              }
+
+                        }
+                }
 	}
 }
