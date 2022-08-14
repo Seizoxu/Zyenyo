@@ -2,24 +2,35 @@ package asynchronous;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class TypeStats implements Runnable
 {
 	private MessageReceivedEvent event;
-	public TypeStats(MessageReceivedEvent event) {this.event = event;}
+	private MessageChannel channel;
+	private String idStr;
+	public TypeStats(MessageReceivedEvent event, String id)
+	{
+		this.event = event;
+		this.channel = event.getChannel();
+		this.idStr = id;
+	}
 	
 	@Override
 	public void run()
 	{
+		channel.sendTyping();
 		try
 		{
-			String jsonString = TypingApiHandler.requestData(event.getAuthor().getIdLong(), "stats");
+			Long id = Long.parseLong(idStr);
+			String jsonString = TypingApiHandler.requestData(id, "stats");
 			JSONObject json = (JSONObject) JSONValue.parse(jsonString);
 			
 			int testsTaken = Integer.parseInt(json.get("tests").toString());
@@ -29,8 +40,8 @@ public class TypeStats implements Runnable
 			double deviation = Double.parseDouble(json.get("deviation").toString());
 			String rank = json.get("rank").toString();
 			
-			event.getChannel().sendMessageEmbeds(new EmbedBuilder()
-					.addField("Stats for " + event.getAuthor().getAsTag(),
+			channel.sendMessageEmbeds(new EmbedBuilder()
+					.addField("Stats for " + event.getJDA().retrieveUserById(id).submit().get().getAsTag(),
 							String.format("Tests Taken: **`%d`**%n"
 									+ "Best WPM: **`%.2f`**%n"
 									+ "Average WPM: **`%.2f`**%n"
@@ -42,6 +53,19 @@ public class TypeStats implements Runnable
 					.build())
 			.queue();
 		}
-		catch (IOException | InterruptedException e) {e.printStackTrace();}
+		catch (IOException | InterruptedException | NumberFormatException e)
+		{
+			channel.sendMessageEmbeds(new EmbedBuilder()
+					.addField("Error: Cannot fetch user stats.", "Reason: User not in database.", false)
+					.build())
+			.queue();
+		}
+		catch (ExecutionException e)
+		{
+			channel.sendMessageEmbeds(new EmbedBuilder()
+					.addField("Error: Cannot fetch user stats.", "Reason: User does not exist.", false)
+					.build())
+			.queue();
+		}
 	}
 }

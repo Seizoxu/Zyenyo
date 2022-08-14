@@ -1,54 +1,34 @@
 package commands;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import asynchronous.Reader;
 import dataStructures.Aliases;
 import dataStructures.InfoCard;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import zyenyo.Zyenyo;
 
 public class MesticsRead extends ListenerAdapter
 {
-	private JDA jda;
-	
-	public MesticsRead(JDA api) {this.jda = api;}
+	private MessageReceivedEvent event;
+	private Runnable sendHelp = new Runnable()
+	{@Override public void run() {event.getMessage().replyEmbeds(InfoCard.INCORRECT_SYNTAX.build()).queue();}};
 	
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event)
 	{
+		this.event = event;
 		if (event.getAuthor().isBot()) {return;}
+		String[] args = event.getMessage().getContentRaw().split("\\s+");
 		
-		// Gets server, channel, and message data.
-		MessageChannel channel = event.getChannel();
-		Message message = event.getMessage();
-		String content = message.getContentRaw();
-		String[] args = content.split("\\s+");
+		// IF: User requests for help...
+		if (args.length == 2 && args[1].equalsIgnoreCase("help")) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
 		
-		ExecutorService pool = Executors.newCachedThreadPool();
-		
+		// IF: Command is MesticsRead...
 		if (Aliases.MESTICSREAD.contains(args[0].toLowerCase()))
 		{
-			// Executes the command if the message is formatted correctly.
-			if (!(args.length == 1) || !(args[1].equalsIgnoreCase("help")))
-			{
-				try
-				{pool.submit(new Reader(Integer.parseInt(args[1]), event, jda));}
-				catch (NumberFormatException e)
-				{channel.sendMessageEmbeds(InfoCard.MesticsReadSyntax(new EmbedBuilder()).build()).queue();}
-			}
-			// Otherwise sends help.
-			else
-			{
-				EmbedBuilder info = InfoCard.MesticsReadHelp(new EmbedBuilder());
-				channel.sendTyping().queue();
-				channel.sendMessageEmbeds(info.build()).queue();
-			}
+			if (args.length == 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
+			
+			Zyenyo.masterThreadPool.submit(new Reader(event, args));
 		}
 	}
 }

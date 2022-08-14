@@ -10,6 +10,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import commands.Typing;
 import dataStructures.TypingSubmission;
 import dataStructures.TypingTestLeaderboard;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -17,7 +18,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import zyenyo.Zyenyo;
+import zyenyo.BotConfig;
 
 public class TypingTest extends ListenerAdapter implements Runnable
 {
@@ -38,9 +39,8 @@ public class TypingTest extends ListenerAdapter implements Runnable
 	private final static short WPM_HARD = 90;
 	private final static short WPM_DIABOLICAL = 120;
 	private final static short NUM_CHARS_IN_WORD = 5;
-//	private final static 
 	
-	private ScheduledExecutorService schedulePool = Executors.newScheduledThreadPool(1);
+	private ScheduledExecutorService schedulePool = Executors.newSingleThreadScheduledExecutor();
 	private Future<?> scheduledStop;
 	private Runnable concludeTest = new Runnable()
 	{
@@ -64,7 +64,7 @@ public class TypingTest extends ListenerAdapter implements Runnable
 					TypingApiHandler.sendTest(s.getUserID(), s.getWPM(), s.getAccuracy());
 				}
 				message.replyEmbeds(embed.build()).queue();
-				Zyenyo.isTypeTestRunning = false;
+				Typing.guildTestList.remove(event.getGuild().getIdLong());
 			}
 			catch (IOException | InterruptedException e) {}
 		}
@@ -90,8 +90,7 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		}
 		
 		String difficulty;
-		if ( (args.length > 2)) {throw new NumberFormatException("Incorrect syntax.");}
-		else if ( (args.length == 1) || !difficulties.contains(args[1].toLowerCase()) ) {difficulty = "easy";}
+		if ( (args.length == 1) || !difficulties.contains(args[1].toLowerCase()) ) {difficulty = "easy";}
 		else {difficulty = args[1].toLowerCase();}
 		
 		constructAndSendTest(difficulty);
@@ -152,7 +151,8 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		// Sets starting time when the message has been sent. TODO: Make a better system for this.
 		long userID = event.getAuthor().getIdLong();
 		MessageChannel answerChannel = event.getChannel();
-		if (userID == Zyenyo.BOT_USER_ID && startTime == -1) {startTime = System.currentTimeMillis(); return;}
+		
+		if (userID == BotConfig.BOT_USER_ID && startTime == -1) {startTime = System.currentTimeMillis(); return;}
 		else if (event.getAuthor().isBot()) {return;}
 		else if (answerChannel.getIdLong() != channel.getIdLong()) {return;}
 		else if (submissions.getUserIDs().contains(userID)) {return;}
@@ -212,8 +212,8 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		submissions.addSubmission(submission);
 		
 		channel.sendMessage(
-				String.format("<@%s> has completed the prompt in **`%.3f` seconds `[%.2f WPM]`**, with an accuracy of **`%.2f%s`.**",
-				submission.getUserID(), timeTakenMillis/1000, submission.getWPM(), submission.getAccuracy(), "%."))
+				String.format("<@%s> has completed the prompt in **`%.3f` seconds `[%.2f WPM]`**, with an accuracy of **`%.2f%%`**.",
+				submission.getUserID(), timeTakenMillis/1000, submission.getWPM(), submission.getAccuracy()))
 				.queue();
 	}
 	

@@ -1,10 +1,11 @@
 package commands;
 
+import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import asynchronous.TypeStats;
 import asynchronous.ClearTests;
+import asynchronous.TypeStats;
 import asynchronous.TypingTest;
 import dataStructures.Aliases;
 import dataStructures.InfoCard;
@@ -16,105 +17,75 @@ import zyenyo.Zyenyo;
 
 public class Typing extends ListenerAdapter
 {
+	public static HashMap<Long, TypingTest> guildTestList = new HashMap<>(); // guildID : TestInstance
 	private TypingTest typingTest;
+	private MessageChannel channel;
+	private long serverID;
+	private String[] args;
+	private ExecutorService pool = Executors.newCachedThreadPool();
+	private Runnable sendHelp = new Runnable()
+		{@Override public void run() {channel.sendMessageEmbeds(InfoCard.INCORRECT_SYNTAX.build()).queue();}};
+	private Runnable testAlreadyRunning = new Runnable()
+	{
+		@Override
+		public void run()
+		{
+			channel.sendMessageEmbeds(new EmbedBuilder()
+					.setDescription("Test is already running in this server.")
+					.build())
+			.queue();
+		}
+	};
+	
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event)
 	{
 		if (event.getAuthor().isBot()) {return;}
-		
+
 		// Gets data.
-		MessageChannel channel = event.getChannel();
-		String[] args = event.getMessage().getContentRaw().split("\\s+");
+		channel = event.getChannel();
+		serverID = event.getGuild().getIdLong();
+		args = event.getMessage().getContentRaw().split("\\s+");
+
+		// IF: User requests for help...
+		if (args.length == 2 && args[1].equalsIgnoreCase("help")) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
 		
-		ExecutorService pool = Executors.newFixedThreadPool(1);
 		
+		
+		// IF: Command is TYPESTART...
 		if (Aliases.TYPESTART.contains(args[0].toLowerCase()))
 		{
-			// Executes command if the syntax is correct.
-			if ((args.length == 1) || !(args[1].equalsIgnoreCase("help")))
-			{
-				try
-				{
-					if (Zyenyo.isTypeTestRunning) {return;}
-					pool.submit(typingTest = new TypingTest(event, args));
-					Zyenyo.isTypeTestRunning = true;
-				}
-				catch (NumberFormatException e)
-				{
-					EmbedBuilder syntax = InfoCard.TypingTestSyntax(new EmbedBuilder());
-					channel.sendMessageEmbeds(syntax.build()).queue();
-				}
-			}
-			// Otherwise sends help.
-			else
-			{
-				EmbedBuilder info = InfoCard.TypingTestHelp(new EmbedBuilder());
-				channel.sendTyping().queue();
-				channel.sendMessageEmbeds(info.build()).queue();
-			}
+			if (args.length != 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
+			if (guildTestList.containsKey(serverID)) {Zyenyo.masterThreadPool.submit(testAlreadyRunning); return;}
+				
+			pool.submit(typingTest = new TypingTest(event, args));
+			guildTestList.put(serverID, typingTest);
 		}
 		
+		// IF: Command is TYPEQUIT...
 		else if (Aliases.TYPEQUIT.contains(args[0].toLowerCase()))
 		{
-			// Executes the command if the message is formatted correctly.
-			if (args.length == 1 || !(args[1].equalsIgnoreCase("help")))
-			{
-				try
-				{
-					if (!Zyenyo.isTypeTestRunning) {return;}
-					typingTest.quitTest();
-					Zyenyo.isTypeTestRunning = false;
-				}
-				catch (NumberFormatException e)
-				{
-					EmbedBuilder syntax = InfoCard.TypingQuitSyntax(new EmbedBuilder());
-					channel.sendMessageEmbeds(syntax.build()).queue();
-				}
-			}
-			// Otherwise sends help.
-			else
-			{
-				EmbedBuilder info = InfoCard.TypingQuitHelp(new EmbedBuilder());
-				channel.sendTyping().queue();
-				channel.sendMessageEmbeds(info.build()).queue();
-			}
+			if (args.length != 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
+			if (!guildTestList.containsKey(serverID)) {return;}
+
+			guildTestList.get(serverID).quitTest();
+			guildTestList.remove(serverID);
 		}
-		
+
+		// IF: Command is TYPESTATS...
 		else if (Aliases.TYPESTATS.contains(args[0].toLowerCase()))
 		{
-			// Executes the command if the message is formatted correctly.
-			if (args.length == 1 || !(args[1].equalsIgnoreCase("help")))
-			{
-				try {pool.submit(new TypeStats(event));}
-				catch (NumberFormatException e)
-				{
-					EmbedBuilder syntax = InfoCard.TypingStatsSyntax(new EmbedBuilder());
-					channel.sendMessageEmbeds(syntax.build()).queue();
-				}
-			}
-			// Otherwise sends help.
-			else
-			{
-				EmbedBuilder info = InfoCard.TypingStatsHelp(new EmbedBuilder());
-				channel.sendTyping().queue();
-				channel.sendMessageEmbeds(info.build()).queue();
-			}
+			if (args.length == 1)		{Zyenyo.masterThreadPool.submit(new TypeStats(event, event.getAuthor().getId()));}
+			else if (args.length == 2)	{Zyenyo.masterThreadPool.submit(new TypeStats(event, args[1].subSequence(2, args[1].length()-1).toString()));}
+			else						{Zyenyo.masterThreadPool.submit(sendHelp);}
 		}
+		
+		// IF: Command is CLEARTESTS...
 		else if (Aliases.CLEARTESTS.contains(args[0].toLowerCase()))
-                {
-                  
-			if (args.length == 1 || !(args[1].equalsIgnoreCase("help")))
-                        {
-                              try {pool.submit(new ClearTests(event));}
-                              catch (NumberFormatException e)
-                              {
-                                      EmbedBuilder syntax = InfoCard.TypingStatsSyntax(new EmbedBuilder());
-                                      channel.sendMessageEmbeds(syntax.build()).queue();
-                              }
-
-                        }
-                }
-
-
+		{
+			if (args.length != 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
+			
+			Zyenyo.masterThreadPool.submit(new ClearTests(event));
+		}
 	}
 }

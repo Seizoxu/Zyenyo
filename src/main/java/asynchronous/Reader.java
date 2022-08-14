@@ -10,24 +10,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import zyenyo.BotConfig;
 
 public class Reader implements Runnable
 {
-	private int msRecallID;
+	private String[] args;
 	private MessageReceivedEvent event;
-	private JDA jda;
 	
-	private String idFile = "ZBotData/IDs.zbif";
-	
-	public Reader(int msRecallID, MessageReceivedEvent event, JDA jda)
+	public Reader(MessageReceivedEvent event, String[] args)
 	{
-		this.msRecallID = msRecallID;
 		this.event = event;
-		this.jda = jda;
+		this.args = args;
 	}
 	
 	@Override
@@ -38,51 +34,57 @@ public class Reader implements Runnable
 		
 		try
 		{
-			ObjectInputStream idFileOIS = new ObjectInputStream(new FileInputStream(new File(idFile)));
+			int msRecallID = Integer.parseInt(args[1]);
+			// Get ID File.
+			ObjectInputStream idFileOIS = new ObjectInputStream(new FileInputStream(new File(BotConfig.INDEX_IDS_FILEPATH)));
 			Hashtable<Integer, String> idTable = (Hashtable<Integer, String>) idFileOIS.readObject();
-			if (idTable.get(msRecallID) != null)
+			
+			// If ID is null...
+			if (idTable.get(msRecallID) == null) {channel.sendMessageFormat("ID `%d` does not exist.", msRecallID).queue(); return;}
+			
+			// Get Scrape File.
+			String filename = String.format("%s.zbsf", idTable.get(msRecallID));
+			ObjectInputStream scrapeFileOIS = new ObjectInputStream(new FileInputStream(new File(
+					String.format("%s%s", BotConfig.SCRAPE_DATA_FILEPATH, filename))));
+			Hashtable<String, Integer> scrapeData = (Hashtable<String, Integer>) scrapeFileOIS.readObject();
+			
+			Hashtable<Long, Integer> charCounts = new Hashtable<>();
+			Hashtable<Long, Integer> messageCounts = new Hashtable<>();
+			Set<String> userIDs = scrapeData.keySet();
+			
+			// For each user ID...
+			userIDs.iterator().forEachRemaining(x ->
 			{
-				String filename = String.format("%s.zbsf", idTable.get(msRecallID));
-				ObjectInputStream scrapeFileOIS = new ObjectInputStream(new FileInputStream(new File(String.format("ZBotData/%s", filename))));
-				Hashtable<String, Integer> scrapeData = (Hashtable<String, Integer>) scrapeFileOIS.readObject();
-				
-				Hashtable<Long, Integer> charCounts = new Hashtable<>();
-				Hashtable<Long, Integer> messageCounts = new Hashtable<>();
-				Set<String> userIDs = scrapeData.keySet();
-				
-				userIDs.iterator().forEachRemaining(x ->
+				char[] idChars = x.toCharArray();
+				if (!Character.toString(idChars[idChars.length - 1]).equals("m")) // If NOT user's message count key...
 				{
-					char[] idChars = x.toCharArray();
-					if (!Character.toString(idChars[idChars.length - 1]).equals("m"))
-					{
-						charCounts.put(Long.parseLong(x), scrapeData.get(x));
-						messageCounts.put(Long.parseLong(x), scrapeData.get(x + "m"));
-					}
-				});
-				
-				List<Long> charLB = charCounts.keySet().stream()
-				.sorted((a,b) -> Integer.compare(charCounts.get(b), charCounts.get(a)))
-				.limit(20)
-				.collect(Collectors.toList());
-				
-				String finalMessage = "Username: **`{character count, message count}`**\n\n";
-				short i = 0;
-				for (long id : charLB)
-				{
-					User user = jda.retrieveUserById(id).submit().get();
-					finalMessage += String.format("%d. %s: **`{%d, %d}`**%n", ++i, user.getName(), charCounts.get(id), messageCounts.get(id));
+					charCounts.put(Long.parseLong(x), scrapeData.get(x));
+					messageCounts.put(Long.parseLong(x), scrapeData.get(x + "m"));
 				}
-				
-				channel.sendMessageFormat("Character leaderboard:%n%s", finalMessage).queue();
-				scrapeFileOIS.close();
+			});
+			
+			// Construct character LB.
+			List<Long> charLB = charCounts.keySet().stream()
+			.sorted((a,b) -> Integer.compare(charCounts.get(b), charCounts.get(a)))
+			.limit(20)
+			.collect(Collectors.toList());
+			
+			String finalMessage = "Username: **`{character count, message count}`**\n\n";
+			short i = 0;
+			for (long id : charLB) // For every ID in the leaderboard, construct string section, and append to final string.
+			{
+				User user = event.getJDA().retrieveUserById(id).submit().get();
+				finalMessage += String.format("%d. %s: **`{%d, %d}`**%n", ++i, user.getName(), charCounts.get(id), messageCounts.get(id));
 			}
-			else {channel.sendMessageFormat("ID `%d` does not exist.", msRecallID).queue();}
+			
+			channel.sendMessageFormat("Character leaderboard:%n%s", finalMessage).queue();
+			scrapeFileOIS.close();
 			
 			idFileOIS.close();
 		}
 		catch (FileNotFoundException e) {System.out.println("[Reader] File Not Found.");}
 		catch (IOException e) {System.out.println("[Reader] IOException Occurred.");}
 		catch (IndexOutOfBoundsException e) {System.out.println("[Reader] Out of Bounds.");}
-		catch (Exception e) {System.out.println("[Reader] Unknown Exception Occurred."); e.printStackTrace();}
+		catch (Exception e) {System.out.println("[Reader] Unknown Exception Occurred.");}
 	}
 }
