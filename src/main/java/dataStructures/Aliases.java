@@ -3,7 +3,7 @@ package dataStructures;
 import java.util.HashSet;
 import java.util.Set;
 
-import zyenyo.Zyenyo;
+import zyenyo.BotConfig;
 
 public final class Aliases
 {
@@ -23,41 +23,41 @@ public final class Aliases
 	
 	public static void setAliases()
 	{
-		PING.add(Zyenyo.PREFIX + "ping");
+		PING.add(BotConfig.PREFIX + "ping");
 		
-		HELP.add(Zyenyo.PREFIX + "help");
+		HELP.add(BotConfig.PREFIX + "help");
 		
-		INFO.add(Zyenyo.PREFIX + "information");
-		INFO.add(Zyenyo.PREFIX + "info");
+		INFO.add(BotConfig.PREFIX + "information");
+		INFO.add(BotConfig.PREFIX + "info");
 		
-		MESTICSSCRAPE.add(Zyenyo.PREFIX + "mesticsscrape");
-		MESTICSSCRAPE.add(Zyenyo.PREFIX + "msscrape");
-		MESTICSSCRAPE.add(Zyenyo.PREFIX + "scrape");
+		MESTICSSCRAPE.add(BotConfig.PREFIX + "mesticsscrape");
+		MESTICSSCRAPE.add(BotConfig.PREFIX + "msscrape");
+		MESTICSSCRAPE.add(BotConfig.PREFIX + "scrape");
 		
-		MESTICSREAD.add(Zyenyo.PREFIX + "mesticsread");
-		MESTICSREAD.add(Zyenyo.PREFIX + "msread");
-		MESTICSREAD.add(Zyenyo.PREFIX + "read");
+		MESTICSREAD.add(BotConfig.PREFIX + "mesticsread");
+		MESTICSREAD.add(BotConfig.PREFIX + "msread");
+		MESTICSREAD.add(BotConfig.PREFIX + "read");
 		
-		TYPESTART.add(Zyenyo.PREFIX + "typestart");
-		TYPESTART.add(Zyenyo.PREFIX + "typetest");
-		TYPESTART.add(Zyenyo.PREFIX + "ttest");
-		TYPESTART.add(Zyenyo.PREFIX + "tt");
+		TYPESTART.add(BotConfig.PREFIX + "typestart");
+		TYPESTART.add(BotConfig.PREFIX + "typetest");
+		TYPESTART.add(BotConfig.PREFIX + "ttest");
+		TYPESTART.add(BotConfig.PREFIX + "tt");
 		
-		TYPEQUIT.add(Zyenyo.PREFIX + "typestop");
-		TYPEQUIT.add(Zyenyo.PREFIX + "typequit");
-		TYPEQUIT.add(Zyenyo.PREFIX + "tquit");
-		TYPEQUIT.add(Zyenyo.PREFIX + "tq");
+		TYPEQUIT.add(BotConfig.PREFIX + "typestop");
+		TYPEQUIT.add(BotConfig.PREFIX + "typequit");
+		TYPEQUIT.add(BotConfig.PREFIX + "tquit");
+		TYPEQUIT.add(BotConfig.PREFIX + "tq");
 		
-		TYPESTATS.add(Zyenyo.PREFIX + "typestats");
-		TYPESTATS.add(Zyenyo.PREFIX + "tstats");
-		TYPESTATS.add(Zyenyo.PREFIX + "ts");
+		TYPESTATS.add(BotConfig.PREFIX + "typestats");
+		TYPESTATS.add(BotConfig.PREFIX + "tstats");
+		TYPESTATS.add(BotConfig.PREFIX + "ts");
 
-		CLEARTESTS.add(Zyenyo.PREFIX + "cleartests");
+		CLEARTESTS.add(BotConfig.PREFIX + "cleartests");
 
 		
-		DPICONVERTER.add(Zyenyo.PREFIX + "dpiconverter");
-		DPICONVERTER.add(Zyenyo.PREFIX + "dpiconv");
-		DPICONVERTER.add(Zyenyo.PREFIX + "dpicalculator");
-		DPICONVERTER.add(Zyenyo.PREFIX + "dpicalc");
+		DPICONVERTER.add(BotConfig.PREFIX + "dpiconverter");
+		DPICONVERTER.add(BotConfig.PREFIX + "dpiconv");
+		DPICONVERTER.add(BotConfig.PREFIX + "dpicalculator");
+		DPICONVERTER.add(BotConfig.PREFIX + "dpicalc");
 	}
 }

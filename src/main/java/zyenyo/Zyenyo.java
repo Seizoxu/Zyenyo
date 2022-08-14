@@ -1,5 +1,8 @@
 package zyenyo;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import commands.Help;
 import commands.Info;
 import commands.MesticsRead;
@@ -14,29 +17,30 @@ import net.dv8tion.jda.api.entities.Activity;
 
 public class Zyenyo
 {
-	public static boolean isTypeTestRunning = false;
-	public static final String PREFIX = "\\";
-	public static final Long BOT_USER_ID = 696614233944752130L;
-	
+	protected static JDA api;
+	public static ExecutorService masterThreadPool = Executors.newCachedThreadPool();
 	
 	public static void main(String[] arguments) throws Exception
 	{
-		// Load:
+		// LOAD: Prerequisites.
 		Aliases.setAliases();
-		
 		final String BOT_TOKEN = arguments[0];
-		JDA api = JDABuilder.createDefault(BOT_TOKEN).build();
+		api = JDABuilder.createDefault(BOT_TOKEN).build();
+		BotConfig.setConfigVars(api.getSelfUser().getIdLong());
+		
+		// LOAD: Commands.
 		api.getPresence().setStatus(OnlineStatus.ONLINE);
 		api.getPresence().setActivity(Activity.playing("with everyone. :D"));
 		api.addEventListener(new Info());
 		api.addEventListener(new MesticsScrape());
-		api.addEventListener(new MesticsRead(api));
+		api.addEventListener(new MesticsRead());
 		api.addEventListener(new Help());
 //		api.addEventListener(new DpiConverter());
 		api.addEventListener(new Ping());
 		api.addEventListener(new Typing());
 		
-		
 //		api.addEventListener(new Profile());
 	}
+	
+	public JDA getJDA() {return Zyenyo.api;}
 }

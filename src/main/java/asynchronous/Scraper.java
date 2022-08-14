@@ -12,47 +12,47 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import zyenyo.BotConfig;
 
 public class Scraper implements Runnable
 {
-	// This is not a command class; it is a separate class used by the MesticsScrape command class.
 	private String serverName;
-	private GuildChannel channelName;
+	private MessageChannel channelToScrape;
 	private int limit;
+	private String[] args;
 	private MessageReceivedEvent event;
 	
-	private final String filepath = "ZBotData/";
-	private final String indexCountsName = "COUNTS.zbif"; //ZBIF = ZyenyoBotIndexFile.
-	private final String indexIDsName = "IDs.zbif";
-	
-	
-	public Scraper(String serverName, GuildChannel channelName, int limit, MessageReceivedEvent event)
+	public Scraper(MessageReceivedEvent event, String[] args)
 	{
-		this.serverName = serverName;
-		this.channelName = channelName;
-		this.limit = limit;
 		this.event = event;
+		this.args = args;
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked") // Unavoidable unchecked cast.
 	public void run()
 	{
-		MessageChannel scrapeChannel = (MessageChannel) channelName;
-		MessageChannel channel = event.getChannel();
-		CompletableFuture<List<Message>> cf = scrapeChannel.getIterableHistory().takeAsync(limit);
-		
-		String location = String.format("%s - %s", serverName, channelName.getName());
-		int id;
-		
 		try
 		{
+			channelToScrape = (MessageChannel) event.getGuild().getGuildChannelById(Long.parseLong(args[1].substring(2, args[1].length() - 1)));
+			serverName = event.getGuild().getName();
+			limit = Integer.parseInt(args[2]);
+			if (limit > 100000)
+			{
+				event.getMessage().replyEmbeds(new EmbedBuilder().setDescription("Limit cannot be over 100,000.") .build()).queue();
+				return;
+			}
+			CompletableFuture<List<Message>> cf = channelToScrape.getIterableHistory().takeAsync(limit);
+			String location = String.format("%s - %s", serverName, channelToScrape.getName());
+			int id;
+		
 			// If files do not exist, make and format one.
-			File indexCountsFile = new File(filepath + indexCountsName);
-			File indexIDsFile = new File(filepath + indexIDsName);
+			File indexCountsFile = new File(BotConfig.INDEX_COUNTS_FILEPATH);
+			File indexIDsFile = new File(BotConfig.INDEX_IDS_FILEPATH);
 			if (!indexCountsFile.exists())
 			{
 				indexCountsFile.createNewFile();
@@ -124,24 +124,24 @@ public class Scraper implements Runnable
 			
 			indexCountsOOS.writeObject(indexCounts);
 			indexIDsOOS.writeObject(indexIDs);
-			indexCountsOOS.close();
 			indexIDsOOS.close();
+			indexCountsOOS.close();
 			
 			// Write the Scrape hashtable to the scrape file.
-			File scrapeFile = new File(String.format("%s%s (%d).zbsf", filepath, location, indexCounts.get(location))); // ZBSF = ZyenyoBotScrapeFile.
+			// ZBSF = ZyenyoBotScrapeFile.
+			File scrapeFile = new File(String.format("%s%s (%d).zbsf", BotConfig.SCRAPE_DATA_FILEPATH, location, indexCounts.get(location)));
 			scrapeFile.createNewFile();
 			ObjectOutputStream scrapeOOS = new ObjectOutputStream(new FileOutputStream(scrapeFile));
 			scrapeOOS.writeObject(data);
 			scrapeOOS.close();
 			
-			channel.sendTyping().queue();
-			channel.sendMessageFormat("Done! <@%s>%nScrape size: `%d messages`.%nMSRecall-ID: `%d`.",
-					event.getAuthor().getId(), limit, id).queue();
+			event.getMessage().replyFormat("Done!%nScrape size: `%d messages`.%nMSRecall-ID: `%d`.",
+					limit, id).queue();
 			return;
 		}
-		catch (IOException e) {channel.sendMessage("Error: `IOException`.").queue();e.printStackTrace(); return;}
+		catch (IOException e) {event.getChannel().sendMessage("Error: `IOException`.").queue();e.printStackTrace(); return;}
 		catch (InterruptedException | ExecutionException e) {System.out.println("[Scraper] Interrupted."); return;}
 		catch (ClassNotFoundException e) {System.out.println("[Scraper] Class not found."); return;}
-		catch (Exception e) {System.out.println("[Scraper] Unknown Exception."); return;}
+		catch (Exception e) {System.out.println("[Scraper] Unknown Exception."); e.printStackTrace(); return;}
 	}
 }

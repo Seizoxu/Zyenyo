@@ -9,11 +9,11 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class Info extends ListenerAdapter
 {
+	private static final String INFO_MESSAGE = "Greetings. I am a statistics bot created by " + /*~~Goshujin-sama~~ *cough**/ "Seizoxu, "
+			+ "currently under development. Some features may work one day, and break the next.";
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event)
 	{
-		final String infoMessage = "Greetings. I am a bot created by " + /*~~Goshujin-sama~~ *cough**/ "Seizoxu. If you are reading this "
-				+ "message, I am currently undergoing a migration from Python to Java, so some (or many) features will be unavailable.";
 		if (event.getAuthor().isBot()) {return;}
 		
 		MessageChannel channel = event.getChannel();
@@ -23,14 +23,15 @@ public class Info extends ListenerAdapter
 		
 		if (Aliases.INFO.contains(args[0].toLowerCase()))
 		{
-			EmbedBuilder info = new EmbedBuilder();
-			info.setTitle("ZyenyoBot Information.");
-			info.setDescription(infoMessage);
-			info.setColor(0xde213c); // Zyen's favourite colour. :-)
-			info.setFooter("Created by Seizoxu#0781.", event.getMember().getUser().getAvatarUrl());
+			channel.sendMessageEmbeds(new EmbedBuilder()
+					.setTitle("ZyenyoBot Information.")
+					.setDescription(INFO_MESSAGE)
+					.addField("GitHub", "https://github.com/Seizoxu/Zyenyo", false)
+					.setColor(0xde213c) // Zyen's favourite colour. :-)
+					.setFooter("Developed by Seizoxu#0781 & ashwin#6541.", event.getMember().getUser().getAvatarUrl())
+					.build())
 			
-			channel.sendTyping().queue();
-			channel.sendMessageEmbeds(info.build()).queue();
+			.queue();
 		}
 	}
 }

@@ -1,0 +1,8 @@
+# Folders
+target/
+.settings/
+
+# Files
+*.zbif
+*.zbsf
+*.log

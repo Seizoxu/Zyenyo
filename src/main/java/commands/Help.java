@@ -30,26 +30,34 @@ public class Help extends ListenerAdapter
 				switch(args[1].toLowerCase())
 				{
 				case "help":
-					embed = InfoCard.HelpEasterEgg(embed);
+					embed = InfoCard.HELP_EASTER_EGG;
 					break;
 				case "information": case "info":
-					embed = InfoCard.InfoHelp(embed);
+					embed = InfoCard.INFO;
 					break;
 				case "mesticsscrape": case "msscrape": case "scrape":
-					embed = InfoCard.MesticsScrapeHelp(embed);
+					embed = InfoCard.MESTICS_SCRAPE;
 					break;
 				case "ping":
-					embed = InfoCard.PingHelp(embed);
+					embed = InfoCard.PING;
 					break;
 				case "mesticsread": case "msread": case "read":
-					embed = InfoCard.MesticsReadHelp(embed);
+					embed = InfoCard.MESTICS_READ;
+				case "typestart": case "typetest": case "ttest": case "tt":
+					embed = InfoCard.TYPING_TEST;
+				case "typestop": case "typequit": case "tquit": case "tq":
+					embed = InfoCard.TYPING_QUIT;
+				case "typestats": case "tstats": case "ts":
+					embed = InfoCard.TYPING_STATS;
+				case "cleartests":
+					embed = InfoCard.CLEAR_TESTS;
 				}
 			}
-			else {embed = InfoCard.FullHelp(embed);}
+			else {embed = InfoCard.FULL_HELP;}
 			
 			channel.sendTyping().queue();
 			try {channel.sendMessageEmbeds(embed.build()).queue();}
-			catch (IllegalStateException e) {channel.sendMessageEmbeds(InfoCard.CommandNotFound(embed, args[1]).build()).queue();}
+			catch (IllegalStateException e) {channel.sendMessageEmbeds(InfoCard.commandNotFound(args[1]).build()).queue();}
 		}
 	}
 }
