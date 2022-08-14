@@ -18,6 +18,7 @@ public final class Aliases
 	public final static Set<String> TYPEQUIT = new HashSet<>();
 	public final static Set<String> TYPESTATS = new HashSet<>();
 	public final static Set<String> CLEARTESTS = new HashSet<>();
+	public final static Set<String> CHART = new HashSet<>();
 	
 	public final static Set<String> DPICONVERTER = new HashSet<>();
 	
@@ -54,6 +55,7 @@ public final class Aliases
 
 		CLEARTESTS.add(BotConfig.PREFIX + "cleartests");
 
+		CHART.add(BotConfig.PREFIX + "chart");
 		
 		DPICONVERTER.add(BotConfig.PREFIX + "dpiconverter");
 		DPICONVERTER.add(BotConfig.PREFIX + "dpiconv");
