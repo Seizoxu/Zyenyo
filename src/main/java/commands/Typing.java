@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import asynchronous.ClearTests;
+import asynchronous.Chart;
 import asynchronous.TypeStats;
 import asynchronous.TypingTest;
 import dataStructures.Aliases;
@@ -87,5 +88,13 @@ public class Typing extends ListenerAdapter
 			
 			Zyenyo.masterThreadPool.submit(new ClearTests(event));
 		}
+		// IF: Command is CHART...
+		else if (Aliases.CHART.contains(args[0].toLowerCase()))
+		{
+			if (args.length != 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
+			
+			Zyenyo.masterThreadPool.submit(new Chart(event));
+		}
+
 	}
 }
