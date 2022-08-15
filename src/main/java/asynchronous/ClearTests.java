@@ -17,7 +17,7 @@ public class ClearTests implements Runnable
     {
 		try
 		{
-			TypingApiHandler.requestData(event.getAuthor().getIdLong(), "remove");
+			TypingApiHandler.requestData("test/remove", event.getAuthor().getIdLong());
 			
 			event.getChannel().sendMessageEmbeds(new EmbedBuilder()
 					.setTitle("Removed all tests for " + event.getAuthor().getAsTag())

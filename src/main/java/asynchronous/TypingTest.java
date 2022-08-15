@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 import zyenyo.BotConfig;
 
 public class TypingTest extends ListenerAdapter implements Runnable
@@ -27,12 +28,14 @@ public class TypingTest extends ListenerAdapter implements Runnable
 	private Message message;
 	private String[] args;
 	private String prompt;
+	private String fakePrompt;
 	private int numChars;
 	private long startTime = -1;
 	private TypingTest thisInstance = this;
 	private TypingTestLeaderboard submissions = new TypingTestLeaderboard();
 	
 	private final static String TEST_PROMPTS_FILEPATH = "ZBotData/TypingPrompts/";
+	private final static String ZERO_WIDTH_NON_JOINER = "‌";
 	private final static short PROMPT_COUNT = 12;
 	private final static short WPM_EASY = 30;
 	private final static short WPM_MEDIUM = 60;
@@ -126,10 +129,11 @@ public class TypingTest extends ListenerAdapter implements Runnable
 				break;
 			}
 			
+			fakePrompt = prompt.substring(0, prompt.length()/2) + ZERO_WIDTH_NON_JOINER + prompt.substring(prompt.length()/2, prompt.length());
 			// Sends typing test.
 			EmbedBuilder embed = new EmbedBuilder()
 					.setTitle("Typing Prompt:")
-					.setDescription(prompt)
+					.setDescription(fakePrompt)
 					.addField("Time", String.format("Test will end <t:%d:R>.", endTime), false);
 			channel.sendMessageEmbeds(embed.build()).queue();
 			
@@ -152,56 +156,27 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		long userID = event.getAuthor().getIdLong();
 		MessageChannel answerChannel = event.getChannel();
 		
-		if (userID == BotConfig.BOT_USER_ID && startTime == -1) {startTime = System.currentTimeMillis(); return;}
-		else if (event.getAuthor().isBot()) {return;}
-		else if (answerChannel.getIdLong() != channel.getIdLong()) {return;}
+		if (answerChannel.getIdLong() != channel.getIdLong()) {return;}
+		else if (userID == BotConfig.BOT_USER_ID && startTime == -1) {startTime = System.currentTimeMillis(); return;}
 		else if (submissions.getUserIDs().contains(userID)) {return;}
+		else if (event.getAuthor().isBot()) {return;}
 		
 		double timeTakenMillis = (System.currentTimeMillis()) - startTime;
 		double wordsPerMinute = (numChars / timeTakenMillis) * 12000;
 		
 		// Definitions.
 		String userTypingSubmission = event.getMessage().getContentRaw();
-		String[] promptWordsArray = prompt.split("\\s");
-		String[] submissionWordsArray = userTypingSubmission.split("\\s");
 		String userTag = event.getAuthor().getAsTag();
 		
 		// If SS...
 		if (prompt.equals(userTypingSubmission))
-		{
-			sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, 100.0), timeTakenMillis);
-			return;
-		}
+			{sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, 100.0), timeTakenMillis); return;}
+		// If Cheated...
+		if (userTypingSubmission.contains(ZERO_WIDTH_NON_JOINER))
+			{event.getMessage().replyFormat("Cheater detected. -1 Rep.").queue(); return;}
 		
-		int correctCharacters = 0,
-			totalWords = promptWordsArray.length,
-			totalCharacters = prompt.toCharArray().length - (totalWords - 1),
-			leastTotalWords = promptWordsArray.length;
-		char[] 	currentPromptWord,
-				currentSubmissionWord;
-		if (submissionWordsArray.length < leastTotalWords) {leastTotalWords = submissionWordsArray.length;}
-		
-		// For each word...
-		for (int i = 0; i < leastTotalWords; i++)
-		{
-			currentPromptWord = promptWordsArray[i].toCharArray();
-			currentSubmissionWord = submissionWordsArray[i].toCharArray();
-			
-			// Get the smaller character count.
-			int leastTotalCurrentChars;
-			if (currentSubmissionWord.length < currentPromptWord.length)
-				{leastTotalCurrentChars = currentSubmissionWord.length;}
-			else
-			{
-				leastTotalCurrentChars = currentPromptWord.length;
-				correctCharacters -= (currentSubmissionWord.length - currentPromptWord.length);
-			}
-			
-			// Check each character.
-			for (int j = 0; j < leastTotalCurrentChars; j++)
-				{if (currentPromptWord[j] == currentSubmissionWord[j]) {correctCharacters++;}}
-		}
-		double accuracy = 100 * (double)correctCharacters / (double)totalCharacters;
+		int editDistance = new LevenshteinDistance().apply(prompt, userTypingSubmission);
+		double accuracy = 100* (double)(prompt.length() - editDistance) / (double)prompt.length();
 		if (accuracy < 50) {return;}
 		
 		sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, accuracy), timeTakenMillis);

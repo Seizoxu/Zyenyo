@@ -7,20 +7,26 @@ import java.util.concurrent.ExecutionException;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import dataStructures.InfoCard;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import zyenyo.Zyenyo;
 
 public class TypeStats implements Runnable
 {
 	private MessageReceivedEvent event;
 	private MessageChannel channel;
 	private String idStr;
-	public TypeStats(MessageReceivedEvent event, String id)
+	private String[] args;
+	private boolean requestGlobal = false;
+	private Runnable sendHelp = new Runnable()
+		{@Override public void run() {channel.sendMessageEmbeds(InfoCard.INCORRECT_SYNTAX.build()).queue();}};
+	public TypeStats(MessageReceivedEvent event, String[] args)
 	{
 		this.event = event;
 		this.channel = event.getChannel();
-		this.idStr = id;
+		this.args = args;
 	}
 	
 	@Override
@@ -29,11 +35,40 @@ public class TypeStats implements Runnable
 		channel.sendTyping();
 		try
 		{
-			Long id = Long.parseLong(idStr);
-			String jsonString = TypingApiHandler.requestData(id, "stats");
-			JSONObject json = (JSONObject) JSONValue.parse(jsonString);
+			// Get command parameters.
+			if (args.length == 1) {idStr = event.getAuthor().getId();}
+			else if (args.length == 2)
+			{
+				if (args[1].equals("-g"))
+				{
+					idStr = event.getAuthor().getId();
+					requestGlobal = true;
+				}
+				else {idStr = args[1].subSequence(2, args[1].length()-1).toString();}
+			}
+			else if (args.length == 3 && args[2].equals("-g"))
+			{
+				idStr = args[1].subSequence(2, args[1].length()-1).toString();
+				requestGlobal = true;
+			}
+			else {Zyenyo.masterThreadPool.submit(sendHelp); return;}
 			
-			int testsTaken = Integer.parseInt(json.get("tests").toString());
+			Long id = Long.parseLong(idStr);
+			String testsTaken="", title;
+			JSONObject json;
+			
+			if (requestGlobal)
+			{
+				json = (JSONObject) JSONValue.parse(TypingApiHandler.requestData("stats/global", id));
+				testsTaken = String.format("Tests Taken: **`%s`**%n", json.get("tests").toString());
+				title = "Global Typing Statistics for " + event.getJDA().retrieveUserById(id).submit().get().getAsTag();
+			}
+			else
+			{
+				json = (JSONObject) JSONValue.parse(TypingApiHandler.requestData("stats/recent", id));
+				title = "Recent Typing Statistics for " + event.getJDA().retrieveUserById(id).submit().get().getAsTag();
+			}
+			
 			double averageWpm = Double.parseDouble(json.get("averageWpm").toString());
 			double averageAcc = Double.parseDouble(json.get("averageAcc").toString());
 			double bestWpm = Double.parseDouble(json.get("bestWpm").toString());
@@ -41,8 +76,8 @@ public class TypeStats implements Runnable
 			String rank = json.get("rank").toString();
 			
 			channel.sendMessageEmbeds(new EmbedBuilder()
-					.addField("Stats for " + event.getJDA().retrieveUserById(id).submit().get().getAsTag(),
-							String.format("Tests Taken: **`%d`**%n"
+					.addField(title,
+							String.format("%s"
 									+ "Best WPM: **`%.2f`**%n"
 									+ "Average WPM: **`%.2f`**%n"
 									+ "Deviation: **`%.2f`**%n"
