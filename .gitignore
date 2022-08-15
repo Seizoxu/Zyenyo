@@ -7,5 +7,4 @@ target/
 *.zbsf
 *.log
 *.prefs
-BotConfig.java
 credentials.json
