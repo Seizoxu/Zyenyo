@@ -7,5 +7,5 @@ target/
 *.zbsf
 *.log
 *.prefs
-src/main/java/zyenyo/BotConfig.java
-src/main/java/resources/credentials.json
+BotConfig.java
+credentials.json

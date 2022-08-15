@@ -145,7 +145,7 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		catch (IOException e)
 		{
 			channel.sendMessageEmbeds(new EmbedBuilder()
-					.addField("Error", "Internal error — contact developer", false).build()).queue();
+					.addField("Error", "Internal error â€” contact developer", false).build()).queue();
 		}
 	}
 	
@@ -168,16 +168,18 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		String userTypingSubmission = event.getMessage().getContentRaw();
 		String userTag = event.getAuthor().getAsTag();
 		
-		// If SS...
-		if (prompt.equals(userTypingSubmission))
-			{sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, 100.0), timeTakenMillis); return;}
 		// If Cheated...
-		if (userTypingSubmission.contains(ZERO_WIDTH_NON_JOINER) || wordsPerMinute >= 200)
-			{event.getMessage().replyFormat("Cheater detected. -1 Rep.").queue(); return;}
+		if (userTypingSubmission.contains(ZERO_WIDTH_NON_JOINER))
+		{event.getMessage().replyFormat("Cheater detected. -1 Rep.").queue(); return;}
+		// If SS...
+		if (prompt.equals(userTypingSubmission) && wordsPerMinute < 200)
+			{sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, 100.0), timeTakenMillis); return;}
 		
 		int editDistance = new LevenshteinDistance().apply(prompt, userTypingSubmission);
 		double accuracy = 100* (double)(prompt.length() - editDistance) / (double)prompt.length();
 		if (accuracy < 50) {return;}
+		if ( (accuracy >= 99) && (wordsPerMinute >= 200) )
+			{event.getMessage().replyFormat("Cheater detected. -1 Rep.").queue(); return;}
 		
 		sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, accuracy), timeTakenMillis);
 	}
