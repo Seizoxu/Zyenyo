@@ -177,8 +177,8 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		
 		int editDistance = new LevenshteinDistance().apply(prompt, userTypingSubmission);
 		double accuracy = 100* (double)(prompt.length() - editDistance) / (double)prompt.length();
-		if (accuracy < 50) {return;}
-		if ( (accuracy >= 99) && (wordsPerMinute >= 200) )
+		if (accuracy < 75) {return;}
+		if ( (accuracy >= 99) && (wordsPerMinute >= 250) )
 			{event.getMessage().replyFormat("Cheater detected. -1 Rep.").queue(); return;}
 		
 		sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, accuracy), timeTakenMillis);
