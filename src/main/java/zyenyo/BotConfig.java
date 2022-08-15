@@ -2,7 +2,7 @@ package zyenyo;
 
 public class BotConfig
 {
-	public static final char PREFIX = '.';
+	public static final char PREFIX = '\\';
 	public static Long BOT_USER_ID = -1L;
 	
 	public static final String BOT_DATA_FILEPATH = "ZBotData/";
