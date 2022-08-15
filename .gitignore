@@ -7,5 +7,10 @@ target/
 *.zbsf
 *.log
 *.prefs
+<<<<<<< HEAD
 BotConfig.java
 credentials.json
+=======
+src/main/java/zyenyo/BotConfig.java
+src/main/java/resources/credentials.json
+>>>>>>> 89f5261 (Typing Accuracy Improvements)

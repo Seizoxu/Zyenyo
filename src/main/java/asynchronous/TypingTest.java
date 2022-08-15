@@ -145,7 +145,7 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		catch (IOException e)
 		{
 			channel.sendMessageEmbeds(new EmbedBuilder()
-					.addField("Error", "Internal error â€” contact developer", false).build()).queue();
+					.addField("Error", "Internal error Ã¢â‚¬â€� contact developer", false).build()).queue();
 		}
 	}
 	
