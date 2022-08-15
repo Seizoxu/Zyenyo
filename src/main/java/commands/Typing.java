@@ -1,11 +1,9 @@
 package commands;
 
 import java.util.HashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import asynchronous.ClearTests;
 import asynchronous.Chart;
+import asynchronous.ClearTests;
 import asynchronous.TypeStats;
 import asynchronous.TypingTest;
 import dataStructures.Aliases;
@@ -23,7 +21,6 @@ public class Typing extends ListenerAdapter
 	private MessageChannel channel;
 	private long serverID;
 	private String[] args;
-	private ExecutorService pool = Executors.newCachedThreadPool();
 	private Runnable sendHelp = new Runnable()
 		{@Override public void run() {channel.sendMessageEmbeds(InfoCard.INCORRECT_SYNTAX.build()).queue();}};
 	private Runnable testAlreadyRunning = new Runnable()
@@ -59,7 +56,7 @@ public class Typing extends ListenerAdapter
 			if (args.length != 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
 			if (guildTestList.containsKey(serverID)) {Zyenyo.masterThreadPool.submit(testAlreadyRunning); return;}
 				
-			pool.submit(typingTest = new TypingTest(event, args));
+			Zyenyo.masterThreadPool.submit(typingTest = new TypingTest(event, args));
 			guildTestList.put(serverID, typingTest);
 		}
 		
@@ -76,9 +73,7 @@ public class Typing extends ListenerAdapter
 		// IF: Command is TYPESTATS...
 		else if (Aliases.TYPESTATS.contains(args[0].toLowerCase()))
 		{
-			if (args.length == 1)		{Zyenyo.masterThreadPool.submit(new TypeStats(event, event.getAuthor().getId()));}
-			else if (args.length == 2)	{Zyenyo.masterThreadPool.submit(new TypeStats(event, args[1].subSequence(2, args[1].length()-1).toString()));}
-			else						{Zyenyo.masterThreadPool.submit(sendHelp);}
+			Zyenyo.masterThreadPool.submit(new TypeStats(event, args));
 		}
 		
 		// IF: Command is CLEARTESTS...

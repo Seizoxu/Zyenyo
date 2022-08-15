@@ -6,3 +6,6 @@ target/
 *.zbif
 *.zbsf
 *.log
+*.prefs
+src/main/java/zyenyo/BotConfig.java
+src/main/java/resources/credentials.json

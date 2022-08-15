@@ -25,22 +25,22 @@ public class Zyenyo
 		// LOAD: Prerequisites.
 		Aliases.setAliases();
 		final String BOT_TOKEN = arguments[0];
-		api = JDABuilder.createDefault(BOT_TOKEN).build();
-		BotConfig.setConfigVars(api.getSelfUser().getIdLong());
 		
 		// LOAD: Commands.
+		api = JDABuilder.createDefault(BOT_TOKEN)
+				.addEventListeners(new Info(),
+						new MesticsScrape(),
+						new MesticsRead(),
+						new Help(),
+						new Ping(),
+//						new Profile(),
+//						new DpiConverter(),
+						new Typing())
+				.build();
+		
+		BotConfig.setConfigVars(api.getSelfUser().getIdLong());
+		
 		api.getPresence().setStatus(OnlineStatus.ONLINE);
 		api.getPresence().setActivity(Activity.playing("with everyone. :D"));
-		api.addEventListener(new Info());
-		api.addEventListener(new MesticsScrape());
-		api.addEventListener(new MesticsRead());
-		api.addEventListener(new Help());
-//		api.addEventListener(new DpiConverter());
-		api.addEventListener(new Ping());
-		api.addEventListener(new Typing());
-		
-//		api.addEventListener(new Profile());
 	}
-	
-	public JDA getJDA() {return Zyenyo.api;}
 }
