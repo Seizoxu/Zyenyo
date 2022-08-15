@@ -8,11 +8,11 @@ import java.net.http.HttpResponse;
 
 public class TypingApiHandler
 {
-	public static String requestData(long discordID, String requestStr) throws IOException, InterruptedException
+	public static String requestData(String requestStr, long discordID) throws IOException, InterruptedException
 	{
 		HttpClient client = HttpClient.newHttpClient();
 		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create(String.format("https://vanillaviking-type-api.herokuapp.com/%d/%s", discordID, requestStr)))
+				.uri(URI.create(String.format("https://vanillaviking-type-api.herokuapp.com/%s/%d", requestStr, discordID)))
 				.build();
 		HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 		return response.body();
@@ -22,7 +22,7 @@ public class TypingApiHandler
 	{
 		HttpClient client = HttpClient.newHttpClient();
 		HttpRequest request = HttpRequest.newBuilder()
-			      .uri(URI.create(String.format("https://vanillaviking-type-api.herokuapp.com/%d/test", discordID)))
+			      .uri(URI.create(String.format("https://vanillaviking-type-api.herokuapp.com/test/add/%d", discordID)))
 			      .header("Content-Type", "application/json")
 			      .POST(HttpRequest.BodyPublishers.ofString(String.format(
 			    		  "{\"wpm\": %f, \"accuracy\": %f}", wordsPerMinute, accuracy)))

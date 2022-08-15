@@ -25,7 +25,7 @@ public class Help extends ListenerAdapter
 			if (args.length >= 2)
 			{
 				if (args.length == 3 && args[2].equalsIgnoreCase("help"))
-					{channel.sendMessage("Oh dear, you seem to be having quite the \"help\" overload.").queue(); return;}
+					{channel.sendMessage("Oh dear, you seem to be having a \"help\" overload.").queue(); return;}
 				
 				switch(args[1].toLowerCase())
 				{

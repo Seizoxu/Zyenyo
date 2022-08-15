@@ -7,7 +7,9 @@ public class InfoCard
 	public static final EmbedBuilder FULL_HELP =
 		new EmbedBuilder()
 		.setTitle("Commands help.")
-		.setDescription("These commands have no particular order for the moment. They will be managed later.")
+		.setDescription("These commands have no particular order for the moment. They will be managed later. To obtain more information "
+				+ "about a command, type `\\help [command]`. Keep in mind that brackets `[]` are used for optional parameters, and "
+				+ "pointed brackets `<>` are used for required parameters.")
 		.addField("Help", "Shows this message.", false)
 		.addField("Info", "Shows general bot information.", false)
 		.addField("Ping", "Returns the bot and gateway latency.", false)
@@ -26,15 +28,16 @@ public class InfoCard
 		.setTitle("CMD: Help.")
 		.setDescription("You wanted help on how to use the _help_ command?!")
 		.setColor(0x8D538D) // Lilac. The colour of helpfulness, apparently.
-		.addField("Syntax", "`\\help <command name:plain text>`", false);
+		.addField("Syntax", "`\\help <command>`", false);
 	
+	@Deprecated
 	public static final EmbedBuilder HELP =
 		new EmbedBuilder()
 		.setTitle("CMD: Help.")
 		.setDescription("Please use the `help` command to obtain more information about a command.")
 		.setColor(0x8D538D)
 		.addField("Aliases", "`None.`", false)
-		.addField("Syntax", "`\\help <command>`", false);
+		.addField("Syntax", "`\\help [command]`", false);
 	
 	
 	public static final EmbedBuilder INCORRECT_SYNTAX =
@@ -100,7 +103,7 @@ public class InfoCard
 				+ "and the typist will have a fixed amount of time to complete it, with an adjustable speed via difficulty adjustment.")
 		.setColor(0x8D538D)
 		.addField("Aliases","`typestart`, `ttest`, `tt`", false)
-		.addField("Syntax", "`\\typetest <difficulty (optional)>`", false);
+		.addField("Syntax", "`\\typetest [difficulty]`", false);
 	
 	public static final EmbedBuilder TYPING_STATS =
 		new EmbedBuilder()
@@ -108,7 +111,7 @@ public class InfoCard
 		.setDescription("This command displays metrics of a user's typing statistics, collected from his/her typing tests so far.")
 		.setColor(0x8D538D)
 		.addField("Aliases","`tstats`, `ts`", false)
-		.addField("Syntax", "`\\typestats`", false);
+		.addField("Syntax", "`\\typestats [User : Mention] [-g : Global]`", false);
 	
 	public static final EmbedBuilder TYPING_QUIT =
 		new EmbedBuilder()

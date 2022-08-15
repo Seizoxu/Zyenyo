@@ -26,35 +26,47 @@
   
   <dependencies>
     <dependency>
-      <groupId>net.dv8tion</groupId>
-      <artifactId>JDA</artifactId>
-      <version>4.4.0_352</version>
+    	<groupId>net.dv8tion</groupId>
+    	<artifactId>JDA</artifactId>
+    	<version>4.4.0_352</version>
     </dependency>
     
     <dependency>
-      <groupId>com.github.Gary50613</groupId>
-      <artifactId>osu4j</artifactId>
-      <version>2.3.3</version>
+    	<groupId>ch.qos.logback</groupId>
+    	<artifactId>logback-classic</artifactId>
+    	<version>1.2.8</version>
+    </dependency>
+    
+    <dependency>
+    	<groupId>com.github.Gary50613</groupId>
+    	<artifactId>osu4j</artifactId>
+    	<version>2.3.3</version>
     </dependency>
 
 	<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-sheets -->
 	<!-- <dependency>
-	    <groupId>com.google.apis</groupId>
-	    <artifactId>google-api-services-sheets</artifactId>
-	    <version>v4-rev614-1.18.0-rc</version>
+		<groupId>com.google.apis</groupId>
+		<artifactId>google-api-services-sheets</artifactId>
+		<version>v4-rev614-1.18.0-rc</version>
 	</dependency>-->
 
 	<!-- https://mvnrepository.com/artifact/com.google.api-client/google-api-client-gson -->
 	<dependency>
-	    <groupId>com.google.api-client</groupId>
-	    <artifactId>google-api-client-gson</artifactId>
-	    <version>1.35.1</version>
+		<groupId>com.google.api-client</groupId>
+		<artifactId>google-api-client-gson</artifactId>
+		<version>1.35.1</version>
 	</dependency>
 
 	<dependency>
 		<groupId>com.googlecode.json-simple</groupId>  
 		<artifactId>json-simple</artifactId>  
 		<version>1.1</version>  
+	</dependency>
+	
+	<dependency>
+		<groupId>org.apache.commons</groupId>
+		<artifactId>commons-text</artifactId>
+		<version>1.9</version>
 	</dependency>
 
   </dependencies>

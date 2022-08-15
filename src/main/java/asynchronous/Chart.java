@@ -1,13 +1,10 @@
 package asynchronous;
 
-import java.awt.Color;
 import java.io.IOException;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 
@@ -21,7 +18,7 @@ public class Chart implements Runnable
     {
 		try
 		{
-			String jsonString = TypingApiHandler.requestData(event.getAuthor().getIdLong(), "chart");
+			String jsonString = TypingApiHandler.requestData("chart/wpm", event.getAuthor().getIdLong());
 			JSONObject json = (JSONObject) JSONValue.parse(jsonString);
 
 			event.getChannel().sendMessage(json.get("URL").toString())
