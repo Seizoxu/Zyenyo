@@ -172,7 +172,7 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		if (prompt.equals(userTypingSubmission))
 			{sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, 100.0), timeTakenMillis); return;}
 		// If Cheated...
-		if (userTypingSubmission.contains(ZERO_WIDTH_NON_JOINER))
+		if (userTypingSubmission.contains(ZERO_WIDTH_NON_JOINER) || wordsPerMinute >= 200)
 			{event.getMessage().replyFormat("Cheater detected. -1 Rep.").queue(); return;}
 		
 		int editDistance = new LevenshteinDistance().apply(prompt, userTypingSubmission);
