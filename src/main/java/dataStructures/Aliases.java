@@ -1,65 +1,63 @@
 package dataStructures;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
 
 import zyenyo.BotConfig;
 
 public final class Aliases
 {
-	public final static Set<String> PING = new HashSet<>();
-	public final static Set<String> HELP = new HashSet<>();
-	public final static Set<String> INFO = new HashSet<String>();
+	/*——————————————————————————————————————————|
+	|————————————————INFORMATION————————————————|
+	|——————————————————————————————————————————*/
+	public final static Set<String> PING = Collections.singleton(BotConfig.PREFIX + "ping");
+	public final static Set<String> HELP = Collections.singleton(BotConfig.PREFIX + "help");
+	public final static Set<String> INFO = Set.of(
+			BotConfig.PREFIX + "information",
+			BotConfig.PREFIX + "info");
 	
-	public final static Set<String> MESTICSSCRAPE = new HashSet<>();
-	public final static Set<String> MESTICSREAD = new HashSet<>();
+	/*——————————————————————————————————————|
+	|————————————————MESTICS————————————————|
+	|——————————————————————————————————————*/
+	public final static Set<String> MESTICSSCRAPE = Set.of(
+			BotConfig.PREFIX + "mesticsscrape",
+			BotConfig.PREFIX + "msscrape",
+			BotConfig.PREFIX + "scrape");
+	public final static Set<String> MESTICSREAD = Set.of(
+			BotConfig.PREFIX + "mesticsread",
+			BotConfig.PREFIX + "msread",
+			BotConfig.PREFIX + "read");
 	
-	public final static Set<String> TYPESTART = new HashSet<>();
-	public final static Set<String> TYPEQUIT = new HashSet<>();
-	public final static Set<String> TYPESTATS = new HashSet<>();
-	public final static Set<String> CLEARTESTS = new HashSet<>();
-	public final static Set<String> CHART = new HashSet<>();
+	/*—————————————————————————————————————|
+	|————————————————TYPING————————————————|
+	|—————————————————————————————————————*/
+	public final static Set<String> TYPESTART = Set.of(
+			BotConfig.PREFIX + "typestart",
+			BotConfig.PREFIX + "typetest",
+			BotConfig.PREFIX + "ttest",
+			BotConfig.PREFIX + "tt");
+	public final static Set<String> TYPEQUIT = Set.of(
+			BotConfig.PREFIX + "typestop",
+			BotConfig.PREFIX + "typequit",
+			BotConfig.PREFIX + "tquit",
+			BotConfig.PREFIX + "tq");
+	public final static Set<String> TYPESTATS = Set.of(
+			BotConfig.PREFIX + "typestats",
+			BotConfig.PREFIX + "tstats",
+			BotConfig.PREFIX + "ts");
+	public final static Set<String> CLEARTESTS = Collections.singleton(BotConfig.PREFIX + "cleartests");
+	public final static Set<String> CHART = Collections.singleton(BotConfig.PREFIX + "chart");
+	public final static Set<String> LEADERBOARD = Set.of(
+			BotConfig.PREFIX + "leaderboard",
+			BotConfig.PREFIX + "lboard",
+			BotConfig.PREFIX + "lb");
 	
-	public final static Set<String> DPICONVERTER = new HashSet<>();
-	
-	public static void setAliases()
-	{
-		PING.add(BotConfig.PREFIX + "ping");
-		
-		HELP.add(BotConfig.PREFIX + "help");
-		
-		INFO.add(BotConfig.PREFIX + "information");
-		INFO.add(BotConfig.PREFIX + "info");
-		
-		MESTICSSCRAPE.add(BotConfig.PREFIX + "mesticsscrape");
-		MESTICSSCRAPE.add(BotConfig.PREFIX + "msscrape");
-		MESTICSSCRAPE.add(BotConfig.PREFIX + "scrape");
-		
-		MESTICSREAD.add(BotConfig.PREFIX + "mesticsread");
-		MESTICSREAD.add(BotConfig.PREFIX + "msread");
-		MESTICSREAD.add(BotConfig.PREFIX + "read");
-		
-		TYPESTART.add(BotConfig.PREFIX + "typestart");
-		TYPESTART.add(BotConfig.PREFIX + "typetest");
-		TYPESTART.add(BotConfig.PREFIX + "ttest");
-		TYPESTART.add(BotConfig.PREFIX + "tt");
-		
-		TYPEQUIT.add(BotConfig.PREFIX + "typestop");
-		TYPEQUIT.add(BotConfig.PREFIX + "typequit");
-		TYPEQUIT.add(BotConfig.PREFIX + "tquit");
-		TYPEQUIT.add(BotConfig.PREFIX + "tq");
-		
-		TYPESTATS.add(BotConfig.PREFIX + "typestats");
-		TYPESTATS.add(BotConfig.PREFIX + "tstats");
-		TYPESTATS.add(BotConfig.PREFIX + "ts");
-
-		CLEARTESTS.add(BotConfig.PREFIX + "cleartests");
-
-		CHART.add(BotConfig.PREFIX + "chart");
-		
-		DPICONVERTER.add(BotConfig.PREFIX + "dpiconverter");
-		DPICONVERTER.add(BotConfig.PREFIX + "dpiconv");
-		DPICONVERTER.add(BotConfig.PREFIX + "dpicalculator");
-		DPICONVERTER.add(BotConfig.PREFIX + "dpicalc");
-	}
+	/*—————————————————————————————————————|
+	|————————————————IN-DEV————————————————|
+	|—————————————————————————————————————*/
+	public final static Set<String> DPICONVERTER = Set.of(
+			BotConfig.PREFIX + "dpiconverter",
+			BotConfig.PREFIX + "dpiconv",
+			BotConfig.PREFIX + "dpicalculator",
+			BotConfig.PREFIX + "dpicalc");
 }

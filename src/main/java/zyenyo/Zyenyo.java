@@ -9,7 +9,6 @@ import commands.MesticsRead;
 import commands.MesticsScrape;
 import commands.Ping;
 import commands.Typing;
-import dataStructures.Aliases;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -22,8 +21,6 @@ public class Zyenyo
 	
 	public static void main(String[] arguments) throws Exception
 	{
-		// LOAD: Prerequisites.
-		Aliases.setAliases();
 		final String BOT_TOKEN = arguments[0];
 		
 		// LOAD: Commands.

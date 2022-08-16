@@ -51,11 +51,12 @@ public class Help extends ListenerAdapter
 					embed = InfoCard.TYPING_STATS;
 				case "cleartests":
 					embed = InfoCard.CLEAR_TESTS;
+				case "leaderboard":
+					embed = InfoCard.LEADERBOARD;
 				}
 			}
 			else {embed = InfoCard.FULL_HELP;}
 			
-			channel.sendTyping().queue();
 			try {channel.sendMessageEmbeds(embed.build()).queue();}
 			catch (IllegalStateException e) {channel.sendMessageEmbeds(InfoCard.commandNotFound(args[1]).build()).queue();}
 		}

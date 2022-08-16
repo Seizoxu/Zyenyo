@@ -19,6 +19,7 @@ public class InfoCard
 		.addField("TypeQuit", "Stops a typing test, if there is one currently running in the server.", false)
 		.addField("TypeStats", "Shows Typing Statistics.", false)
 		.addField("ClearTests", "Clears the database of all the user's tests.", false)
+		.addField("Leaderboard", "Shows the typing stats leaderboard of a specified statistic.", false)
 		.addField("DpiConverter", "Converts fullscreen DPI on one screen to another (not implemented).", false)
 		.setColor(0x8D538D);
 	
@@ -128,4 +129,12 @@ public class InfoCard
 			.setColor(0x8D538D)
 			.addField("Aliases","`None`", false)
 			.addField("Syntax", "`\\cleartests`", false);
+	
+	public static final EmbedBuilder LEADERBOARD =
+			new EmbedBuilder()
+			.setTitle("CMD: Leaderboard.")
+			.setDescription("This command displays the global leaderboard for a user-specified statistic.")
+			.setColor(0x8D538D)
+			.addField("Aliases","`lboard`, `lb`", false)
+			.addField("Syntax", "`\\leaderboard [-wpm | -acc]`", false);
 }

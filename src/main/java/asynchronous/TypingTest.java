@@ -54,6 +54,7 @@ public class TypingTest extends ListenerAdapter implements Runnable
 			{
 				// Print leaderboard.
 				event.getJDA().removeEventListener(thisInstance);
+				channel.sendTyping().queue();
 				EmbedBuilder embed = new EmbedBuilder();
 				embed.setTitle("Typing Test Results");
 				
