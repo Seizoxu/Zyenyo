@@ -11,7 +11,6 @@ import dataStructures.InfoCard;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import zyenyo.Zyenyo;
 
 public class TypeStats implements Runnable
 {
@@ -51,21 +50,22 @@ public class TypeStats implements Runnable
 				idStr = args[1].subSequence(2, args[1].length()-1).toString();
 				requestGlobal = true;
 			}
-			else {Zyenyo.masterThreadPool.submit(sendHelp); return;}
+			else {sendHelp.run(); return;}
+			// Yes, the above line blocks the curr. thread, but this class is already another thread, and it doesn't need to go further.
 			
-			Long id = Long.parseLong(idStr);
+			Long id = Long.parseLong(idStr); // Used for error checking; will change later.
 			String testsTaken="", title;
 			JSONObject json;
 			
 			if (requestGlobal)
 			{
-				json = (JSONObject) JSONValue.parse(TypingApiHandler.requestData("stats/global", id));
+				json = (JSONObject) JSONValue.parse(TypingApiHandler.requestData("stats/global/" + id));
 				testsTaken = String.format("Tests Taken: **`%s`**%n", json.get("tests").toString());
 				title = "Global Typing Statistics for " + event.getJDA().retrieveUserById(id).submit().get().getAsTag();
 			}
 			else
 			{
-				json = (JSONObject) JSONValue.parse(TypingApiHandler.requestData("stats/recent", id));
+				json = (JSONObject) JSONValue.parse(TypingApiHandler.requestData("stats/recent/" + id));
 				title = "Recent Typing Statistics for " + event.getJDA().retrieveUserById(id).submit().get().getAsTag();
 			}
 			

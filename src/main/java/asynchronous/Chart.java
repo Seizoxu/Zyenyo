@@ -18,7 +18,7 @@ public class Chart implements Runnable
     {
 		try
 		{
-			String jsonString = TypingApiHandler.requestData("chart/wpm", event.getAuthor().getIdLong());
+			String jsonString = TypingApiHandler.requestData("chart/wpm/" + event.getAuthor().getId());
 			JSONObject json = (JSONObject) JSONValue.parse(jsonString);
 
 			event.getChannel().sendMessage(json.get("URL").toString())

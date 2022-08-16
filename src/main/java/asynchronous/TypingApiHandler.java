@@ -8,11 +8,11 @@ import java.net.http.HttpResponse;
 
 public class TypingApiHandler
 {
-	public static String requestData(String requestStr, long discordID) throws IOException, InterruptedException
+	public static String requestData(String requestStr) throws IOException, InterruptedException
 	{
 		HttpClient client = HttpClient.newHttpClient();
 		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create(String.format("https://vanillaviking-type-api.herokuapp.com/%s/%d", requestStr, discordID)))
+				.uri(URI.create("https://vanillaviking-type-api.herokuapp.com/" + requestStr))
 				.build();
 		HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 		return response.body();

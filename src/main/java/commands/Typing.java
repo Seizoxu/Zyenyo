@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import asynchronous.Chart;
 import asynchronous.ClearTests;
+import asynchronous.Leaderboard;
 import asynchronous.TypeStats;
 import asynchronous.TypingTest;
 import dataStructures.Aliases;
@@ -72,9 +73,7 @@ public class Typing extends ListenerAdapter
 
 		// IF: Command is TYPESTATS...
 		else if (Aliases.TYPESTATS.contains(args[0].toLowerCase()))
-		{
-			Zyenyo.masterThreadPool.submit(new TypeStats(event, args));
-		}
+			{Zyenyo.masterThreadPool.submit(new TypeStats(event, args));}
 		
 		// IF: Command is CLEARTESTS...
 		else if (Aliases.CLEARTESTS.contains(args[0].toLowerCase()))
@@ -83,6 +82,7 @@ public class Typing extends ListenerAdapter
 			
 			Zyenyo.masterThreadPool.submit(new ClearTests(event));
 		}
+		
 		// IF: Command is CHART...
 		else if (Aliases.CHART.contains(args[0].toLowerCase()))
 		{
@@ -90,6 +90,13 @@ public class Typing extends ListenerAdapter
 			
 			Zyenyo.masterThreadPool.submit(new Chart(event));
 		}
-
+		
+		// IF: Command is LEADERBOARD...
+		else if (Aliases.LEADERBOARD.contains(args[0].toLowerCase()))
+		{
+			if (args.length != 2) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
+			
+			Zyenyo.masterThreadPool.submit(new Leaderboard(event, args));
+		}
 	}
 }
