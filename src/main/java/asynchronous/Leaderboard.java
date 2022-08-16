@@ -29,17 +29,20 @@ public class Leaderboard implements Runnable
 	@Override
 	public void run()
 	{
-		String leaderboardType="";
-		if (args[1].equals("-wpm")) {leaderboardType = "wpm";}
-		else if (args[1].equals("-acc")) {leaderboardType = "acc";}
+		String statisticType="";
+		String leaderboardScope = "average"; // Average vs best, future implementation.
+		if (args.length == 1) {statisticType = "wpm";}
+		else if (args[1].equals("-wpm")) {statisticType = "wpm";}
+		else if (args[1].equals("-acc")) {statisticType = "acc";}
 		else {sendHelp.run(); return;}
 		
 		try
 		{
-			JSONArray json = (JSONArray) ((JSONObject)JSONValue.parse(TypingApiHandler.requestData("leaderboards/" + leaderboardType))).get("lb");
+			JSONArray json = (JSONArray) ((JSONObject)JSONValue.parse(TypingApiHandler.requestData(
+					String.format("leaderboards/%s/%s", statisticType, leaderboardScope)))).get("lb");
 			
 			EmbedBuilder leaderboardEmbed = new EmbedBuilder()
-					.setTitle("Global " + ((leaderboardType.equals("wpm")) ? "WPM" : "Accuracy") + " Leaderboards");
+					.setTitle("Global " + ((statisticType.equals("wpm")) ? "WPM" : "Accuracy") + " Leaderboards");
 			JSONObject leaderboardMember;
 			String userTag;
 			double averageWPM, averageAcc;

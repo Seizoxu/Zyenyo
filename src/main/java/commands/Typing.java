@@ -94,7 +94,7 @@ public class Typing extends ListenerAdapter
 		// IF: Command is LEADERBOARD...
 		else if (Aliases.LEADERBOARD.contains(args[0].toLowerCase()))
 		{
-			if (args.length != 2) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
+			if (args.length > 2) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
 			
 			Zyenyo.masterThreadPool.submit(new Leaderboard(event, args));
 		}
