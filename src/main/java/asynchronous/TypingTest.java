@@ -130,8 +130,8 @@ public class TypingTest extends ListenerAdapter implements Runnable
 				break;
 			}
 			
-			fakePrompt = prompt.substring(0, prompt.length()/2) + ZERO_WIDTH_NON_JOINER + prompt.substring(prompt.length()/2, prompt.length());
 			// Sends typing test.
+			fakePrompt = prompt.substring(0, prompt.length()/2) + ZERO_WIDTH_NON_JOINER + prompt.substring(prompt.length()/2, prompt.length());
 			EmbedBuilder embed = new EmbedBuilder()
 					.setTitle("Typing Prompt:")
 					.setDescription(fakePrompt)

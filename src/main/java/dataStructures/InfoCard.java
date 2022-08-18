@@ -20,7 +20,8 @@ public class InfoCard
 		.addField("TypeStats", "Shows Typing Statistics.", false)
 		.addField("ClearTests", "Clears the database of all the user's tests.", false)
 		.addField("Leaderboard", "Shows the typing stats leaderboard of a specified statistic.", false)
-		.addField("DpiConverter", "Converts fullscreen DPI on one screen to another (not implemented).", false)
+		.addField("Chart", "Shows a chart of a user's typing stats.", false)
+//		.addField("DpiConverter", "Converts fullscreen DPI on one screen to another (not implemented).", false)
 		.setColor(0x8D538D);
 	
 	
@@ -136,5 +137,13 @@ public class InfoCard
 			.setDescription("This command displays the global leaderboard for a user-specified statistic.")
 			.setColor(0x8D538D)
 			.addField("Aliases","`lboard`, `lb`", false)
-			.addField("Syntax", "`\\leaderboard [-wpm | -acc]`", false);
+			.addField("Syntax", "`\\leaderboard [-wpm | -acc] [-best]`", false);
+
+	public static final EmbedBuilder CHART =
+			new EmbedBuilder()
+			.setTitle("CMD: Chart.")
+			.setDescription("This command displays a chart for a user's recent typing tests.")
+			.setColor(0x8D538D)
+			.addField("Aliases","`None`", false)
+			.addField("Syntax", "`\\chart`", false);
 }

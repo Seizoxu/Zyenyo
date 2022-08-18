@@ -10,8 +10,5 @@ public class BotConfig
 	public static final String INDEX_COUNTS_FILEPATH = "ZBotData/ScrapeData/COUNTS.zbif"; //ZBIF = ZyenyoBotIndexFile.
 	public static final String INDEX_IDS_FILEPATH = "ZBotData/ScrapeData/IDs.zbif";
 	
-	protected static void setConfigVars(Long id)
-	{
-		BOT_USER_ID = id;
-	}
+	protected static void setConfigVars(Long id) {BOT_USER_ID = id;}
 }
