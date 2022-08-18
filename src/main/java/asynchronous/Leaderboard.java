@@ -29,11 +29,21 @@ public class Leaderboard implements Runnable
 	@Override
 	public void run()
 	{
+		event.getChannel().sendTyping().queue();
+		
 		String statisticType="";
-		String leaderboardScope = "average"; // Average vs best, future implementation.
+		String leaderboardScope = "Average";
 		if (args.length == 1) {statisticType = "wpm";}
-		else if (args[1].equals("-wpm")) {statisticType = "wpm";}
-		else if (args[1].equals("-acc")) {statisticType = "acc";}
+		else if (args.length == 2)
+		{
+			if (args[1].equalsIgnoreCase("-acc")) {statisticType = "acc";}
+			else if (args[1].equalsIgnoreCase("-wpm")) {statisticType = "wpm";}
+		}
+		else if (args.length == 3 && args[1].equalsIgnoreCase("-wpm") && args[2].equalsIgnoreCase("-best"))
+		{
+			statisticType = "wpm";
+			leaderboardScope = "Best";
+		}
 		else {sendHelp.run(); return;}
 		
 		try
@@ -42,18 +52,27 @@ public class Leaderboard implements Runnable
 					String.format("leaderboards/%s/%s", statisticType, leaderboardScope)))).get("lb");
 			
 			EmbedBuilder leaderboardEmbed = new EmbedBuilder()
-					.setTitle("Global " + ((statisticType.equals("wpm")) ? "WPM" : "Accuracy") + " Leaderboards");
+					.setTitle(String.format("Global %s %s Leaderboards",
+							leaderboardScope, ((statisticType.equals("wpm")) ? "WPM" : "Accuracy")));
 			JSONObject leaderboardMember;
 			String userTag;
-			double averageWPM, averageAcc;
+			double wordsPerMinute, averageAcc;
+			boolean isBest = (leaderboardScope.equals("Best")) ? true : false;
 			for (int i = 0; (i < json.size() && i < 10);)
 			{
 				leaderboardMember = (JSONObject) json.get(i);
 				userTag = jda.retrieveUserById(leaderboardMember.get("_id").toString()).complete().getAsTag();
-				averageWPM = Double.parseDouble(leaderboardMember.get("averageWpm").toString());
-				averageAcc = Double.parseDouble(leaderboardMember.get("averageAcc").toString());
 				
-				leaderboardEmbed.appendDescription(String.format("%n**#%d | %s**: `%.2f WPM`, `%.2f%%`", ++i, userTag, averageWPM, averageAcc));
+				if (isBest) // Not the most optimised; will be cleared later.
+				{
+					wordsPerMinute = Double.parseDouble(leaderboardMember.get("bestWpm").toString());
+					leaderboardEmbed.appendDescription(String.format("%n**#%d | %s**: `%.2f WPM`", ++i, userTag, wordsPerMinute));
+					continue;
+				}
+				
+				wordsPerMinute = Double.parseDouble(leaderboardMember.get("averageWpm").toString());
+				averageAcc = Double.parseDouble(leaderboardMember.get("averageAcc").toString());
+				leaderboardEmbed.appendDescription(String.format("%n**#%d | %s**: `%.2f WPM`, `%.2f%%`", ++i, userTag, wordsPerMinute, averageAcc));
 			}
 			
 			event.getChannel().sendMessageEmbeds(leaderboardEmbed.build()).queue();

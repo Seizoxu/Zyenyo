@@ -28,7 +28,7 @@ public class Info extends ListenerAdapter
 					.setDescription(INFO_MESSAGE)
 					.addField("GitHub", "https://github.com/Seizoxu/Zyenyo", false)
 					.setColor(0xde213c) // Zyen's favourite colour. :-)
-					.setFooter("Developed by Seizoxu#0781 & ashwin#6541.", event.getMember().getUser().getAvatarUrl())
+					.setFooter("Developed by Seizoxu#0781 & ashwin#6541.")
 					.build())
 			
 			.queue();

@@ -31,9 +31,10 @@ public class TypeStats implements Runnable
 	@Override
 	public void run()
 	{
-		channel.sendTyping();
 		try
 		{
+			channel.sendTyping().queue();
+			
 			// Get command parameters.
 			if (args.length == 1) {idStr = event.getAuthor().getId();}
 			else if (args.length == 2)
