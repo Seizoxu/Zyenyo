@@ -28,4 +28,5 @@ public class TypingTestLeaderboard
 	public TypingSubmission getSubmission(int index) {return this.leaderboard.get((short)index);}
 	public Set<Long> getUserIDs() {return this.userIDs;}
 	public int getNumSubmissions() {return this.numSubmissions;}
+	public HashMap<Short, TypingSubmission> getMap() {return this.leaderboard;}
 }

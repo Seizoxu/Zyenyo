@@ -30,22 +30,22 @@ public class Reader implements Runnable
 	@SuppressWarnings("unchecked")
 	public void run()
 	{
+		ObjectInputStream scrapeFileOIS = null;
 		MessageChannel channel = event.getChannel();
 		
-		try
+		try (ObjectInputStream idFileOIS = new ObjectInputStream(new FileInputStream(BotConfig.INDEX_IDS_FILEPATH));)
 		{
 			int msRecallID = Integer.parseInt(args[1]);
 			// Get ID File.
-			ObjectInputStream idFileOIS = new ObjectInputStream(new FileInputStream(new File(BotConfig.INDEX_IDS_FILEPATH)));
 			Hashtable<Integer, String> idTable = (Hashtable<Integer, String>) idFileOIS.readObject();
 			
 			// If ID is null...
 			if (idTable.get(msRecallID) == null) {channel.sendMessageFormat("ID `%d` does not exist.", msRecallID).queue(); return;}
 			
 			// Get Scrape File.
-			String filename = String.format("%s.zbsf", idTable.get(msRecallID));
-			ObjectInputStream scrapeFileOIS = new ObjectInputStream(new FileInputStream(new File(
-					String.format("%s%s", BotConfig.SCRAPE_DATA_FILEPATH, filename))));
+			File scrapeFile = new File(String.format("%s%s.zbsf", BotConfig.SCRAPE_DATA_FILEPATH, idTable.get(msRecallID)));
+			if (!scrapeFile.exists()) {channel.sendMessage("The specified scrape file no longer exists.").queue(); return;}
+			scrapeFileOIS = new ObjectInputStream(new FileInputStream(scrapeFile));
 			Hashtable<String, Integer> scrapeData = (Hashtable<String, Integer>) scrapeFileOIS.readObject();
 			
 			Hashtable<Long, Integer> charCounts = new Hashtable<>();
@@ -78,13 +78,15 @@ public class Reader implements Runnable
 			}
 			
 			channel.sendMessageFormat("Character leaderboard:%n%s", finalMessage).queue();
-			scrapeFileOIS.close();
-			
-			idFileOIS.close();
 		}
 		catch (FileNotFoundException e) {System.out.println("[Reader] File Not Found.");}
 		catch (IOException e) {System.out.println("[Reader] IOException Occurred.");}
 		catch (IndexOutOfBoundsException e) {System.out.println("[Reader] Out of Bounds.");}
 		catch (Exception e) {System.out.println("[Reader] Unknown Exception Occurred.");}
+		finally
+		{
+			try {if (scrapeFileOIS != null) {scrapeFileOIS.close();}}
+			catch (IOException e) {e.printStackTrace();}
+		}
 	}
 }

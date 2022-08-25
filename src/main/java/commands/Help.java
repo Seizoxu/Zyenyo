@@ -49,8 +49,6 @@ public class Help extends ListenerAdapter
 					embed = InfoCard.TYPING_QUIT;
 				case "typestats": case "tstats": case "ts":
 					embed = InfoCard.TYPING_STATS;
-				case "cleartests":
-					embed = InfoCard.CLEAR_TESTS;
 				case "leaderboard": case "lboard": case "lb":
 					embed = InfoCard.LEADERBOARD;
 				case "chart":
