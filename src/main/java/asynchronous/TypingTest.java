@@ -3,12 +3,17 @@ package asynchronous;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import org.apache.commons.text.similarity.LevenshteinDistance;
 
 import commands.Typing;
 import dataStructures.TypingSubmission;
@@ -18,7 +23,6 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.apache.commons.text.similarity.LevenshteinDistance;
 import zyenyo.BotConfig;
 
 public class TypingTest extends ListenerAdapter implements Runnable
@@ -28,15 +32,15 @@ public class TypingTest extends ListenerAdapter implements Runnable
 	private Message message;
 	private String[] args;
 	private String prompt;
+	private double promptRating;
 	private String fakePrompt;
 	private int numChars;
 	private long startTime = -1;
 	private TypingTest thisInstance = this;
 	private TypingTestLeaderboard submissions = new TypingTestLeaderboard();
 	
-	private final static String TEST_PROMPTS_FILEPATH = "ZBotData/TypingPrompts/";
+	private final static String TEST_PROMPTS_FILEPATH = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/";
 	private final static String ZERO_WIDTH_NON_JOINER = "‌";
-	private final static short PROMPT_COUNT = 12;
 	private final static short WPM_EASY = 30;
 	private final static short WPM_MEDIUM = 60;
 	private final static short WPM_HARD = 90;
@@ -58,14 +62,26 @@ public class TypingTest extends ListenerAdapter implements Runnable
 				EmbedBuilder embed = new EmbedBuilder();
 				embed.setTitle("Typing Test Results");
 				
-				for (int i = 1; i < submissions.getNumSubmissions() + 1; i++)
+				// Sorting by Typing Points.
+				HashMap<Short, TypingSubmission> leaderboardMap = submissions.getMap();
+				List<Integer> lbOrder = leaderboardMap.keySet().stream()
+						.mapToInt(x -> (int)x)
+						.boxed()
+						.sorted((a,b)->Double.compare(submissions.getSubmission(b).getTypingPoints(), submissions.getSubmission(a).getTypingPoints()))
+						.collect(Collectors.toList());
+				
+				for (int i = 0; i < submissions.getNumSubmissions(); i++)
 				{
-					TypingSubmission s = submissions.getSubmission(i);
+					TypingSubmission s = submissions.getSubmission(lbOrder.get(i));
 					embed.addField(
-							String.format("#%d.) %s", i, s.getUserTag()),
-							String.format("WPM: **`%.2f`**%nAccuracy: **`%.2f`**%s", s.getWPM(), s.getAccuracy(), "%."),
+							String.format("#%d.) %s", i+1, s.getUserTag()),
+							String.format(
+									"TP: **`%.2f`**%n"
+									+ "WPM: **`%.2f`**%n"
+									+ "Accuracy: **`%.2f`**%%",
+									s.getTypingPoints(), s.getWPM(), s.getAccuracy()),
 							false);
-					TypingApiHandler.sendTest(s.getUserID(), s.getWPM(), s.getAccuracy());
+					TypingApiHandler.sendTest(s.getUserID(), s.getWPM(), s.getAccuracy(), s.getTypingPoints());
 				}
 				message.replyEmbeds(embed.build()).queue();
 				Typing.guildTestList.remove(event.getGuild().getIdLong());
@@ -103,12 +119,11 @@ public class TypingTest extends ListenerAdapter implements Runnable
 	
 	private void constructAndSendTest(String difficulty)
 	{
-		try
+		int promptNumber = (int) (BotConfig.NUM_PROMPTS*Math.random() + 1);
+		promptRating = BotConfig.promptRatingMap.get(promptNumber);
+		
+		try (BufferedReader reader = new BufferedReader(new FileReader(String.format("%sprompt%d.txt", TEST_PROMPTS_FILEPATH, promptNumber)));)
 		{
-			// Reads random file.
-			int promptNumber = (int) (PROMPT_COUNT*Math.random()+ 1);
-			BufferedReader reader = new BufferedReader(new FileReader(
-					String.format("%s%s%d.txt", TEST_PROMPTS_FILEPATH, "prompt", promptNumber)));
 			prompt = reader.readLine();
 			numChars = prompt.length();
 			
@@ -146,7 +161,7 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		catch (IOException e)
 		{
 			channel.sendMessageEmbeds(new EmbedBuilder()
-					.addField("Error", "Internal error â€” contact developer", false).build()).queue();
+					.addField("Error", "Internal error — contact developer", false).build()).queue();
 		}
 	}
 	
@@ -162,9 +177,6 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		else if (submissions.getUserIDs().contains(userID)) {return;}
 		else if (event.getAuthor().isBot()) {return;}
 		
-		double timeTakenMillis = (System.currentTimeMillis()) - startTime;
-		double wordsPerMinute = (numChars / timeTakenMillis) * 12000;
-		
 		// Definitions.
 		String userTypingSubmission = event.getMessage().getContentRaw();
 		String userTag = event.getAuthor().getAsTag();
@@ -172,17 +184,23 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		// If Cheated...
 		if (userTypingSubmission.contains(ZERO_WIDTH_NON_JOINER))
 		{event.getMessage().replyFormat("Cheater detected. -1 Rep.").queue(); return;}
-		// If SS...
-		if (prompt.equals(userTypingSubmission) && wordsPerMinute < 200)
-			{sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, 100.0), timeTakenMillis); return;}
 		
+		// Metrics calculations.
+		double timeTakenMillis = (System.currentTimeMillis()) - startTime;
+		double wordsPerMinute = (numChars / timeTakenMillis) * 12000;
 		int editDistance = new LevenshteinDistance().apply(prompt, userTypingSubmission);
 		double accuracy = 100* (double)(prompt.length() - editDistance) / (double)prompt.length();
-		if (accuracy < 75) {return;}
-		if ( (accuracy >= 99) && (wordsPerMinute >= 250) )
-			{event.getMessage().replyFormat("Cheater detected. -1 Rep.").queue(); return;}
+		double typingPoints = (wordsPerMinute * promptRating) * Math.pow(0.9, 100-accuracy);
 		
-		sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, accuracy), timeTakenMillis);
+		
+		// If SS...
+		if (prompt.equals(userTypingSubmission) && wordsPerMinute < 200)
+			{sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, 100.0, typingPoints), timeTakenMillis); return;}
+		
+		if (accuracy < 75.0) {return;} // Doesn't accept accuracy below 75%.
+		if (wordsPerMinute >= 250.0) {event.getMessage().replyFormat("Cheater detected. -1 Rep.").queue(); return;}
+		
+		sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, accuracy, typingPoints), timeTakenMillis);
 	}
 	
 	private void sendResult(MessageChannel channel, TypingSubmission submission, double timeTakenMillis)
@@ -190,8 +208,9 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		submissions.addSubmission(submission);
 		
 		channel.sendMessage(
-				String.format("<@%s> has completed the prompt in **`%.3f` seconds `[%.2f WPM]`**, with an accuracy of **`%.2f%%`**.",
-				submission.getUserID(), timeTakenMillis/1000, submission.getWPM(), submission.getAccuracy()))
+				String.format("<@%s> has completed the prompt in **`%.3f` seconds `[%.2f WPM]`**, "
+						+ "with an accuracy of **`%.2f%%`**.%nTyping Points: **`%.2f TP`**.",
+				submission.getUserID(), timeTakenMillis/1000, submission.getWPM(), submission.getAccuracy(), submission.getTypingPoints()))
 				.queue();
 	}
 	

@@ -1,6 +1,8 @@
 # Folders
 target/
 .settings/
+debug/
+test/
 
 # Files
 *.zbif

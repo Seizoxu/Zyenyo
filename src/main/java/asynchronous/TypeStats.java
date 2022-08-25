@@ -74,17 +74,19 @@ public class TypeStats implements Runnable
 			double averageAcc = Double.parseDouble(json.get("averageAcc").toString());
 			double bestWpm = Double.parseDouble(json.get("bestWpm").toString());
 			double deviation = Double.parseDouble(json.get("deviation").toString());
+			double typingPoints = Double.parseDouble(json.get("weightedTp").toString());
 			String rank = json.get("rank").toString();
 			
 			channel.sendMessageEmbeds(new EmbedBuilder()
 					.addField(title,
 							String.format("%s"
+									+ "Weighted Typing Points: **`%.2f`**%n"
 									+ "Best WPM: **`%.2f`**%n"
 									+ "Average WPM: **`%.2f`**%n"
 									+ "Deviation: **`%.2f`**%n"
 									+ "Average Accuracy: **`%.2f%%`**%n"
 									+ "Rank: **`%s`**",
-									testsTaken, bestWpm, averageWpm, deviation, averageAcc, rank), false)
+									testsTaken, typingPoints, bestWpm, averageWpm, deviation, averageAcc, rank), false)
 					.setColor(new Color(180, 50, 80))
 					.build())
 			.queue();

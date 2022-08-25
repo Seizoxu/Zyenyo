@@ -18,7 +18,7 @@ public class InfoCard
 		.addField("TypeTest", "Starts a typing test.", false)
 		.addField("TypeQuit", "Stops a typing test, if there is one currently running in the server.", false)
 		.addField("TypeStats", "Shows Typing Statistics.", false)
-		.addField("ClearTests", "Clears the database of all the user's tests.", false)
+//		.addField("ClearTests", "Clears the database of all the user's tests.", false)
 		.addField("Leaderboard", "Shows the typing stats leaderboard of a specified statistic.", false)
 		.addField("Chart", "Shows a chart of a user's typing stats.", false)
 //		.addField("DpiConverter", "Converts fullscreen DPI on one screen to another (not implemented).", false)
@@ -123,13 +123,13 @@ public class InfoCard
 		.addField("Aliases","`typestop`, `tquit`, `tq`", false)
 		.addField("Syntax", "`\\typequit`", false);
 	
-	public static final EmbedBuilder CLEAR_TESTS =
-			new EmbedBuilder()
-			.setTitle("CMD: Clear Tests.")
-			.setDescription("This command clears all the user's test entries from the database.")
-			.setColor(0x8D538D)
-			.addField("Aliases","`None`", false)
-			.addField("Syntax", "`\\cleartests`", false);
+//	public static final EmbedBuilder CLEAR_TESTS =
+//			new EmbedBuilder()
+//			.setTitle("CMD: Clear Tests.")
+//			.setDescription("This command clears all the user's test entries from the database.")
+//			.setColor(0x8D538D)
+//			.addField("Aliases","`None`", false)
+//			.addField("Syntax", "`\\cleartests`", false);
 	
 	public static final EmbedBuilder LEADERBOARD =
 			new EmbedBuilder()

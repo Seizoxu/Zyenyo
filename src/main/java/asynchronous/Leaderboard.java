@@ -38,11 +38,20 @@ public class Leaderboard implements Runnable
 		{
 			if (args[1].equalsIgnoreCase("-acc")) {statisticType = "acc";}
 			else if (args[1].equalsIgnoreCase("-wpm")) {statisticType = "wpm";}
+			else if (args[1].equalsIgnoreCase("-tp")) {statisticType = "tp";}
 		}
-		else if (args.length == 3 && args[1].equalsIgnoreCase("-wpm") && args[2].equalsIgnoreCase("-best"))
+		else if (args.length == 3)
 		{
-			statisticType = "wpm";
-			leaderboardScope = "Best";
+			if (args[1].equalsIgnoreCase("-wpm") && args[2].equalsIgnoreCase("-best"))
+			{
+				statisticType = "wpm";
+				leaderboardScope = "Best";
+			}
+			else if (args[1].equalsIgnoreCase("-tp") && args[2].equalsIgnoreCase("-best"))
+			{
+				statisticType = "tp";
+				leaderboardScope = "Best";
+			}
 		}
 		else {sendHelp.run(); return;}
 		

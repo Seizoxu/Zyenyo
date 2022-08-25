@@ -45,7 +45,7 @@ public final class Aliases
 			BotConfig.PREFIX + "typestats",
 			BotConfig.PREFIX + "tstats",
 			BotConfig.PREFIX + "ts");
-	public final static Set<String> CLEARTESTS = Collections.singleton(BotConfig.PREFIX + "cleartests");
+//	public final static Set<String> CLEARTESTS = Collections.singleton(BotConfig.PREFIX + "cleartests");
 	public final static Set<String> CHART = Collections.singleton(BotConfig.PREFIX + "chart");
 	public final static Set<String> LEADERBOARD = Set.of(
 			BotConfig.PREFIX + "leaderboard",
