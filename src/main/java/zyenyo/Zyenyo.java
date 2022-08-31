@@ -22,6 +22,10 @@ public class Zyenyo
 	public static void main(String[] arguments) throws Exception
 	{
 		final String BOT_TOKEN = arguments[0];
+        final String MONGO_URI = arguments[1];
+
+        //Connect to Database.
+        Database.connect(MONGO_URI);
 		
 		// LOAD: Commands.
 		api = JDABuilder.createDefault(BOT_TOKEN)
