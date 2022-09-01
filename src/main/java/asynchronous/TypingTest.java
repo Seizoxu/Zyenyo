@@ -24,6 +24,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import zyenyo.BotConfig;
+import zyenyo.Database;
 
 public class TypingTest extends ListenerAdapter implements Runnable
 {
@@ -54,8 +55,6 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		@Override
 		public void run()
 		{
-			try
-			{
 				// Print leaderboard.
 				event.getJDA().removeEventListener(thisInstance);
 				channel.sendTyping().queue();
@@ -81,12 +80,10 @@ public class TypingTest extends ListenerAdapter implements Runnable
 									+ "Accuracy: **`%.2f`**%%",
 									s.getTypingPoints(), s.getWPM(), s.getAccuracy()),
 							false);
-					TypingApiHandler.sendTest(s.getUserID(), s.getWPM(), s.getAccuracy(), s.getTypingPoints());
+					Database.addTest(s.getUserID(), s.getWPM(), s.getAccuracy(), s.getTypingPoints());
 				}
 				message.replyEmbeds(embed.build()).queue();
 				Typing.guildTestList.remove(event.getGuild().getIdLong());
-			}
-			catch (IOException | InterruptedException e) {}
 		}
 	};
 	

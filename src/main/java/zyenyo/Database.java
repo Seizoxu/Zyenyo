@@ -12,12 +12,17 @@ import com.mongodb.client.result.*;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import java.util.List;
-import java.util.Arrays;
-import java.util.ArrayList;
-
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Updates.*;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoCollection;
+
+
+import org.bson.Document;
+import org.bson.types.ObjectId;
+
+import java.time.LocalDateTime;
 
 public class Database {
   static final String DB_NAME = "MyDatabase";
@@ -30,5 +35,16 @@ public class Database {
     client = MongoClients.create(uri);
     tests = client.getDatabase(DB_NAME).getCollection("tests");
     users = client.getDatabase(DB_NAME).getCollection("users");
+  }
+
+  public static void addTest(long discordId, double wpm, double accuracy, double tp) {
+    tests.insertOne(new Document()
+          .append("_id", new ObjectId())
+          .append("discordId", discordId)
+          .append("wpm", wpm)
+          .append("accuracy", accuracy)
+          .append("tp", tp)
+          .append("date", LocalDateTime.now())
+          );
   }
 }
