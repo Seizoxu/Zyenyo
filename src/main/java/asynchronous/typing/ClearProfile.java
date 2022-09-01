@@ -1,4 +1,4 @@
-package asynchronous;
+package asynchronous.typing;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -6,18 +6,17 @@ import java.io.IOException;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-@Deprecated
-public class ClearTests implements Runnable
+public class ClearProfile implements Runnable
 {
 	private MessageReceivedEvent event;
-	public ClearTests(MessageReceivedEvent event) {this.event = event;}
+	public ClearProfile(MessageReceivedEvent event) {this.event = event;}
 
     @Override
     public void run()
     {
 		try
 		{
-			TypingApiHandler.requestData("test/remove/" + event.getAuthor().getId());
+			TypingApiHandler.requestData("admin/remove/" + event.getAuthor().getId());
 			
 			event.getChannel().sendMessageEmbeds(new EmbedBuilder()
 					.setTitle("Removed all tests for " + event.getAuthor().getAsTag())

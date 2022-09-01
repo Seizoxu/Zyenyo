@@ -1,4 +1,4 @@
-package asynchronous;
+package asynchronous.typing;
 
 import java.awt.Color;
 import java.io.IOException;

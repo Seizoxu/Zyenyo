@@ -1,4 +1,4 @@
-package asynchronous;
+package asynchronous.typing;
 
 import java.io.IOException;
 

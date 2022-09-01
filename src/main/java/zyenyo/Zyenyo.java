@@ -3,12 +3,12 @@ package zyenyo;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import commands.Help;
-import commands.Info;
-import commands.MesticsRead;
-import commands.MesticsScrape;
-import commands.Ping;
+import commands.Administrator;
+import commands.MessageStatistics;
 import commands.Typing;
+import commands.info.Help;
+import commands.info.Info;
+import commands.info.Ping;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -16,7 +16,7 @@ import net.dv8tion.jda.api.entities.Activity;
 
 public class Zyenyo
 {
-	protected static JDA api;
+	private static JDA api;
 	public static ExecutorService masterThreadPool = Executors.newCachedThreadPool();
 	
 	public static void main(String[] arguments) throws Exception
@@ -25,17 +25,18 @@ public class Zyenyo
 		
 		// LOAD: Commands.
 		api = JDABuilder.createDefault(BOT_TOKEN)
-				.addEventListeners(new Info(),
-						new MesticsScrape(),
-						new MesticsRead(),
+				.addEventListeners(
+						new Info(),
 						new Help(),
 						new Ping(),
+						new MessageStatistics(),
+						new Typing(),
+						new Administrator()
 //						new Profile(),
 //						new DpiConverter(),
-						new Typing())
-				.build();
+				).build();
 		
-		BotConfig.setConfigVars(api.getSelfUser().getIdLong());
+		BotConfig.setConfigVars();
 		
 		api.getPresence().setStatus(OnlineStatus.ONLINE);
 		api.getPresence().setActivity(Activity.playing("with everyone. :D"));
