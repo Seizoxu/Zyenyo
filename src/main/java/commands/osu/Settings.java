@@ -1,3 +1,4 @@
+package commands.osu;
 //package osuCommands;
 //
 //import net.dv8tion.jda.api.hooks.ListenerAdapter;

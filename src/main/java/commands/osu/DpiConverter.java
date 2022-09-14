@@ -1,3 +1,4 @@
+package commands.osu;
 //package commands;
 //
 //import dataStructures.Aliases;

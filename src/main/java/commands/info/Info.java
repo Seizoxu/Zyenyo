@@ -1,4 +1,4 @@
-package commands;
+package commands.info;
 
 import dataStructures.Aliases;
 import net.dv8tion.jda.api.EmbedBuilder;

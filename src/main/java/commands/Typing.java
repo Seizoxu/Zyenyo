@@ -2,10 +2,10 @@ package commands;
 
 import java.util.HashMap;
 
-import asynchronous.Chart;
-import asynchronous.Leaderboard;
-import asynchronous.TypeStats;
-import asynchronous.TypingTest;
+import asynchronous.typing.Chart;
+import asynchronous.typing.Leaderboard;
+import asynchronous.typing.TypeStats;
+import asynchronous.typing.TypingTest;
 import dataStructures.Aliases;
 import dataStructures.InfoCard;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -53,7 +53,7 @@ public class Typing extends ListenerAdapter
 		// IF: Command is TYPESTART...
 		if (Aliases.TYPESTART.contains(args[0].toLowerCase()))
 		{
-			if (args.length != 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
+			if (args.length > 2) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
 			if (guildTestList.containsKey(serverID)) {Zyenyo.masterThreadPool.submit(testAlreadyRunning); return;}
 				
 			Zyenyo.masterThreadPool.submit(typingTest = new TypingTest(event, args));
@@ -73,14 +73,6 @@ public class Typing extends ListenerAdapter
 		// IF: Command is TYPESTATS...
 		else if (Aliases.TYPESTATS.contains(args[0].toLowerCase()))
 			{Zyenyo.masterThreadPool.submit(new TypeStats(event, args));}
-		
-		// IF: Command is CLEARTESTS...
-//		else if (Aliases.CLEARTESTS.contains(args[0].toLowerCase()))
-//		{
-//			if (args.length != 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
-//			
-//			Zyenyo.masterThreadPool.submit(new ClearTests(event));
-//		}
 		
 		// IF: Command is CHART...
 		else if (Aliases.CHART.contains(args[0].toLowerCase()))
