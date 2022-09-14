@@ -1,21 +1,15 @@
 package asynchronous.typing;
 
-import java.io.IOException;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
-import zyenyo.Database;
-import com.mongodb.client.AggregateIterable;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
-import org.apache.commons.lang3.StringUtils;  
+import com.mongodb.client.AggregateIterable;
 
 import dataStructures.InfoCard;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import zyenyo.Database;
 
 public class Leaderboard implements Runnable
 {
@@ -67,7 +61,6 @@ public class Leaderboard implements Runnable
 		EmbedBuilder leaderboardEmbed = new EmbedBuilder()
 				.setTitle(String.format("Global %s %s Leaderboards",
 						leaderboardScope, StringUtils.capitalize(statisticType)));
-		JSONObject leaderboardMember;
 
 		int position = 0;
 		String userTag;
