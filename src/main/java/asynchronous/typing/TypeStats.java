@@ -1,7 +1,6 @@
 package asynchronous.typing;
 
 import java.awt.Color;
-import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 import org.json.simple.JSONObject;
@@ -11,6 +10,7 @@ import dataStructures.InfoCard;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import zyenyo.Database;
 
 public class TypeStats implements Runnable
 {
@@ -60,13 +60,13 @@ public class TypeStats implements Runnable
 			
 			if (requestGlobal)
 			{
-				json = (JSONObject) JSONValue.parse(TypingApiHandler.requestData("stats/global/" + id));
+				json = (JSONObject) JSONValue.parse(Database.getGlobalStats(idStr));
 				testsTaken = String.format("Tests Taken: **`%s`**%n", json.get("tests").toString());
 				title = "Global Typing Statistics for " + event.getJDA().retrieveUserById(id).submit().get().getAsTag();
 			}
 			else
 			{
-				json = (JSONObject) JSONValue.parse(TypingApiHandler.requestData("stats/recent/" + id));
+				json = (JSONObject) JSONValue.parse(Database.getStats(idStr));
 				title = "Recent Typing Statistics for " + event.getJDA().retrieveUserById(id).submit().get().getAsTag();
 			}
 			
@@ -75,7 +75,7 @@ public class TypeStats implements Runnable
 			double bestWpm = Double.parseDouble(json.get("bestWpm").toString());
 			double deviation = Double.parseDouble(json.get("deviation").toString());
 			double typingPoints = Double.parseDouble(json.get("weightedTp").toString());
-			String rank = json.get("rank").toString();
+			String rank = getRank(averageWpm);
 			
 			channel.sendMessageEmbeds(new EmbedBuilder()
 					.addField(title,
@@ -91,7 +91,7 @@ public class TypeStats implements Runnable
 					.build())
 			.queue();
 		}
-		catch (IOException | InterruptedException | NumberFormatException e)
+		catch (InterruptedException | NumberFormatException e)
 		{
 			channel.sendMessageEmbeds(new EmbedBuilder()
 					.addField("Error: Cannot fetch user stats.", "Reason: User not in database.", false)
@@ -106,4 +106,24 @@ public class TypeStats implements Runnable
 			.queue();
 		}
 	}
+
+	private static String getRank(double wpm)
+	{
+		String rank = "Undetermined";
+		
+		if (wpm < 50) {rank = "Novice";}
+		else if (wpm < 60) {rank = "Iron";}
+		else if (wpm < 70) {rank = "Bronze";}
+		else if (wpm < 80) {rank = "Silver";}
+		else if (wpm < 90) {rank = "Gold";}
+		else if (wpm < 100) {rank = "Diamond" ;}
+		else if (wpm < 110) {rank = "Demon";}
+		else if (wpm < 130) {rank = "Demi God";}
+		else if (wpm < 150) {rank = "God";}
+		else if (wpm < 250) {rank = "Untouchable";}
+		else if (wpm >= 250) {rank = "Suspicious";}
+		
+		return rank;
+	}
+
 }

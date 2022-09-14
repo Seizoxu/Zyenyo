@@ -1,10 +1,9 @@
 package asynchronous.typing;
 
-import java.io.IOException;
-
 import dataStructures.InfoCard;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import zyenyo.Database;
 
 public class AddTest implements Runnable
 {
@@ -30,10 +29,8 @@ public class AddTest implements Runnable
 			if (args.length == 4) {userID = event.getAuthor().getIdLong();}
 			else {userID = Long.parseLong(args[4].substring(2, args[4].length() - 1));} // Only other case possible is args.length == 5.
 			
-			TypingApiHandler.sendTest(userID, wpm, accuracy, tp);
+			Database.addTest(userID, wpm, accuracy, tp);
 		}
 		catch (NumberFormatException e) {System.out.println("[ADDTEST: Unable to add test.] - Arguments formatted incorrectly."); sendHelp.run();}
-		catch (IOException e) {System.out.println("[ADDTEST: IOException]");}
-		catch (InterruptedException e) {System.out.println("[ADDTEST: Interrupted Exception]");}
 	}
 }
