@@ -16,6 +16,8 @@ public final class Aliases
 			BotConfig.PREFIX + "information",
 			BotConfig.PREFIX + "info");
 	
+	
+	
 	/*——————————————————————————————————————|
 	|————————————————MESTICS————————————————|
 	|——————————————————————————————————————*/
@@ -27,6 +29,8 @@ public final class Aliases
 			BotConfig.PREFIX + "mesticsread",
 			BotConfig.PREFIX + "msread",
 			BotConfig.PREFIX + "read");
+	
+	
 	
 	/*—————————————————————————————————————|
 	|————————————————TYPING————————————————|
@@ -45,12 +49,23 @@ public final class Aliases
 			BotConfig.PREFIX + "typestats",
 			BotConfig.PREFIX + "tstats",
 			BotConfig.PREFIX + "ts");
-//	public final static Set<String> CLEARTESTS = Collections.singleton(BotConfig.PREFIX + "cleartests");
 	public final static Set<String> CHART = Collections.singleton(BotConfig.PREFIX + "chart");
 	public final static Set<String> LEADERBOARD = Set.of(
 			BotConfig.PREFIX + "leaderboard",
 			BotConfig.PREFIX + "lboard",
 			BotConfig.PREFIX + "lb");
+	
+	
+	/*————————————————————————————————————|
+	|————————————————ADMIN————————————————|
+	|————————————————————————————————————*/
+	public final static Set<String> SHUTDOWN = Collections.singleton(BotConfig.PREFIX + "shutdown");
+	public final static Set<String> ADDTEST = Collections.singleton(BotConfig.PREFIX + "addtest");
+	public final static Set<String> CLEARPROFILE = Collections.singleton(BotConfig.PREFIX + "clearprofile");
+	public final static Set<String> FINDCHEATERS = Collections.singleton(BotConfig.PREFIX + "findcheaters");
+	public final static Set<String> REMOVECHEATERS = Collections.singleton(BotConfig.PREFIX + "removecheaters");
+	
+	
 	
 	/*—————————————————————————————————————|
 	|————————————————IN-DEV————————————————|

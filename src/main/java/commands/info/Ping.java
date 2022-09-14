@@ -1,4 +1,4 @@
-package commands;
+package commands.info;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -14,6 +14,7 @@ public class Ping extends ListenerAdapter
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event)
 	{
+		if (event.getAuthor().isBot()) {return;}
 		if (Aliases.PING.contains(event.getMessage().getContentRaw().trim().toLowerCase()))
 		{
 			try

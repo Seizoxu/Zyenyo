@@ -1,10 +1,9 @@
-package asynchronous;
+package asynchronous.typing;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -42,14 +41,140 @@ public class TypingTest extends ListenerAdapter implements Runnable
 	
 	private final static String TEST_PROMPTS_FILEPATH = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/";
 	private final static String ZERO_WIDTH_NON_JOINER = "‌";
-	private final static short WPM_EASY = 30;
-	private final static short WPM_MEDIUM = 60;
-	private final static short WPM_HARD = 90;
-	private final static short WPM_DIABOLICAL = 120;
+	private final static Set<String> DIFFICULTIES = Set.of("easy", "medium", "hard", "diabolical");
+	private static final int NUM_PROMPTS_EASY = BotConfig.promptDifficultyList.get(0).size();
+	private static final int NUM_PROMPTS_MEDIUM = BotConfig.promptDifficultyList.get(1).size();
+	private static final int NUM_PROMPTS_HARD = BotConfig.promptDifficultyList.get(2).size();
+	private static final int NUM_PROMPTS_DIABOLICAL = BotConfig.promptDifficultyList.get(3).size();
+	private final static short WPM_MINIMUM = 30;
 	private final static short NUM_CHARS_IN_WORD = 5;
 	
 	private ScheduledExecutorService schedulePool = Executors.newSingleThreadScheduledExecutor();
 	private Future<?> scheduledStop;
+	
+	public TypingTest(MessageReceivedEvent event, String[] args)
+	{
+		this.event = event;
+		this.channel = event.getChannel();
+		this.args = args;
+		this.message = event.getMessage();
+	}
+	
+	@Override
+	public void run() throws NumberFormatException
+	{
+		String difficulty;
+		if ( (args.length == 1) || !DIFFICULTIES.contains(args[1].toLowerCase()) ) {difficulty = "none";}
+		else {difficulty = args[1].toLowerCase();}
+		
+		constructAndSendTest(difficulty);
+		event.getJDA().addEventListener(this);
+	}
+	
+	private void constructAndSendTest(String difficulty)
+	{
+		// Sets a random prompt number, based on the difficulty.
+		int promptNumber = 1;
+		if (difficulty.equals("none")) {promptNumber = (int) (BotConfig.NUM_PROMPTS*Math.random() + 1);}
+		else
+		{
+			switch(difficulty) // Gets prompt number from the appropriate ArrayList in promptDifficultyList
+			{
+			case "easy":
+				promptNumber = BotConfig.promptDifficultyList.get(0).get((int) (NUM_PROMPTS_EASY*Math.random()));
+				break;
+			case "medium":
+				promptNumber = BotConfig.promptDifficultyList.get(1).get((int) (NUM_PROMPTS_MEDIUM*Math.random()));
+				break;
+			case "hard":
+				promptNumber = BotConfig.promptDifficultyList.get(2).get((int) (NUM_PROMPTS_HARD*Math.random()));
+				break;
+			case "diabolical":
+				promptNumber = BotConfig.promptDifficultyList.get(3).get((int) (NUM_PROMPTS_DIABOLICAL*Math.random()));
+				break;
+			}
+		}
+		promptRating = BotConfig.promptRatingMap.get(promptNumber);
+		
+		try (BufferedReader reader = new BufferedReader(new FileReader(String.format("%sprompt%d.txt", TEST_PROMPTS_FILEPATH, promptNumber)));)
+		{
+			prompt = reader.readLine();
+			numChars = prompt.length();
+			
+			// Sets ending time and sends typing test.
+			long endTime = (System.currentTimeMillis() / 1000) + (60*numChars / (WPM_MINIMUM * NUM_CHARS_IN_WORD));
+			fakePrompt = prompt.substring(0, prompt.length()/2) + ZERO_WIDTH_NON_JOINER + prompt.substring(prompt.length()/2, prompt.length());
+			EmbedBuilder embed = new EmbedBuilder()
+					.setTitle("Typing Prompt:")
+					.setDescription(fakePrompt)
+					.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
+			channel.sendMessageEmbeds(embed.build()).complete();
+			startTime = System.currentTimeMillis();
+			
+			// Makes sure the typing test finishes on time.
+			long delay = endTime*1000 - startTime;
+			scheduledStop = schedulePool.schedule(concludeTest, delay, TimeUnit.MILLISECONDS);
+		}
+		catch (IOException e)
+		{
+			channel.sendMessageEmbeds(new EmbedBuilder()
+					.addField("Error", "Internal error — contact developer.", false).build()).queue();
+		}
+	}
+	
+	@Override
+	public void onMessageReceived(MessageReceivedEvent event)
+	{
+		long userID = event.getAuthor().getIdLong();
+		MessageChannel answerChannel = event.getChannel();
+		
+		if (answerChannel.getIdLong() != channel.getIdLong()) {return;}
+		else if (submissions.getUserIDs().contains(userID)) {return;}
+		else if (event.getAuthor().isBot()) {return;}
+		
+		// Definitions.
+		String userTypingSubmission = event.getMessage().getContentRaw();
+		String userTag = event.getAuthor().getAsTag();
+		
+		// If Cheated...
+		if (userTypingSubmission.contains(ZERO_WIDTH_NON_JOINER))
+		{event.getMessage().replyFormat("Cheater detected. What a naughty user...").queue(); return;}
+		
+		// Metrics calculations.
+		double timeTakenMillis = (System.currentTimeMillis()) - startTime;
+		double wordsPerMinute = (numChars / timeTakenMillis) * 12000;
+		int editDistance = new LevenshteinDistance().apply(prompt, userTypingSubmission);
+		double accuracy = 100* (double)(prompt.length() - editDistance) / (double)prompt.length();
+		double typingPoints = (wordsPerMinute * promptRating) * Math.pow(0.95, 100-accuracy);
+		
+		
+		// If SS...
+		if (prompt.equals(userTypingSubmission) && wordsPerMinute < 200)
+			{sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, 100.0, typingPoints), timeTakenMillis); return;}
+		
+		if (accuracy < 75.0) {return;} // Doesn't accept accuracy below 75%.
+		if (wordsPerMinute >= 250.0) {event.getMessage().replyFormat("Cheater detected. What a naughty user...").queue(); return;}
+		
+		sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, accuracy, typingPoints), timeTakenMillis);
+	}
+	
+	private void sendResult(MessageChannel channel, TypingSubmission submission, double timeTakenMillis)
+	{
+		submissions.addSubmission(submission);
+		
+		channel.sendMessage(
+				String.format("<@%s> has completed the prompt in **`%.3f` seconds `[%.2f WPM]`**, "
+						+ "with an accuracy of **`%.2f%%`**.%nTyping Points: **`%.2f TP`**.",
+				submission.userID(), timeTakenMillis/1000, submission.wordsPerMinute(), submission.accuracy(), submission.typingPoints()))
+				.queue();
+	}
+	
+	public void quitTest()
+	{
+		scheduledStop.cancel(true);
+		concludeTest.run();
+	}
+	
 	private Runnable concludeTest = new Runnable()
 	{
 		@Override
@@ -66,153 +191,25 @@ public class TypingTest extends ListenerAdapter implements Runnable
 				List<Integer> lbOrder = leaderboardMap.keySet().stream()
 						.mapToInt(x -> (int)x)
 						.boxed()
-						.sorted((a,b)->Double.compare(submissions.getSubmission(b).getTypingPoints(), submissions.getSubmission(a).getTypingPoints()))
+						.sorted((a,b)->Double.compare(submissions.getSubmission(b).typingPoints(), submissions.getSubmission(a).typingPoints()))
 						.collect(Collectors.toList());
 				
 				for (int i = 0; i < submissions.getNumSubmissions(); i++)
 				{
 					TypingSubmission s = submissions.getSubmission(lbOrder.get(i));
 					embed.addField(
-							String.format("#%d.) %s", i+1, s.getUserTag()),
+							String.format("#%d.) %s", i+1, s.userTag()),
 							String.format(
 									"TP: **`%.2f`**%n"
 									+ "WPM: **`%.2f`**%n"
 									+ "Accuracy: **`%.2f`**%%",
-									s.getTypingPoints(), s.getWPM(), s.getAccuracy()),
+									s.typingPoints(), s.wordsPerMinute(), s.accuracy()),
 							false);
-					Database.addTest(s.getUserID(), s.getWPM(), s.getAccuracy(), s.getTypingPoints());
+					
+					Database.addTest(s.userID(), s.wordsPerMinute(), s.accuracy(), s.typingPoints());
 				}
 				message.replyEmbeds(embed.build()).queue();
 				Typing.guildTestList.remove(event.getGuild().getIdLong());
 		}
 	};
-	
-	public TypingTest(MessageReceivedEvent event, String[] args)
-	{
-		this.event = event;
-		this.channel = event.getChannel();
-		this.args = args;
-		this.message = event.getMessage();
-	}
-	
-	@Override
-	public void run() throws NumberFormatException
-	{
-		Set<String> difficulties = new HashSet<>();
-		{
-			difficulties.add("easy");
-			difficulties.add("medium");
-			difficulties.add("hard");
-			difficulties.add("diabolical");
-		}
-		
-		String difficulty;
-		if ( (args.length == 1) || !difficulties.contains(args[1].toLowerCase()) ) {difficulty = "easy";}
-		else {difficulty = args[1].toLowerCase();}
-		
-		constructAndSendTest(difficulty);
-		event.getJDA().addEventListener(this);
-	}
-	
-	private void constructAndSendTest(String difficulty)
-	{
-		int promptNumber = (int) (BotConfig.NUM_PROMPTS*Math.random() + 1);
-		promptRating = BotConfig.promptRatingMap.get(promptNumber);
-		
-		try (BufferedReader reader = new BufferedReader(new FileReader(String.format("%sprompt%d.txt", TEST_PROMPTS_FILEPATH, promptNumber)));)
-		{
-			prompt = reader.readLine();
-			numChars = prompt.length();
-			
-			// Sets ending time based on difficulty.
-			long endTime = System.currentTimeMillis() / 1000;
-			switch(difficulty)
-			{
-			case "easy":
-				endTime += (long) (60*numChars / (WPM_EASY * NUM_CHARS_IN_WORD));
-				break;
-			case "medium":
-				endTime += (long) (60*numChars / (WPM_MEDIUM * NUM_CHARS_IN_WORD));
-				break;
-			case "hard":
-				endTime += (long) (60*numChars / (WPM_HARD * NUM_CHARS_IN_WORD));
-				break;
-			case "diabolical":
-				endTime += (long) (60*numChars / (WPM_DIABOLICAL * NUM_CHARS_IN_WORD));
-				break;
-			}
-			
-			// Sends typing test.
-			fakePrompt = prompt.substring(0, prompt.length()/2) + ZERO_WIDTH_NON_JOINER + prompt.substring(prompt.length()/2, prompt.length());
-			EmbedBuilder embed = new EmbedBuilder()
-					.setTitle("Typing Prompt:")
-					.setDescription(fakePrompt)
-					.addField("Time", String.format("Test will end <t:%d:R>.", endTime), false);
-			channel.sendMessageEmbeds(embed.build()).queue();
-			
-			
-			// Makes sure the typing test finishes on time.
-			long delay = endTime*1000 - System.currentTimeMillis();
-			scheduledStop = schedulePool.schedule(concludeTest, delay, TimeUnit.MILLISECONDS);
-		}
-		catch (IOException e)
-		{
-			channel.sendMessageEmbeds(new EmbedBuilder()
-					.addField("Error", "Internal error — contact developer", false).build()).queue();
-		}
-	}
-	
-	@Override
-	public void onMessageReceived(MessageReceivedEvent event)
-	{
-		// Sets starting time when the message has been sent. TODO: Make a better system for this.
-		long userID = event.getAuthor().getIdLong();
-		MessageChannel answerChannel = event.getChannel();
-		
-		if (answerChannel.getIdLong() != channel.getIdLong()) {return;}
-		else if (userID == BotConfig.BOT_USER_ID && startTime == -1) {startTime = System.currentTimeMillis(); return;}
-		else if (submissions.getUserIDs().contains(userID)) {return;}
-		else if (event.getAuthor().isBot()) {return;}
-		
-		// Definitions.
-		String userTypingSubmission = event.getMessage().getContentRaw();
-		String userTag = event.getAuthor().getAsTag();
-		
-		// If Cheated...
-		if (userTypingSubmission.contains(ZERO_WIDTH_NON_JOINER))
-		{event.getMessage().replyFormat("Cheater detected. -1 Rep.").queue(); return;}
-		
-		// Metrics calculations.
-		double timeTakenMillis = (System.currentTimeMillis()) - startTime;
-		double wordsPerMinute = (numChars / timeTakenMillis) * 12000;
-		int editDistance = new LevenshteinDistance().apply(prompt, userTypingSubmission);
-		double accuracy = 100* (double)(prompt.length() - editDistance) / (double)prompt.length();
-		double typingPoints = (wordsPerMinute * promptRating) * Math.pow(0.9, 100-accuracy);		
-		
-		// If SS...
-		if (prompt.equals(userTypingSubmission) && wordsPerMinute < 200)
-			{sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, 100.0, typingPoints), timeTakenMillis); return;}
-		
-		if (accuracy < 75.0) {return;} // Doesn't accept accuracy below 75%.
-		if (wordsPerMinute >= 250.0) {event.getMessage().replyFormat("Cheater detected. -1 Rep.").queue(); return;}
-		
-		sendResult(event.getChannel(), new TypingSubmission(userID, userTag, wordsPerMinute, accuracy, typingPoints), timeTakenMillis);
-	}
-	
-	private void sendResult(MessageChannel channel, TypingSubmission submission, double timeTakenMillis)
-	{
-		submissions.addSubmission(submission);
-		
-		channel.sendMessage(
-				String.format("<@%s> has completed the prompt in **`%.3f` seconds `[%.2f WPM]`**, "
-						+ "with an accuracy of **`%.2f%%`**.%nTyping Points: **`%.2f TP`**.",
-				submission.getUserID(), timeTakenMillis/1000, submission.getWPM(), submission.getAccuracy(), submission.getTypingPoints()))
-				.queue();
-	}
-	
-	public void quitTest()
-	{
-		scheduledStop.cancel(true);
-		concludeTest.run();
-	}
 }

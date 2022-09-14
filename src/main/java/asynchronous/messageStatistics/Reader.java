@@ -1,11 +1,11 @@
-package asynchronous;
+package asynchronous.messageStatistics;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,7 +27,6 @@ public class Reader implements Runnable
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public void run()
 	{
 		ObjectInputStream scrapeFileOIS = null;
@@ -36,8 +35,10 @@ public class Reader implements Runnable
 		try (ObjectInputStream idFileOIS = new ObjectInputStream(new FileInputStream(BotConfig.INDEX_IDS_FILEPATH));)
 		{
 			int msRecallID = Integer.parseInt(args[1]);
+			
 			// Get ID File.
-			Hashtable<Integer, String> idTable = (Hashtable<Integer, String>) idFileOIS.readObject();
+			@SuppressWarnings("unchecked")
+			HashMap<Integer, String> idTable = (HashMap<Integer, String>)idFileOIS.readObject();
 			
 			// If ID is null...
 			if (idTable.get(msRecallID) == null) {channel.sendMessageFormat("ID `%d` does not exist.", msRecallID).queue(); return;}
@@ -46,10 +47,11 @@ public class Reader implements Runnable
 			File scrapeFile = new File(String.format("%s%s.zbsf", BotConfig.SCRAPE_DATA_FILEPATH, idTable.get(msRecallID)));
 			if (!scrapeFile.exists()) {channel.sendMessage("The specified scrape file no longer exists.").queue(); return;}
 			scrapeFileOIS = new ObjectInputStream(new FileInputStream(scrapeFile));
-			Hashtable<String, Integer> scrapeData = (Hashtable<String, Integer>) scrapeFileOIS.readObject();
+			@SuppressWarnings("unchecked")
+			HashMap<String, Integer> scrapeData = (HashMap<String, Integer>)scrapeFileOIS.readObject();
 			
-			Hashtable<Long, Integer> charCounts = new Hashtable<>();
-			Hashtable<Long, Integer> messageCounts = new Hashtable<>();
+			HashMap<Long, Integer> charCounts = new HashMap<>();
+			HashMap<Long, Integer> messageCounts = new HashMap<>();
 			Set<String> userIDs = scrapeData.keySet();
 			
 			// For each user ID...

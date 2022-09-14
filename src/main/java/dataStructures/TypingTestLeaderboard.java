@@ -15,9 +15,9 @@ public class TypingTestLeaderboard
 	
 	public boolean addSubmission(TypingSubmission submission)
 	{
-		if (!userIDs.contains(submission.getUserID()))
+		if (!userIDs.contains(submission.userID()))
 		{
-			userIDs.add(submission.getUserID());
+			userIDs.add(submission.userID());
 			leaderboard.put(++numSubmissions, submission);
 			return true;
 		}

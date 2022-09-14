@@ -1,4 +1,4 @@
-package asynchronous;
+package asynchronous.messageStatistics;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -33,7 +33,6 @@ public class Scraper implements Runnable
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked") // Unavoidable unchecked cast.
 	public void run()
 	{
 		ObjectOutputStream	createIndexCountsOOS = null,
@@ -43,9 +42,6 @@ public class Scraper implements Runnable
 							scrapeOOS = null;
 		ObjectInputStream	readIndexCountsOIS = null,
 							readIndexIDsOIS = null;
-		
-		Hashtable<String, Integer> indexCounts;
-		Hashtable<Integer, String> indexIDs;
 		
 		try
 		{
@@ -72,23 +68,25 @@ public class Scraper implements Runnable
 				createIndexCountsOOS = new ObjectOutputStream(new FileOutputStream(indexCountsFile));
 				createIndexIDsOOS = new ObjectOutputStream(new FileOutputStream(indexIDsFile));
 				
-				Hashtable<String, Integer> ht1 = new Hashtable<>();
-				Hashtable<Integer, String> ht2 = new Hashtable<>();
-				ht1.put("PLACEHOLDER", 0);
-				ht2.put(0, "PLACEHOLDER");
+				HashMap<String, Integer> map1 = new HashMap<>();
+				HashMap<Integer, String> map2 = new HashMap<>();
+				map1.put("PLACEHOLDER", 0);
+				map2.put(0, "PLACEHOLDER");
 				
-				createIndexCountsOOS.writeObject(ht1);
-				createIndexIDsOOS.writeObject(ht2);
+				createIndexCountsOOS.writeObject(map1);
+				createIndexIDsOOS.writeObject(map2);
 			}
 			
-			// Read Hashtable objects from files.
+			// Read Hashmap objects from files.
 			readIndexCountsOIS = new ObjectInputStream(new FileInputStream(indexCountsFile));
 			readIndexIDsOIS = new ObjectInputStream(new FileInputStream(indexIDsFile));
 			
-			indexCounts = (Hashtable<String, Integer>) readIndexCountsOIS.readObject();
-			indexIDs = (Hashtable<Integer, String>) readIndexIDsOIS.readObject();
+			@SuppressWarnings("unchecked")
+			HashMap<String, Integer> indexCounts = (HashMap<String, Integer>)readIndexCountsOIS.readObject();
+			@SuppressWarnings("unchecked")
+			HashMap<Integer, String> indexIDs = (HashMap<Integer, String>)readIndexIDsOIS.readObject();
 			
-			// Update Index Hashtables.
+			// Update Index Hashmaps.
 			if (indexCounts.containsKey("Total")) {indexCounts.replace("Total", indexCounts.get("Total") + 1);}
 			else {indexCounts.put("Total", 1);} // In case the file is fresh.
 			id = indexCounts.get("Total");
@@ -105,9 +103,9 @@ public class Scraper implements Runnable
 			Message m;
 			String memberID;
 			int charCount;
-			Hashtable<String,Integer> data = new Hashtable<>();
+			HashMap<String,Integer> data = new HashMap<>();
 			
-			// Update Scrape Hashtables.
+			// Update Scrape Hashmaps.
 			for (int i = 0; i < list.size(); i++)
 			{
 				m = list.get(i);
@@ -123,14 +121,14 @@ public class Scraper implements Runnable
 				else {data.put(memberID + "m", 1);}
 			}
 			
-			// Write the updated hashtable to the Index file.
+			// Write the updated hashmap to the Index file.
 			indexCountsOOS = new ObjectOutputStream(new FileOutputStream(indexCountsFile));
 			indexIDsOOS = new ObjectOutputStream(new FileOutputStream(indexIDsFile));
 			
 			indexCountsOOS.writeObject(indexCounts);
 			indexIDsOOS.writeObject(indexIDs);
 			
-			// Write the Scrape hashtable to the scrape file.
+			// Write the Scrape hashmap to the scrape file.
 			// ZBSF = ZyenyoBotScrapeFile.
 			File scrapeFile = new File(String.format("%s%s (%d).zbsf", BotConfig.SCRAPE_DATA_FILEPATH, location, indexCounts.get(location)));
 			scrapeFile.createNewFile();
