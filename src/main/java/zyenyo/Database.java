@@ -32,7 +32,7 @@ public class Database {
 		users = client.getDatabase(DB_NAME).getCollection("users");
 	}
 
-	public static void addTest(long discordId, double wpm, double accuracy, double tp) {
+	public static double addTest(long discordId, double wpm, double accuracy, double tp) {
 		tests.insertOne(new Document()
 				.append("_id", new ObjectId())
 				.append("discordId", String.valueOf(discordId))
@@ -42,14 +42,18 @@ public class Database {
 				.append("date", LocalDateTime.now())
 				);
 
-                //update users collection
-                Document usr = users.findOneAndUpdate(Filters.eq("discordId", String.valueOf(discordId)), Updates.set("totalTp", getWeightedTp(discordId)));
-                if (usr == null) {
-                  users.insertOne(new Document()
-                      .append("_id", new ObjectId())
-                      .append("discordId", String.valueOf(discordId))
-                      .append("totalTp", getWeightedTp(discordId)));
-                }
+		//update users collection
+		double weightedTp = getWeightedTp(discordId);
+
+		Document usr = users.findOneAndUpdate(Filters.eq("discordId", String.valueOf(discordId)), Updates.set("totalTp", weightedTp));
+		if (usr == null) {
+			users.insertOne(new Document()
+					.append("_id", new ObjectId())
+					.append("discordId", String.valueOf(discordId))
+					.append("totalTp", weightedTp));
+		}
+
+		return weightedTp - usr.getDouble("totalTp");
 
 	}
 
@@ -109,21 +113,21 @@ public class Database {
 
 	}
 
-  private static double getWeightedTp(long id) {
-    AggregateIterable<Document> tpList = tests.aggregate(Arrays.asList(
-        Aggregates.match(Filters.eq("discordId", String.valueOf(id))),
-        Aggregates.match(Filters.exists("tp")),
-        Aggregates.sort(descending("tp")),
-        Aggregates.limit(100)
-          ));
+	private static double getWeightedTp(long id) {
+		AggregateIterable<Document> tpList = tests.aggregate(Arrays.asList(
+				Aggregates.match(Filters.eq("discordId", String.valueOf(id))),
+				Aggregates.match(Filters.exists("tp")),
+				Aggregates.sort(descending("tp")),
+				Aggregates.limit(100)
+				));
 
-    double weightedTp = 0;
-    double index = 0;
-    for (Document test : tpList) {
-      weightedTp += (test.getDouble("tp") * Math.pow(0.95, index++));
-    }
+		double weightedTp = 0;
+		double index = 0;
+		for (Document test : tpList) {
+			weightedTp += (test.getDouble("tp") * Math.pow(0.95, index++));
+		}
 
-    return weightedTp;
-  
-  }
+		return weightedTp;
+
+	}
 }
