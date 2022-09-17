@@ -4,6 +4,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -31,7 +32,7 @@ public class Database {
 		users = client.getDatabase(DB_NAME).getCollection("users");
 	}
 
-	public static void addTest(long discordId, double wpm, double accuracy, double tp) {
+	public static double addTest(long discordId, double wpm, double accuracy, double tp) {
 		tests.insertOne(new Document()
 				.append("_id", new ObjectId())
 				.append("discordId", String.valueOf(discordId))
@@ -40,6 +41,20 @@ public class Database {
 				.append("tp", tp)
 				.append("date", LocalDateTime.now())
 				);
+
+		//update users collection
+		double weightedTp = getWeightedTp(discordId);
+
+		Document usr = users.findOneAndUpdate(Filters.eq("discordId", String.valueOf(discordId)), Updates.set("totalTp", weightedTp));
+		if (usr == null) {
+			users.insertOne(new Document()
+					.append("_id", new ObjectId())
+					.append("discordId", String.valueOf(discordId))
+					.append("totalTp", weightedTp));
+		}
+
+		return weightedTp - usr.getDouble("totalTp");
+
 	}
 
 	public static String getStats(String discordId) {
@@ -58,7 +73,6 @@ public class Database {
 				Aggregates.set(new Field<Double>("weightedTp", userTp))
 				)).first();
 
-		System.out.println(stats.toJson());
 
 		return stats.toJson();
 	}
@@ -96,6 +110,24 @@ public class Database {
 					));
 
 		}
+
+	}
+
+	private static double getWeightedTp(long id) {
+		AggregateIterable<Document> tpList = tests.aggregate(Arrays.asList(
+				Aggregates.match(Filters.eq("discordId", String.valueOf(id))),
+				Aggregates.match(Filters.exists("tp")),
+				Aggregates.sort(descending("tp")),
+				Aggregates.limit(100)
+				));
+
+		double weightedTp = 0;
+		double index = 0;
+		for (Document test : tpList) {
+			weightedTp += (test.getDouble("tp") * Math.pow(0.95, index++));
+		}
+
+		return weightedTp;
 
 	}
 }
