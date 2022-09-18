@@ -122,7 +122,7 @@ public class Database {
 				));
 
 		double weightedTp = 0;
-		double index = 0;
+		int index = 0;
 		for (Document test : tpList) {
 			weightedTp += (test.getDouble("tp") * Math.pow(0.95, index++));
 		}

@@ -35,7 +35,7 @@ public class Administrator extends ListenerAdapter
 			Zyenyo.masterThreadPool.submit(new AddTest(event));
 		}
 		
-		// IF: Command is CLEARTESTS...
+		// IF: Command is CLEARPROFILE...
 		else if (Aliases.CLEARPROFILE.contains(args[0].toLowerCase()))
 		{
 			if (args.length != 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
