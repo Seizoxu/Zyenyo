@@ -65,7 +65,7 @@ public class Database {
               .append("_id", new ObjectId())
               .append("title", title)
               .append("text", text)
-              .append("rating", 0));
+              .append("rating", CalculatePromptDifficulty.calculateStringPrompt(text.toCharArray())));
         }
 
 	public static String getStats(String discordId) {
