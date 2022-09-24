@@ -19,17 +19,20 @@ import static com.mongodb.client.model.Sorts.descending;
 
 import java.time.LocalDateTime;
 
+import zyenyo.CalculatePromptDifficulty;
 public class Database {
 	static final String DB_NAME = "MyDatabase";
 
 	private static MongoClient client;
 	private static MongoCollection<Document> tests;
 	private static MongoCollection<Document> users;
+	private static MongoCollection<Document> prompts;
 
 	public static void connect(String uri) {
 		client = MongoClients.create(uri);
 		tests = client.getDatabase(DB_NAME).getCollection("tests");
 		users = client.getDatabase(DB_NAME).getCollection("users");
+                prompts = client.getDatabase(DB_NAME).getCollection("prompts");
 	}
 
 	public static double addTest(long discordId, double wpm, double accuracy, double tp) {
@@ -56,6 +59,14 @@ public class Database {
 		return weightedTp - usr.getDouble("totalTp");
 
 	}
+
+        public static void addPrompt(String title, String text) {
+          prompts.insertOne(new Document()
+              .append("_id", new ObjectId())
+              .append("title", title)
+              .append("text", text)
+              .append("rating", CalculatePromptDifficulty.calculateStringPrompt(text.toCharArray())));
+        }
 
 	public static String getStats(String discordId) {
 		double userTp = users.find(Filters.eq("discordId", discordId)).first().getDouble("totalTp");
