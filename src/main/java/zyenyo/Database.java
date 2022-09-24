@@ -1,26 +1,25 @@
 package zyenyo;
 
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
+import static com.mongodb.client.model.Sorts.descending;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
-import com.mongodb.client.model.Field;
-import java.util.Arrays;
-
-import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Accumulators;
-import static com.mongodb.client.model.Sorts.descending;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Field;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
 
-import java.time.LocalDateTime;
-
-import zyenyo.CalculatePromptDifficulty;
-public class Database {
+public class Database
+{
 	static final String DB_NAME = "MyDatabase";
 
 	private static MongoClient client;
@@ -28,14 +27,16 @@ public class Database {
 	private static MongoCollection<Document> users;
 	private static MongoCollection<Document> prompts;
 
-	public static void connect(String uri) {
+	public static void connect(String uri)
+	{
 		client = MongoClients.create(uri);
 		tests = client.getDatabase(DB_NAME).getCollection("tests");
 		users = client.getDatabase(DB_NAME).getCollection("users");
-                prompts = client.getDatabase(DB_NAME).getCollection("prompts");
+		prompts = client.getDatabase(DB_NAME).getCollection("prompts");
 	}
 
-	public static double addTest(long discordId, double wpm, double accuracy, double tp) {
+	public static double addTest(long discordId, double wpm, double accuracy, double tp)
+	{
 		tests.insertOne(new Document()
 				.append("_id", new ObjectId())
 				.append("discordId", String.valueOf(discordId))
@@ -45,11 +46,12 @@ public class Database {
 				.append("date", LocalDateTime.now())
 				);
 
-		//update users collection
+		// Update users collection.
 		double weightedTp = getWeightedTp(discordId);
 
 		Document usr = users.findOneAndUpdate(Filters.eq("discordId", String.valueOf(discordId)), Updates.set("totalTp", weightedTp));
-		if (usr == null) {
+		if (usr == null)
+		{
 			users.insertOne(new Document()
 					.append("_id", new ObjectId())
 					.append("discordId", String.valueOf(discordId))
@@ -60,15 +62,17 @@ public class Database {
 
 	}
 
-        public static void addPrompt(String title, String text) {
-          prompts.insertOne(new Document()
-              .append("_id", new ObjectId())
-              .append("title", title)
-              .append("text", text)
-              .append("rating", CalculatePromptDifficulty.calculateStringPrompt(text.toCharArray())));
-        }
+	public static void addPrompt(String title, String text)
+	{
+		prompts.insertOne(new Document()
+				.append("_id", new ObjectId())
+				.append("title", title)
+				.append("text", text)
+				.append("rating", CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray())));
+	}
 
-	public static String getStats(String discordId) {
+	public static String getStats(String discordId)
+	{
 		double userTp = users.find(Filters.eq("discordId", discordId)).first().getDouble("totalTp");
 
 		Document stats = tests.aggregate(Arrays.asList(
@@ -91,9 +95,10 @@ public class Database {
 	//TODO
 	public static String getGlobalStats(String discordId) {return "";}
 
-	public static AggregateIterable<Document> getLeaderboards(String statisticType, String leaderboardScope) {
-
-		if (leaderboardScope.equals("Best")) {
+	public static AggregateIterable<Document> getLeaderboards(String statisticType, String leaderboardScope)
+	{
+		if (leaderboardScope.equals("Best"))
+		{
 			return tests.aggregate(Arrays.asList(
 					Aggregates.match(Filters.exists(statisticType)),
 					Aggregates.group("$discordId", 
@@ -101,8 +106,9 @@ public class Database {
 							),
 					Aggregates.sort(descending(statisticType))
 					));
-
-		} else if (leaderboardScope.equals("Total")) {
+		}
+		else if (leaderboardScope.equals("Total"))
+		{
 			return users.aggregate(Arrays.asList(
 					Aggregates.match(Filters.exists("totalTp")),
 					Aggregates.group("$discordId", 
@@ -111,7 +117,9 @@ public class Database {
 					Aggregates.sort(descending(statisticType))
 					));
 
-		} else { //average
+		}
+		else // Average
+		{
 			return tests.aggregate(Arrays.asList(
 					Aggregates.match(Filters.exists(statisticType)),
 					Aggregates.group("$discordId", 
@@ -124,7 +132,8 @@ public class Database {
 
 	}
 
-	private static double getWeightedTp(long id) {
+	private static double getWeightedTp(long id)
+	{
 		AggregateIterable<Document> tpList = tests.aggregate(Arrays.asList(
 				Aggregates.match(Filters.eq("discordId", String.valueOf(id))),
 				Aggregates.match(Filters.exists("tp")),
@@ -134,11 +143,8 @@ public class Database {
 
 		double weightedTp = 0;
 		int index = 0;
-		for (Document test : tpList) {
-			weightedTp += (test.getDouble("tp") * Math.pow(0.95, index++));
-		}
+		for (Document test : tpList) {weightedTp += (test.getDouble("tp") * Math.pow(0.95, index++));}
 
 		return weightedTp;
-
 	}
 }
