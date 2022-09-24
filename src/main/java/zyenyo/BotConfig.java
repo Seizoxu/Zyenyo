@@ -27,7 +27,7 @@ public class BotConfig
 	@SuppressWarnings("unchecked")
 	protected static void setConfigVars()
 	{
-		if (!PROMPT_RATING_FILE.exists() || !PROMPT_DIFFICULTY_FILE.exists()) {CalculatePromptDifficulty.calculate();}
+		if (!PROMPT_RATING_FILE.exists() || !PROMPT_DIFFICULTY_FILE.exists()) {CalculatePromptDifficulty.recalculatePromptRatings();}
 		
 		ObjectInputStream ratingMapOIS=null, difficultyListOIS=null;
 		try
