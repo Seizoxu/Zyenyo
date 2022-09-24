@@ -1,6 +1,7 @@
 package commands;
 
 import asynchronous.typing.AddTest;
+import asynchronous.typing.AddPrompt;
 import asynchronous.typing.ClearProfile;
 import asynchronous.typing.FindCheaters;
 import asynchronous.typing.RemoveCheaters;
@@ -58,7 +59,13 @@ public class Administrator extends ListenerAdapter
 			
 			Zyenyo.masterThreadPool.submit(new RemoveCheaters(event));
 		}
-		
+
+		// IF: Command is ADDPROMPT...
+		else if (Aliases.ADDPROMPT.contains(args[0].toLowerCase()))
+		{
+			Zyenyo.masterThreadPool.submit(new AddPrompt(event));
+		}
+	
 		// IF: Command is SHUTDOWN...
 		else if (Aliases.SHUTDOWN.contains(args[0].toLowerCase()))
 		{

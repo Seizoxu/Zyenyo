@@ -64,6 +64,7 @@ public final class Aliases
 	public final static Set<String> CLEARPROFILE = Collections.singleton(BotConfig.PREFIX + "clearprofile");
 	public final static Set<String> FINDCHEATERS = Collections.singleton(BotConfig.PREFIX + "findcheaters");
 	public final static Set<String> REMOVECHEATERS = Collections.singleton(BotConfig.PREFIX + "removecheaters");
+	public final static Set<String> ADDPROMPT = Collections.singleton(BotConfig.PREFIX + "addprompt");
 	
 	
 	
