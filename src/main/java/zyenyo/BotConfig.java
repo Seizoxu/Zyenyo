@@ -10,7 +10,7 @@ import java.util.List;
 
 public class BotConfig
 {
-	public static final char PREFIX = '.';
+	public static final char PREFIX = '\\';
 	public static HashMap<Integer, Double> promptRatingMap = new HashMap<>();
 	public static ArrayList<List<Integer>> promptDifficultyList = new ArrayList<List<Integer>>(4);
 	
@@ -27,7 +27,7 @@ public class BotConfig
 	@SuppressWarnings("unchecked")
 	protected static void setConfigVars()
 	{
-		if (!PROMPT_RATING_FILE.exists() || !PROMPT_DIFFICULTY_FILE.exists()) {CalculatePromptDifficulty.calculate();}
+		if (!PROMPT_RATING_FILE.exists() || !PROMPT_DIFFICULTY_FILE.exists()) {CalculatePromptDifficulty.recalculatePromptRatings();}
 		
 		ObjectInputStream ratingMapOIS=null, difficultyListOIS=null;
 		try

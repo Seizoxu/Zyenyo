@@ -35,7 +35,7 @@ public class CalculatePromptDifficulty
 	private static ArrayList<List<Integer>> promptsSortedByDifficulty = new ArrayList<List<Integer>>(4);
 	
 	// Typing Points v0.2.3_2
-	public static void calculate()
+	public static void recalculatePromptRatings()
 	{
 		BufferedReader reader = null;
 		ObjectOutputStream mapObjectWriter = null,
@@ -45,61 +45,21 @@ public class CalculatePromptDifficulty
 		try
 		{
 			char[] prompt;
-			char currentChar;
-			double currentPoints;
-			for (int i = 0; i < 4; i++) {promptsSortedByDifficulty.add(new ArrayList<Integer>());}
+			for (int i = 0; i < 4; i++) {promptsSortedByDifficulty.add(new ArrayList<Integer>());} // Initialise 2DArrayList.
 			for (int i = 0; i < BotConfig.NUM_PROMPTS; i++)
 			{
 				reader = new BufferedReader(new FileReader(String.format("%sTypingPrompts/prompt%d.txt", BotConfig.BOT_DATA_FILEPATH, i+1)));
 				prompt = reader.readLine().toCharArray();
-				Hand previousHand = Hand.LEFT;
-				double totalDifficulty = 0;
-				double specialCharacterBonus = 0;
-				int handCombo = 0;
+				promptData pd = calculateSinglePrompt(prompt);
 				
-				for (int j = 0; j < prompt.length; j++)
-				{
-					currentChar = prompt[j];
-					if (LEFT_HAND_CHARS.contains(currentChar))
-					{
-						if (previousHand.equals(Hand.LEFT)) {handCombo++;} // Same hand.
-						else if (previousHand.equals(Hand.RIGHT)) // Other hand.
-						{
-							handCombo = 0;
-							previousHand = Hand.LEFT;
-						}
-					}
-					else if (RIGHT_HAND_CHARS.contains(currentChar))
-					{
-						if (previousHand.equals(Hand.LEFT)) // Other hand.
-						{
-							handCombo = 0;
-							previousHand = Hand.RIGHT;
-						}
-						else if (previousHand.equals(Hand.RIGHT)) {handCombo++;} // Same hand.
-					}
-					else if (BOTH_HANDS_CHARS.contains(currentChar))
-					{
-						handCombo = 0;
-						if (previousHand.equals(Hand.LEFT)) {previousHand = Hand.RIGHT;}
-						else if (previousHand.equals(Hand.RIGHT)) {previousHand = Hand.LEFT;}
-					}
-					
-					currentPoints = calculatePoints(handCombo);
-					specialCharacterBonus = (SPECIAL_CHARS.contains(currentChar)) ? 5*currentPoints : 0;
-					totalDifficulty += currentPoints + specialCharacterBonus;
-				}
+				promptRatingMap.put(i+1, pd.typeRating());
 				
-				double lengthBonus = Math.sqrt(prompt.length/200);
-				double typeRating = lengthBonus * ((totalDifficulty / (double)prompt.length) - 1);
-				promptRatingMap.put(i+1, typeRating);
-				
-				if (typeRating < 1.5) {promptsSortedByDifficulty.get(0).add(i+1);} // Easy.
-				else if (typeRating < 3.0) {promptsSortedByDifficulty.get(1).add(i+1);} // Medium.
-				else if (typeRating < 4.0) {promptsSortedByDifficulty.get(2).add(i+1);} // Hard.
+				if (pd.typeRating() < 1.5) {promptsSortedByDifficulty.get(0).add(i+1);} // Easy.
+				else if (pd.typeRating() < 3.0) {promptsSortedByDifficulty.get(1).add(i+1);} // Medium.
+				else if (pd.typeRating() < 4.0) {promptsSortedByDifficulty.get(2).add(i+1);} // Hard.
 				else {promptsSortedByDifficulty.get(3).add(i+1);} // Diabolical.
 				
-				System.out.println(String.format("Prompt %d: %.4f", i+1, typeRating));
+				System.out.println(String.format("Prompt %d: %.4f", i+1, pd.typeRating()));
 			}
 			
 			new File(BotConfig.BOT_DATA_FILEPATH+"TypingPrompts/").mkdirs();
@@ -124,12 +84,63 @@ public class CalculatePromptDifficulty
 		}
 	}
 	
-	private static double calculatePoints(int handCombo)
+	public static promptData calculateSinglePrompt(char[] prompt)
+	{
+		char currentChar;
+		double currentPoints;
+		Hand previousHand = Hand.LEFT;
+		double totalDifficulty = 0;
+		double specialCharacterBonus = 0;
+		int handCombo = 0;
+		
+		for (int j = 0; j < prompt.length; j++)
+		{
+			currentChar = prompt[j];
+			if (LEFT_HAND_CHARS.contains(currentChar))
+			{
+				if (previousHand.equals(Hand.LEFT)) {handCombo++;} // Same hand.
+				else if (previousHand.equals(Hand.RIGHT)) // Other hand.
+				{
+					handCombo = 0;
+					previousHand = Hand.LEFT;
+				}
+			}
+			else if (RIGHT_HAND_CHARS.contains(currentChar))
+			{
+				if (previousHand.equals(Hand.LEFT)) // Other hand.
+				{
+					handCombo = 0;
+					previousHand = Hand.RIGHT;
+				}
+				else if (previousHand.equals(Hand.RIGHT)) {handCombo++;} // Same hand.
+			}
+			else if (BOTH_HANDS_CHARS.contains(currentChar))
+			{
+				handCombo = 0;
+				if (previousHand.equals(Hand.LEFT)) {previousHand = Hand.RIGHT;}
+				else if (previousHand.equals(Hand.RIGHT)) {previousHand = Hand.LEFT;}
+			}
+			
+			currentPoints = calculateComboPoints(handCombo);
+			specialCharacterBonus += (SPECIAL_CHARS.contains(currentChar)) ? 5*currentPoints : 0;
+			
+			totalDifficulty += currentPoints;
+		}
+		totalDifficulty += specialCharacterBonus;
+		
+		double lengthBonus = Math.sqrt(prompt.length/200);
+		double typeRating = lengthBonus * ((totalDifficulty / (double)prompt.length) - 1);
+		
+		return new promptData(typeRating, lengthBonus, specialCharacterBonus);
+	}
+	
+	private static double calculateComboPoints(int handCombo)
 	{
 		if (handCombo > 9) {return Math.pow(COMBO_BASE_CONSTANT, 9);} // 10 max combo bonus (125.00 points per char).
-		
 		return Math.pow(COMBO_BASE_CONSTANT, handCombo);
 	}
 }
+
+record promptData(double typeRating, double lengthBonus, double specialCharacterBonus) {}
 
 enum Hand {LEFT,RIGHT}

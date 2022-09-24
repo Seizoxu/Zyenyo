@@ -7,9 +7,9 @@ import zyenyo.BotConfig;
 
 public final class Aliases
 {
-	/*——————————————————————————————————————————|
-	|————————————————INFORMATION————————————————|
-	|——————————————————————————————————————————*/
+	/*â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”|
+	|â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”INFORMATIONâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”|
+	|â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”*/
 	public final static Set<String> PING = Collections.singleton(BotConfig.PREFIX + "ping");
 	public final static Set<String> HELP = Collections.singleton(BotConfig.PREFIX + "help");
 	public final static Set<String> INFO = Set.of(
@@ -18,9 +18,9 @@ public final class Aliases
 	
 	
 	
-	/*——————————————————————————————————————|
-	|————————————————MESTICS————————————————|
-	|——————————————————————————————————————*/
+	/*â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”|
+	|â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”MESTICSâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”|
+	|â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”*/
 	public final static Set<String> MESTICSSCRAPE = Set.of(
 			BotConfig.PREFIX + "mesticsscrape",
 			BotConfig.PREFIX + "msscrape",
@@ -32,9 +32,9 @@ public final class Aliases
 	
 	
 	
-	/*—————————————————————————————————————|
-	|————————————————TYPING————————————————|
-	|—————————————————————————————————————*/
+	/*â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”|
+	|â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”TYPINGâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”|
+	|â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”*/
 	public final static Set<String> TYPESTART = Set.of(
 			BotConfig.PREFIX + "typestart",
 			BotConfig.PREFIX + "typetest",
@@ -56,21 +56,22 @@ public final class Aliases
 			BotConfig.PREFIX + "lb");
 	
 	
-	/*————————————————————————————————————|
-	|————————————————ADMIN————————————————|
-	|————————————————————————————————————*/
+	/*â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”|
+	|â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”ADMINâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”|
+	|â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”*/
 	public final static Set<String> SHUTDOWN = Collections.singleton(BotConfig.PREFIX + "shutdown");
 	public final static Set<String> ADDTEST = Collections.singleton(BotConfig.PREFIX + "addtest");
 	public final static Set<String> CLEARPROFILE = Collections.singleton(BotConfig.PREFIX + "clearprofile");
 	public final static Set<String> FINDCHEATERS = Collections.singleton(BotConfig.PREFIX + "findcheaters");
 	public final static Set<String> REMOVECHEATERS = Collections.singleton(BotConfig.PREFIX + "removecheaters");
 	public final static Set<String> ADDPROMPT = Collections.singleton(BotConfig.PREFIX + "addprompt");
+	public final static Set<String> RECALCULATEPROMPTS = Collections.singleton(BotConfig.PREFIX + "recalculateprompts");
 	
 	
 	
-	/*—————————————————————————————————————|
-	|————————————————IN-DEV————————————————|
-	|—————————————————————————————————————*/
+	/*â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”|
+	|â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”IN-DEVâ€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”|
+	|â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”*/
 	public final static Set<String> DPICONVERTER = Set.of(
 			BotConfig.PREFIX + "dpiconverter",
 			BotConfig.PREFIX + "dpiconv",
