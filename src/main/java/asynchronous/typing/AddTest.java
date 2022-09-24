@@ -30,6 +30,8 @@ public class AddTest implements Runnable
 			else {userID = Long.parseLong(args[4].substring(2, args[4].length() - 1));} // Only other case possible is args.length == 5.
 			
 			Database.addTest(userID, wpm, accuracy, tp);
+			
+			channel.sendMessageFormat("_`[SA] Successfully added test.`_").queue();
 		}
 		catch (NumberFormatException e) {System.out.println("[ADDTEST: Unable to add test.] - Arguments formatted incorrectly."); sendHelp.run();}
 	}
