@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ~/projects/Zyenyo/
+cd $BOT_DIR
 
 git pull origin stable
 
