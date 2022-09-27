@@ -21,5 +21,6 @@ public class AddPrompt implements Runnable
 		channel = event.getChannel();
                 
                 Database.addPrompt(args[1], args[2]);
+                channel.sendMessage("Added").queue();
 		}
 }

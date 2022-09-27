@@ -64,7 +64,6 @@ public class Administrator extends ListenerAdapter
 		// IF: Command is ADDPROMPT...
 		else if (Aliases.ADDPROMPT.contains(args[0].toLowerCase()))
 		{
-			if (args.length != 3) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
 			
 			Zyenyo.masterThreadPool.submit(new AddPrompt(event));
 		}
