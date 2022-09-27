@@ -64,11 +64,12 @@ public class Database
 
 	public static void addPrompt(String title, String text)
 	{
+          System.out.println(CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray()).typeRating());
 		prompts.insertOne(new Document()
 				.append("_id", new ObjectId())
 				.append("title", title)
 				.append("text", text)
-				.append("rating", CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray())));
+				.append("rating", CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray()).typeRating()));
 	}
 
 	public static String getStats(String discordId)
