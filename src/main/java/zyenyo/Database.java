@@ -3,6 +3,7 @@ package zyenyo;
 import static com.mongodb.client.model.Sorts.descending;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.bson.Document;
@@ -64,13 +65,22 @@ public class Database
 
 	public static void addPrompt(String title, String text)
 	{
-          System.out.println(CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray()).typeRating());
 		prompts.insertOne(new Document()
 				.append("_id", new ObjectId())
 				.append("title", title)
 				.append("text", text)
 				.append("rating", CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray()).typeRating()));
 	}
+
+        public static ArrayList<Document> getPrompts() {
+          ArrayList<Document> documents = new ArrayList<Document>();
+
+          prompts.aggregate(Arrays.asList()).forEach(doc -> documents.add(doc));
+
+          System.out.println(documents);
+
+          return documents;
+        }
 
 	public static String getStats(String discordId)
 	{
