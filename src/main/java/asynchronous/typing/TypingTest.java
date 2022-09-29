@@ -140,12 +140,17 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		if (userTypingSubmission.contains(ZERO_WIDTH_NON_JOINER))
 		{event.getMessage().replyFormat("Cheater detected. What a naughty user...").queue(); return;}
 
-		// Metrics calculations.
+		// Data
 		double timeTakenMillis = (System.currentTimeMillis()) - startTime;
 		double wordsPerMinute = (numChars / timeTakenMillis) * 12000;
+
 		int editDistance = new LevenshteinDistance().apply(prompt, userTypingSubmission);
 		double accuracy = 100* (double)(prompt.length() - editDistance) / (double)prompt.length();
-		double typingPoints = (wordsPerMinute * promptRating) * Math.pow(0.95, 100-accuracy);
+
+		// Metrics
+		double wpmMultiplier = 0.2 * Math.pow(wordsPerMinute, 1.5);
+		double accuracyMultiplier = Math.pow(0.95, 100-accuracy);
+		double typingPoints = (wpmMultiplier * promptRating) * accuracyMultiplier;
 
 
 		// If SS...

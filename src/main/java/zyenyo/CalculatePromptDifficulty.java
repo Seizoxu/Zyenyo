@@ -29,7 +29,7 @@ public class CalculatePromptDifficulty
 			'n','m',',','.','/',				'N','M','<','>','?');
 	private final static Set<Character> BOTH_HANDS_CHARS =	Set.of('6','b','^','B',' ');
 	
-	private final static double COMBO_BASE_CONSTANT = 2;
+	private final static double COMBO_EXPONENT_CONSTANT = 2;
 	
 	private static HashMap<Integer, Double> promptRatingMap = new HashMap<>();
 	private static ArrayList<List<Integer>> promptsSortedByDifficulty = new ArrayList<List<Integer>>(4);
@@ -54,12 +54,10 @@ public class CalculatePromptDifficulty
 				
 				promptRatingMap.put(i+1, pd.typeRating());
 				
-				if (pd.typeRating() < 1.5) {promptsSortedByDifficulty.get(0).add(i+1);} // Easy.
-				else if (pd.typeRating() < 3.0) {promptsSortedByDifficulty.get(1).add(i+1);} // Medium.
-				else if (pd.typeRating() < 4.0) {promptsSortedByDifficulty.get(2).add(i+1);} // Hard.
+				if (pd.typeRating() < 0.8) {promptsSortedByDifficulty.get(0).add(i+1);} // Easy.
+				else if (pd.typeRating() < 1.0) {promptsSortedByDifficulty.get(1).add(i+1);} // Medium.
+				else if (pd.typeRating() < 1.5) {promptsSortedByDifficulty.get(2).add(i+1);} // Hard.
 				else {promptsSortedByDifficulty.get(3).add(i+1);} // Diabolical.
-				
-				System.out.println(String.format("Prompt %d: %.4f", i+1, pd.typeRating()));
 			}
 			
 			new File(BotConfig.BOT_DATA_FILEPATH+"TypingPrompts/").mkdirs();
@@ -122,22 +120,26 @@ public class CalculatePromptDifficulty
 			}
 			
 			currentPoints = calculateComboPoints(handCombo);
-			specialCharacterBonus += (SPECIAL_CHARS.contains(currentChar)) ? 5*currentPoints : 0;
+			specialCharacterBonus += (SPECIAL_CHARS.contains(currentChar)) ? 2.5*currentPoints : 0;
 			
 			totalDifficulty += currentPoints;
 		}
-		totalDifficulty += specialCharacterBonus;
 		
-		double lengthBonus = Math.sqrt(prompt.length/200);
-		double typeRating = lengthBonus * ((totalDifficulty / (double)prompt.length) - 1);
+		totalDifficulty += specialCharacterBonus;
+		double lengthBonus = (prompt.length < 200)
+				? Math.sqrt(prompt.length/200)
+				: (Math.log(prompt.length/200) / Math.log(50)) + 1;
+		// Effective log base 50 of (x/200) + 1   (Change of log base formula).
+		
+		double typeRating = lengthBonus * ((totalDifficulty / (double)prompt.length));
 		
 		return new promptData(typeRating, lengthBonus, specialCharacterBonus);
 	}
 	
 	private static double calculateComboPoints(int handCombo)
 	{
-		if (handCombo > 9) {return Math.pow(COMBO_BASE_CONSTANT, 9);} // 10 max combo bonus (125.00 points per char).
-		return Math.pow(COMBO_BASE_CONSTANT, handCombo);
+		if (handCombo > 9) {return 0.75*Math.pow(9, COMBO_EXPONENT_CONSTANT);} // 10 max combo bonus (40.50 points per char).
+		return 0.75*Math.pow(handCombo, COMBO_EXPONENT_CONSTANT);
 	}
 }
 
