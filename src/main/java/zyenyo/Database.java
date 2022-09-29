@@ -63,13 +63,16 @@ public class Database
 
 	}
 
-	public static void addPrompt(String title, String text)
+	public static double addPrompt(String title, String text)
 	{
+                double rating = CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray()).typeRating();
 		prompts.insertOne(new Document()
 				.append("_id", new ObjectId())
 				.append("title", title)
 				.append("text", text)
-				.append("rating", CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray()).typeRating()));
+				.append("rating", rating));
+
+                return rating;
 	}
 
         public static ArrayList<Document> getPrompts() {
@@ -77,9 +80,19 @@ public class Database
 
           prompts.aggregate(Arrays.asList()).forEach(doc -> documents.add(doc));
 
-          System.out.println(documents);
-
           return documents;
+        }
+
+        public static void recalcPrompts() {
+          ArrayList<Document> docs = getPrompts();
+
+          for (Document prompt : docs) {
+            String text = prompt.getString("text");
+            double rating = CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray()).typeRating();
+
+            System.out.println(String.format("%f -> %f", rating, prompt.getDouble("rating")));
+            prompts.updateOne(Filters.eq("text", text), Updates.set("rating", rating));
+          }
         }
 
 	public static String getStats(String discordId)
