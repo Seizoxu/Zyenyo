@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import zyenyo.BotConfig;
 import zyenyo.CalculatePromptDifficulty;
 import zyenyo.Zyenyo;
+import zyenyo.Database;
 
 public class Administrator extends ListenerAdapter
 {
@@ -73,7 +74,11 @@ public class Administrator extends ListenerAdapter
 		{
 			Zyenyo.masterThreadPool.submit(new Runnable()
 			{
-				@Override public void run() {CalculatePromptDifficulty.recalculatePromptRatings();}
+				@Override public void run() 
+                                {
+                                  CalculatePromptDifficulty.recalculatePromptRatings();
+                                  Database.recalcPrompts();
+                                }
 			});
 		}
 	
