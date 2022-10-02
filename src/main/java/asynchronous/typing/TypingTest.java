@@ -27,17 +27,17 @@ import zyenyo.Database;
 
 public class TypingTest extends ListenerAdapter implements Runnable
 {
-	private MessageReceivedEvent event;
-	private MessageChannel channel;
-	private Message message;
+	protected MessageReceivedEvent event;
+	protected MessageChannel channel;
+	protected Message message;
 	private String[] args;
 	private String prompt;
 	private double promptRating;
 	private String fakePrompt;
 	private int numChars;
 	private long startTime = -1;
-	private TypingTest thisInstance = this;
-	private TypingTestLeaderboard submissions = new TypingTestLeaderboard();
+	protected TypingTest thisInstance = this;
+	protected TypingTestLeaderboard submissions = new TypingTestLeaderboard();
 
 	private final static String TEST_PROMPTS_FILEPATH = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/";
 	private final static String ZERO_WIDTH_NON_JOINER = "‌";
@@ -50,7 +50,7 @@ public class TypingTest extends ListenerAdapter implements Runnable
 	private final static short NUM_CHARS_IN_WORD = 5;
 
 	private ScheduledExecutorService schedulePool = Executors.newSingleThreadScheduledExecutor();
-	private Future<?> scheduledStop;
+	protected Future<?> scheduledStop;
 
 	public TypingTest(MessageReceivedEvent event, String[] args)
 	{
@@ -71,7 +71,7 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		event.getJDA().addEventListener(this);
 	}
 
-	private void constructAndSendTest(String difficulty)
+	protected void constructAndSendTest(String difficulty)
 	{
 		// Sets a random prompt number, based on the difficulty.
 		int promptNumber = 1;
