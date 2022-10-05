@@ -3,6 +3,7 @@ package zyenyo;
 import static com.mongodb.client.model.Sorts.descending;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.bson.Document;
@@ -62,14 +63,37 @@ public class Database
 
 	}
 
-	public static void addPrompt(String title, String text)
+	public static double addPrompt(String title, String text)
 	{
+                double rating = CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray()).typeRating();
 		prompts.insertOne(new Document()
 				.append("_id", new ObjectId())
 				.append("title", title)
 				.append("text", text)
-				.append("rating", CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray())));
+				.append("rating", rating));
+
+                return rating;
 	}
+
+        public static ArrayList<Document> getPrompts() {
+          ArrayList<Document> documents = new ArrayList<Document>();
+
+          prompts.aggregate(Arrays.asList()).forEach(doc -> documents.add(doc));
+
+          return documents;
+        }
+
+        public static void recalcPrompts() {
+          ArrayList<Document> docs = getPrompts();
+
+          for (Document prompt : docs) {
+            String text = prompt.getString("text");
+            double rating = CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray()).typeRating();
+
+            System.out.println(String.format("%f -> %f", rating, prompt.getDouble("rating")));
+            prompts.updateOne(Filters.eq("text", text), Updates.set("rating", rating));
+          }
+        }
 
 	public static String getStats(String discordId)
 	{
