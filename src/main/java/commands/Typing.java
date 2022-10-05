@@ -6,7 +6,6 @@ import asynchronous.typing.Chart;
 import asynchronous.typing.Leaderboard;
 import asynchronous.typing.TypeStats;
 import asynchronous.typing.TypingTest;
-import asynchronous.typing.TeamTypingTest;
 import dataStructures.Aliases;
 import dataStructures.InfoCard;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -60,18 +59,6 @@ public class Typing extends ListenerAdapter
 			Zyenyo.masterThreadPool.submit(typingTest = new TypingTest(event, args));
 			guildTestList.put(serverID, typingTest);
 		}
-
-                // IF: Command is TEAMVS...
-		else if (Aliases.TEAMVS.contains(args[0].toLowerCase()))
-		{
-			if (args.length == 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
-			if (guildTestList.containsKey(serverID)) {Zyenyo.masterThreadPool.submit(testAlreadyRunning); return;}
-
-			Zyenyo.masterThreadPool.submit(typingTest = new TeamTypingTest(event, args));
-			guildTestList.put(serverID, typingTest);
-
-		}
-
 		
 		// IF: Command is TYPEQUIT...
 		else if (Aliases.TYPEQUIT.contains(args[0].toLowerCase()))

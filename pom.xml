@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>zyenyo.Zyenyo</groupId>
   <artifactId>zyenyo</artifactId>
-  <version>0.2.0-beta</version>
+  <version>0.1.0-beta</version>
   <name>ZyenyoBot</name>
 
   <properties>

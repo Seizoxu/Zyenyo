@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import zyenyo.BotConfig;
 import zyenyo.CalculatePromptDifficulty;
 import zyenyo.Zyenyo;
-import zyenyo.Database;
 
 public class Administrator extends ListenerAdapter
 {
@@ -65,6 +64,7 @@ public class Administrator extends ListenerAdapter
 		// IF: Command is ADDPROMPT...
 		else if (Aliases.ADDPROMPT.contains(args[0].toLowerCase()))
 		{
+			if (args.length != 3) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
 			
 			Zyenyo.masterThreadPool.submit(new AddPrompt(event));
 		}
@@ -74,11 +74,7 @@ public class Administrator extends ListenerAdapter
 		{
 			Zyenyo.masterThreadPool.submit(new Runnable()
 			{
-				@Override public void run() 
-                                {
-                                  CalculatePromptDifficulty.recalculatePromptRatings();
-                                  Database.recalcPrompts();
-                                }
+				@Override public void run() {CalculatePromptDifficulty.recalculatePromptRatings();}
 			});
 		}
 	

@@ -10,4 +10,3 @@ test/
 *.log
 *.prefs
 credentials.json
-.classpath
