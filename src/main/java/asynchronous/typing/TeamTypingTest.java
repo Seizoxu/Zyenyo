@@ -12,16 +12,16 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class TeamTypingTest extends TypingTest
 {
-	private String[] teamA;
-	private String[] teamB;
+	private String[] teamRed;
+	private String[] teamBlue;
 
 	public TeamTypingTest(MessageReceivedEvent event, String[] args)
 	{
 		super(event, args);
 		String[] players = Arrays.copyOfRange(args, 1, args.length);
 
-		teamA = Arrays.copyOfRange(players,0, (int)players.length/2);
-		teamB = Arrays.copyOfRange(players, (int)players.length/2, players.length);
+		teamRed = Arrays.copyOfRange(players,0, (int)players.length/2);
+		teamBlue = Arrays.copyOfRange(players, (int)players.length/2, players.length);
 	}
 
 	@Override
@@ -58,8 +58,8 @@ public class TeamTypingTest extends TypingTest
 					.collect(Collectors.toList());
 
 			String team;
-			double teamATotal = 0;
-			double teamBTotal = 0;
+			double teamRedTotal = 0;
+			double teamBlueTotal = 0;
 
 			for (int i = 0; i < submissions.getNumSubmissions(); i++)
 			{
@@ -67,29 +67,27 @@ public class TeamTypingTest extends TypingTest
 
 				TypingSubmission s = submissions.getSubmission(lbOrder.get(i));
 				System.out.println(s.userID());
-				Arrays.asList(teamA).forEach((String a) -> System.out.println(a));
-				Arrays.asList(teamB).forEach((String a) -> System.out.println(a));
-				if (Arrays.asList(teamA).contains(String.format("<@%s>", s.userID()))) {team = "team A"; teamATotal += s.typingPoints();}
-				else if (Arrays.asList(teamB).contains(String.format("<@%s>", s.userID()))) {team = "team B"; teamBTotal += s.typingPoints();}
+				Arrays.asList(teamRed).forEach((String a) -> System.out.println(a));
+				Arrays.asList(teamBlue).forEach((String a) -> System.out.println(a));
+				if (Arrays.asList(teamRed).contains(String.format("<@%s>", s.userID()))) {team = ":red_square:"; teamRedTotal += s.typingPoints();}
+				else if (Arrays.asList(teamBlue).contains(String.format("<@%s>", s.userID()))) {team = ":blue_square:"; teamBlueTotal += s.typingPoints();}
 				else {continue;}
 				//double rawTp = Database.addTest(s.userID(), s.wordsPerMinute(), s.accuracy(), s.typingPoints());
 
 				embed.addField(
-						String.format("#%d.) %s **(%s)**", i+1, s.userTag(), team),
+						String.format("%s %s ", team, s.userTag()),
 						String.format(
-								"TP: **`%.2f`**%n"
-										+ "WPM: **`%.2f`**%n"
-										+ "Accuracy: **`%.2f`**%%%n",
-										s.typingPoints(), s.wordsPerMinute(), s.accuracy()),
-						false);
+								"TP: **`%.2f`**%n",
+										s.typingPoints()),
+						true);
 
 			}
 
-			embed.addField("Team Results", String.format("*Team A Total:* **`%.2f`**%n"
-					+ "*Team B Total:* **`%.2f`%n**", 
-					teamATotal, teamBTotal), false);
-			double difference = teamATotal - teamBTotal;
-			String winner = difference > 0 ? "A" : "B";
+			embed.addField("Team Results", String.format("*Team Red Total:* **`%.2f`**%n"
+					+ "*Team Blue Total:* **`%.2f`%n**", 
+					teamRedTotal, teamBlueTotal), false);
+			double difference = teamRedTotal - teamBlueTotal;
+			String winner = difference > 0 ? "Red" : "Blue";
 
 			embed.addField(String.format("**Team %s Wins By: `%.2f` Points!**", winner, Math.abs(difference)), "", false);
 
