@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import zyenyo.Database;
+
 import commands.Typing;
 import dataStructures.TypingSubmission;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -72,7 +74,7 @@ public class TeamTypingTest extends TypingTest
 				if (Arrays.asList(teamRed).contains(String.format("<@%s>", s.userID()))) {team = ":red_square:"; teamRedTotal += s.typingPoints();}
 				else if (Arrays.asList(teamBlue).contains(String.format("<@%s>", s.userID()))) {team = ":blue_square:"; teamBlueTotal += s.typingPoints();}
 				else {continue;}
-				//double rawTp = Database.addTest(s.userID(), s.wordsPerMinute(), s.accuracy(), s.typingPoints());
+				Database.addTest(s.userID(), s.wordsPerMinute(), s.accuracy(), s.typingPoints());
 
 				embed.addField(
 						String.format("%s %s ", team, s.userTag()),
