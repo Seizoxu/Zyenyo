@@ -38,6 +38,9 @@ public class Database
 
 	public static double addTest(long discordId, double wpm, double accuracy, double tp)
 	{
+
+		double initialWeightedTp = getWeightedTp(discordId);
+
 		tests.insertOne(new Document()
 				.append("_id", new ObjectId())
 				.append("discordId", String.valueOf(discordId))
@@ -47,19 +50,7 @@ public class Database
 				.append("date", LocalDateTime.now())
 				);
 
-		// Update users collection.
-		double weightedTp = getWeightedTp(discordId);
-
-		Document usr = users.findOneAndUpdate(Filters.eq("discordId", String.valueOf(discordId)), Updates.set("totalTp", weightedTp));
-		if (usr == null)
-		{
-			users.insertOne(new Document()
-					.append("_id", new ObjectId())
-					.append("discordId", String.valueOf(discordId))
-					.append("totalTp", weightedTp));
-		}
-
-		return weightedTp - usr.getDouble("totalTp");
+		return getWeightedTp(discordId) - initialWeightedTp;
 
 	}
 
@@ -97,7 +88,6 @@ public class Database
 
 	public static String getStats(String discordId)
 	{
-		double userTp = users.find(Filters.eq("discordId", discordId)).first().getDouble("totalTp");
 
 		Document stats = tests.aggregate(Arrays.asList(
 				Aggregates.match(Filters.eq("discordId", discordId)),
@@ -109,7 +99,7 @@ public class Database
 						Accumulators.max("bestWpm", "$wpm"),
 						Accumulators.stdDevPop("deviation", "$wpm")
 						),
-				Aggregates.set(new Field<Double>("weightedTp", userTp))
+				Aggregates.set(new Field<Double>("weightedTp", getWeightedTp(Long.valueOf(discordId))))
 				)).first();
 
 
