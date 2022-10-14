@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import com.mongodb.client.model.BsonField;
 
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoClient;
@@ -18,9 +19,32 @@ import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Field;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
+import com.mongodb.MongoException;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.ConnectionString;
+
+import com.mongodb.event.CommandListener;
+import com.mongodb.event.CommandSucceededEvent;
+import com.mongodb.event.CommandFailedEvent;
+
+class CommandMonitor implements CommandListener {
+	@Override
+	public synchronized void commandSucceeded(final CommandSucceededEvent event) {
+		String commandName = event.getCommandName();
+		System.out.println(commandName + " command " + event.getRequestId());
+	}
+	@Override
+	public void commandFailed(final CommandFailedEvent event) {
+		System.out.println(String.format("Failed execution of command '%s' because of %s",
+				event.getCommandName(),
+				event.getThrowable()));
+	}
+}
+
 
 public class Database
 {
+
 	static final String DB_NAME = "MyDatabase";
 
 	private static MongoClient client;
@@ -30,7 +54,15 @@ public class Database
 
 	public static void connect(String uri)
 	{
-		client = MongoClients.create(uri);
+
+		MongoClientSettings settings =
+				MongoClientSettings.builder()
+				.applyConnectionString(new ConnectionString(uri))
+				.addCommandListener(new CommandMonitor())
+				.build();
+
+		client = MongoClients.create(settings);
+
 		tests = client.getDatabase(DB_NAME).getCollection("tests");
 		users = client.getDatabase(DB_NAME).getCollection("users");
 		prompts = client.getDatabase(DB_NAME).getCollection("prompts");
@@ -56,35 +88,35 @@ public class Database
 
 	public static double addPrompt(String title, String text)
 	{
-                double rating = CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray()).typeRating();
+		double rating = CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray()).typeRating();
 		prompts.insertOne(new Document()
 				.append("_id", new ObjectId())
 				.append("title", title)
 				.append("text", text)
 				.append("rating", rating));
 
-                return rating;
+		return rating;
 	}
 
-        public static ArrayList<Document> getPrompts() {
-          ArrayList<Document> documents = new ArrayList<Document>();
+	public static ArrayList<Document> getPrompts() {
+		ArrayList<Document> documents = new ArrayList<Document>();
 
-          prompts.aggregate(Arrays.asList()).forEach(doc -> documents.add(doc));
+		prompts.aggregate(Arrays.asList()).forEach(doc -> documents.add(doc));
 
-          return documents;
-        }
+		return documents;
+	}
 
-        public static void recalcPrompts() {
-          ArrayList<Document> docs = getPrompts();
+	public static void recalcPrompts() {
+		ArrayList<Document> docs = getPrompts();
 
-          for (Document prompt : docs) {
-            String text = prompt.getString("text");
-            double rating = CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray()).typeRating();
+		for (Document prompt : docs) {
+			String text = prompt.getString("text");
+			double rating = CalculatePromptDifficulty.calculateSinglePrompt(text.toCharArray()).typeRating();
 
-            System.out.println(String.format("%f -> %f", rating, prompt.getDouble("rating")));
-            prompts.updateOne(Filters.eq("text", text), Updates.set("rating", rating));
-          }
-        }
+			System.out.println(String.format("%f -> %f", rating, prompt.getDouble("rating")));
+			prompts.updateOne(Filters.eq("text", text), Updates.set("rating", rating));
+		}
+	}
 
 	public static String getStats(String discordId)
 	{
@@ -123,13 +155,15 @@ public class Database
 		}
 		else if (leaderboardScope.equals("Total"))
 		{
-			return users.aggregate(Arrays.asList(
+			AggregateIterable<Document> lb = users.aggregate(Arrays.asList(
 					Aggregates.match(Filters.exists("totalTp")),
 					Aggregates.group("$discordId", 
 							Accumulators.sum(statisticType, "$totalTp")
 							),
 					Aggregates.sort(descending(statisticType))
 					));
+			System.out.println(lb);
+			return lb;
 
 		}
 		else // Average
@@ -160,5 +194,24 @@ public class Database
 		for (Document test : tpList) {weightedTp += (test.getDouble("tp") * Math.pow(0.95, index++));}
 
 		return weightedTp;
+	}
+
+	private static BsonField tpAccumulator() {
+		System.out.println("a");
+		ArrayList<String> a = new ArrayList<String>();
+		a.add("$tp");
+
+		return Accumulators.accumulator(
+				"$totalTp",
+				"function() {return { count: 0, sum: 0 }}",
+				null,
+				"function(state, numTp) {return { count: state.count + 1, sum: state.sum + Math.pow(numTp, state.count) }}",
+				a,
+				"function(state1, state2) {return { count: state1.count + state2.count, sum: state1.sum + state2.sum }}",
+				"js"
+
+				)
+				;
+
 	}
 }
