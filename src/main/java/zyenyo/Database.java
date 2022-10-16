@@ -30,12 +30,11 @@ import com.mongodb.event.CommandFailedEvent;
 class CommandMonitor implements CommandListener {
 	@Override
 	public synchronized void commandSucceeded(final CommandSucceededEvent event) {
-		String commandName = event.getCommandName();
-		System.out.println(commandName + " command " + event.getRequestId());
+		System.out.println(event.getCommandName() + " command " + event.getRequestId());
 	}
 	@Override
 	public void commandFailed(final CommandFailedEvent event) {
-		System.out.println(String.format("Failed execution of command '%s' because of %s",
+		System.out.println(String.format("Failed execution of command '%s' cause: %s",
 				event.getCommandName(),
 				event.getThrowable()));
 	}

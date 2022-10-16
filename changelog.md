@@ -47,3 +47,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Profile osu command: Shows your profile overview/stats.
 - Settings osu command: Meant for another project, with Google sheets integration, where one's
   osu! playstyle settings can be stored on a spreadsheet, editable by a bot.
+- Team Typing Test: Allows for 2 teams to battle each other on a prompt.
