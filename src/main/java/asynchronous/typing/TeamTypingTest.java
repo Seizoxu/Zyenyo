@@ -1,6 +1,7 @@
 package asynchronous.typing;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,9 +60,11 @@ public class TeamTypingTest extends TypingTest
 					.sorted((a,b)->Double.compare(submissions.getSubmission(b).typingPoints(), submissions.getSubmission(a).typingPoints()))
 					.collect(Collectors.toList());
 
-			String team;
 			double teamRedTotal = 0;
 			double teamBlueTotal = 0;
+
+                        ArrayList<TypingSubmission> red = new ArrayList<TypingSubmission>();
+                        ArrayList<TypingSubmission> blue = new ArrayList<TypingSubmission>();
 
 			for (int i = 0; i < submissions.getNumSubmissions(); i++)
 			{
@@ -71,19 +74,36 @@ public class TeamTypingTest extends TypingTest
 				System.out.println(s.userID());
 				Arrays.asList(teamRed).forEach((String a) -> System.out.println(a));
 				Arrays.asList(teamBlue).forEach((String a) -> System.out.println(a));
-				if (Arrays.asList(teamRed).contains(String.format("<@%s>", s.userID()))) {team = ":red_square:"; teamRedTotal += s.typingPoints();}
-				else if (Arrays.asList(teamBlue).contains(String.format("<@%s>", s.userID()))) {team = ":blue_square:"; teamBlueTotal += s.typingPoints();}
+				if (Arrays.asList(teamRed).contains(String.format("<@%s>", s.userID()))) {red.add(s); teamRedTotal += s.typingPoints();}
+				else if (Arrays.asList(teamBlue).contains(String.format("<@%s>", s.userID()))) {blue.add(s); teamBlueTotal += s.typingPoints();}
 				else {continue;}
 				Database.addTest(s.userID(), s.wordsPerMinute(), s.accuracy(), s.typingPoints());
 
+			}
+
+                        int i = 0;
+                        //add submissions strategically so that red and blue teams have thei own columns
+                        while (i < red.size() || i < blue.size()) {
+                          if (i < red.size()) {
 				embed.addField(
-						String.format("%s %s ", team, s.userTag()),
+						String.format("%s %s ", ":red_square:", red.get(i).userTag()),
 						String.format(
 								"TP: **`%.2f`**%n",
-										s.typingPoints()),
+										red.get(i).typingPoints()),
 						true);
+                          } else {embed.addField("","",true);}
+                          if (i < blue.size()) {
+				embed.addField(
+						String.format("%s %s ", ":blue_square:", blue.get(i).userTag()),
+						String.format(
+								"TP: **`%.2f`**%n",
+										blue.get(i).typingPoints()),
+						true);
+                          } else {embed.addField("","",true);}
+                          embed.addField("","", true);
 
-			}
+                            i++;
+                        }
 
 			embed.addField("Team Results", String.format("*Team Red Total:* **`%.2f`**%n"
 					+ "*Team Blue Total:* **`%.2f`%n**", 
