@@ -23,9 +23,10 @@ public class Zyenyo
 	{
 		final String BOT_TOKEN = arguments[0];
         final String MONGO_URI = arguments[1];
+        final String ENVIRONMENT = arguments[2];
 
         //Connect to Database.
-        Database.connect(MONGO_URI);
+        Database.connect(MONGO_URI, ENVIRONMENT);
 		
 		// LOAD: Commands.
 		api = JDABuilder.createDefault(BOT_TOKEN)
@@ -40,7 +41,7 @@ public class Zyenyo
 //						new DpiConverter(),
 				).build();
 		
-		BotConfig.setConfigVars();
+		BotConfig.setConfigVars(ENVIRONMENT);
 		
 		api.getPresence().setStatus(OnlineStatus.ONLINE);
 		api.getPresence().setActivity(Activity.playing("with everyone. :D"));
