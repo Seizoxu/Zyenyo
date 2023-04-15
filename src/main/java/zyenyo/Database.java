@@ -8,24 +8,23 @@ import java.util.Arrays;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import com.mongodb.client.model.BsonField;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.BsonField;
 import com.mongodb.client.model.Field;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
-import com.mongodb.MongoException;
-import com.mongodb.MongoClientSettings;
-import com.mongodb.ConnectionString;
-
+import com.mongodb.event.CommandFailedEvent;
 import com.mongodb.event.CommandListener;
 import com.mongodb.event.CommandSucceededEvent;
-import com.mongodb.event.CommandFailedEvent;
 
 class CommandMonitor implements CommandListener {
 	@Override
@@ -47,6 +46,8 @@ public class Database
 	private static MongoCollection<Document> tests;
 	private static MongoCollection<Document> users;
 	private static MongoCollection<Document> prompts;
+	
+	private static UpdateOptions upsertTrue = new UpdateOptions().upsert(true);
 
 	public static void connect(String uri, String ENVIRONMENT)
 	{
@@ -68,7 +69,6 @@ public class Database
 
 	public static double addTest(long discordId, double wpm, double accuracy, double tp)
 	{
-
 		double initialWeightedTp = getWeightedTp(discordId);
 
 		tests.insertOne(new Document()
@@ -79,9 +79,16 @@ public class Database
 				.append("tp", tp)
 				.append("date", LocalDateTime.now())
 				);
-
-		return getWeightedTp(discordId) - initialWeightedTp;
-
+		
+		double newWeightedTp = getWeightedTp(discordId);
+		
+		users.updateOne(
+				Filters.eq("discordId", discordId),
+				Updates.set("totalTp", newWeightedTp),
+				upsertTrue
+				);
+		
+		return newWeightedTp - initialWeightedTp;
 	}
 
 	public static double addPrompt(String title, String text)
