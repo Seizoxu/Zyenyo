@@ -42,9 +42,6 @@ class CommandMonitor implements CommandListener {
 
 public class Database
 {
-
-	static final String DB_NAME = "MyDatabase";
-
 	private static MongoClient client;
 	private static MongoCollection<Document> tests;
 	private static MongoCollection<Document> users;
@@ -52,8 +49,10 @@ public class Database
 	
 	private static UpdateOptions upsertTrue = new UpdateOptions().upsert(true);
 
-	public static void connect(String uri)
+	public static void connect(String uri, String ENVIRONMENT)
 	{
+
+                final String DB_NAME = ENVIRONMENT.equals("development") ? "ZyenyoStaging" : "MyDatabase";
 
 		MongoClientSettings settings =
 				MongoClientSettings.builder()

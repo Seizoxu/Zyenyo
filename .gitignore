@@ -3,6 +3,7 @@ target/
 .settings/
 debug/
 test/
+.vim/
 
 # Files
 *.zbif
@@ -11,3 +12,4 @@ test/
 *.prefs
 credentials.json
 .classpath
+.project
