@@ -82,7 +82,7 @@ public class Database
 		
 		double newWeightedTp = getWeightedTp(discordId);
 		
-		users.updateMany(
+		users.updateOne(
 				Filters.eq("discordId", discordId),
 				Updates.set("totalTp", newWeightedTp),
 				upsertTrue
