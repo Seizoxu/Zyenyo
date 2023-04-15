@@ -10,7 +10,7 @@ import java.util.List;
 
 public class BotConfig
 {
-	public static final char PREFIX = '\\';
+        public static char PREFIX;
 	public static HashMap<Integer, Double> promptRatingMap = new HashMap<>();
 	public static ArrayList<List<Integer>> promptDifficultyList = new ArrayList<List<Integer>>(4);
 	
@@ -25,8 +25,10 @@ public class BotConfig
 	private static final File PROMPT_DIFFICULTY_FILE = new File("ZBotData/TypingPrompts/SortedPromptsList.zbo");
 	
 	@SuppressWarnings("unchecked")
-	protected static void setConfigVars()
+	protected static void setConfigVars(String ENVIRONMENT)
 	{
+                PREFIX = ENVIRONMENT.equals("development") ? '.' : '\\';
+                
 		if (!PROMPT_RATING_FILE.exists() || !PROMPT_DIFFICULTY_FILE.exists()) {CalculatePromptDifficulty.recalculatePromptRatings();}
 		
 		ObjectInputStream ratingMapOIS=null, difficultyListOIS=null;
