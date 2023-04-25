@@ -41,6 +41,7 @@ public final class Aliases
 			BotConfig.PREFIX + "ttest",
 			BotConfig.PREFIX + "tt");
 	public final static Set<String> TEAMVS = Collections.singleton(BotConfig.PREFIX + "teamvs");
+	public final static Set<String> NUMROWTEST = Collections.singleton(BotConfig.PREFIX + "numrow");
 	public final static Set<String> TYPEQUIT = Set.of(
 			BotConfig.PREFIX + "typestop",
 			BotConfig.PREFIX + "typequit",
