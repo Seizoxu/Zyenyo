@@ -145,7 +145,6 @@ public class TypingTest extends ListenerAdapter implements Runnable
 		double wordsPerMinute = (numChars / timeTakenMillis) * 12000;
 		
 
-		System.out.println(prompt + userTypingSubmission);
 		int editDistance = new LevenshteinDistance().apply(prompt, userTypingSubmission);
 		double accuracy = 100* (double)(prompt.length() - editDistance) / (double)prompt.length();
 
