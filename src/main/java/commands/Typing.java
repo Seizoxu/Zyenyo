@@ -31,7 +31,7 @@ public class Typing extends ListenerAdapter
 		public void run()
 		{
 			channel.sendMessageEmbeds(new EmbedBuilder()
-					.setDescription("Test is already running in this server.")
+					.setDescription("Test is already running in this server. Type `\\tq` to stop the test.")
 					.build())
 			.queue();
 		}
