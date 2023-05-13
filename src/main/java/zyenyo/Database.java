@@ -26,6 +26,8 @@ import com.mongodb.event.CommandFailedEvent;
 import com.mongodb.event.CommandListener;
 import com.mongodb.event.CommandSucceededEvent;
 
+import dataStructures.LeaderboardConfig;
+
 class CommandMonitor implements CommandListener {
 	@Override
 	public synchronized void commandSucceeded(final CommandSucceededEvent event) {
@@ -42,6 +44,7 @@ class CommandMonitor implements CommandListener {
 
 public class Database
 {
+	private static String DB_NAME;
 	private static MongoClient client;
 	private static MongoCollection<Document> tests;
 	private static MongoCollection<Document> users;
@@ -52,7 +55,7 @@ public class Database
 	public static void connect(String uri, String ENVIRONMENT)
 	{
 
-                final String DB_NAME = ENVIRONMENT.equals("development") ? "ZyenyoStaging" : "MyDatabase";
+                DB_NAME = ENVIRONMENT.equals("development") ? "ZyenyoStaging" : "MyDatabase";
 
 		MongoClientSettings settings =
 				MongoClientSettings.builder()
@@ -146,42 +149,16 @@ public class Database
 	//TODO
 	public static String getGlobalStats(String discordId) {return "";}
 
-	public static AggregateIterable<Document> getLeaderboards(String statisticType, String leaderboardScope)
-	{
-		if (leaderboardScope.equals("Best"))
-		{
-			return tests.aggregate(Arrays.asList(
-					Aggregates.match(Filters.exists(statisticType)),
-					Aggregates.group("$discordId", 
-							Accumulators.max(statisticType, "$" + statisticType)
-							),
-					Aggregates.sort(descending(statisticType))
-					));
-		}
-		else if (leaderboardScope.equals("Total"))
-		{
-			AggregateIterable<Document> lb = users.aggregate(Arrays.asList(
-					Aggregates.match(Filters.exists("totalTp")),
-					Aggregates.group("$discordId", 
-							Accumulators.sum(statisticType, "$totalTp")
-							),
-					Aggregates.sort(descending(statisticType))
-					));
-			System.out.println(lb);
-			return lb;
+	public static AggregateIterable<Document> getLeaderboards(LeaderboardConfig lbConfig) {
+		MongoCollection<Document> collection = client.getDatabase(DB_NAME).getCollection(lbConfig.getCollection());
 
-		}
-		else // Average
-		{
-			return tests.aggregate(Arrays.asList(
-					Aggregates.match(Filters.exists(statisticType)),
-					Aggregates.group("$discordId", 
-							Accumulators.avg(statisticType, "$" + statisticType)
-							),
-					Aggregates.sort(descending(statisticType))
-					));
-
-		}
+		return collection.aggregate(Arrays.asList(
+			Aggregates.match(Filters.exists(lbConfig.getStatistic())),
+			Aggregates.group("$discordId", 
+				lbConfig.getAccumulationStrategy()
+					),
+			Aggregates.sort(descending(lbConfig.getStatistic()))
+		));
 
 	}
 
@@ -201,22 +178,4 @@ public class Database
 		return weightedTp;
 	}
 
-	private static BsonField tpAccumulator() {
-		System.out.println("a");
-		ArrayList<String> a = new ArrayList<String>();
-		a.add("$tp");
-
-		return Accumulators.accumulator(
-				"$totalTp",
-				"function() {return { count: 0, sum: 0 }}",
-				null,
-				"function(state, numTp) {return { count: state.count + 1, sum: state.sum + Math.pow(numTp, state.count) }}",
-				a,
-				"function(state1, state2) {return { count: state1.count + state2.count, sum: state1.sum + state2.sum }}",
-				"js"
-
-				)
-				;
-
-	}
 }
