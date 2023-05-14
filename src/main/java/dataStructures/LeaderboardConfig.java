@@ -11,74 +11,67 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class LeaderboardConfig {
 	private LeaderboardScope lbScope;
-	private LeaderboardStatisticType lbStatistic;
+	private String lbStatistic;
+	private String collection = "tests";
+	private BsonField accumulator;
 
 	public LeaderboardConfig(LeaderboardStatisticType lbStatistic, LeaderboardScope lbScope) {
-		this.lbStatistic = lbStatistic;
+		this.lbScope = lbScope;
 
 		switch (lbStatistic) {
-			case TP: switch(lbScope) {
-				default: this.lbScope = lbScope;
-			} break;
-			case WPM: switch(lbScope) {
-				// WPM SUM does not seem like a useful leaderboard.
-				case SUM: this.lbScope = LeaderboardScope.AVERAGE; break;
-				default: this.lbScope = lbScope;
-			} break;
-			case ACCURACY: switch(lbScope) {
-				// ACCURACY BEST is not a useful leaderboard.
-				case BEST: this.lbScope = LeaderboardScope.AVERAGE; break;
-				// ACCURACY SUM makes absolutely no sense.
-				case SUM: this.lbScope = LeaderboardScope.AVERAGE; break;
-				default: this.lbScope = lbScope;
+			case TP: 
+				this.lbStatistic = "tp";
+				switch(lbScope) {
+					case SUM: 
+						this.lbStatistic = "totalTp";
+						this.collection = "users";
+						this.accumulator = Accumulators.sum(this.lbStatistic, "$" + this.lbStatistic);
+						break;
+					case AVERAGE:
+						this.accumulator = Accumulators.avg(this.lbStatistic, "$" + this.lbStatistic);
+						break;
+					case BEST:
+						this.accumulator = Accumulators.max(this.lbStatistic, "$" + this.lbStatistic);
+						break;
+				} break;
+			case WPM: 
+				this.lbStatistic = "wpm";
+				switch(lbScope) {
+					case BEST: 
+						this.accumulator = Accumulators.max(this.lbStatistic, "$" + this.lbStatistic);
+						break;
+					case AVERAGE:
+					default: 
+						this.lbScope = LeaderboardScope.AVERAGE;
+						this.accumulator = Accumulators.avg(this.lbStatistic, "$" + this.lbStatistic);
+						
+				} break;
+			case ACCURACY: 
+				this.lbStatistic = "accuracy";
+				switch(lbScope) {
+					case AVERAGE:
+					default:
+						this.lbScope = LeaderboardScope.AVERAGE;
+						this.accumulator = Accumulators.avg(this.lbStatistic, "$" + this.lbStatistic);
+						
 			} break;
 		}
-		
 	}
 
 	public String getStatistic() {
-		String stat = "";
-
-		switch(lbStatistic) {
-			case TP: switch(lbScope) {
-				// tp in users collection is named totalTp whereas in tests it is just tp
-				case SUM: stat = "totalTp"; break;
-				default: stat = "tp"; break;
-			} break;
-			case ACCURACY: stat = "accuracy"; break;
-			case WPM: stat = "wpm"; break;
-		}
-
-		return stat;
+		return this.lbStatistic;
 	}
 	
 	public String getCollection() {
-		String collection = "";
-
-		switch(lbStatistic) {
-			case TP: switch(lbScope) {
-				case SUM: collection = "users"; break;
-				default: collection = "tests"; break;
-			} break;
-			default: collection = "tests"; break;
-		}
-
-		return collection;
+		return this.collection;
 	}
 
 	public BsonField getAccumulationStrategy() {
-		switch(lbScope) {
-			case BEST: return Accumulators.max(getStatistic(), "$" + getStatistic());
-			case AVERAGE: return Accumulators.avg(getStatistic(), "$" + getStatistic());
-			case SUM: return Accumulators.sum(getStatistic(), "$" + getStatistic());
-		}
-
-		// this should technically never reach but java is not smart enough to know that all cases of the enum have been covered, so it complains without it.
-		return Accumulators.sum(getStatistic(), "$" + getStatistic());
+		return this.accumulator;
 	}
 
 	public String getLeaderboardTitle() {
-		return String.format("Global %s %s Leaderboards", StringUtils.capitalize(lbScope.toString().toLowerCase()), StringUtils.capitalize(String.join(" ", StringUtils.splitByCharacterTypeCamelCase(getStatistic()))));
+		return String.format("Global %s %s Leaderboards", StringUtils.capitalize(lbScope.toString().toLowerCase()), StringUtils.capitalize(String.join(" ", StringUtils.splitByCharacterTypeCamelCase(this.lbStatistic))));
 	}
 
 }
