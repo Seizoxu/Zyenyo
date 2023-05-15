@@ -1,11 +1,13 @@
 package asynchronous.typing;
 
-import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
 import com.mongodb.client.AggregateIterable;
 
 import dataStructures.InfoCard;
+import dataStructures.LeaderboardConfig;
+import dataStructures.LeaderboardScope;
+import dataStructures.LeaderboardStatisticType;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -30,52 +32,42 @@ public class Leaderboard implements Runnable
 	public void run()
 	{
 		event.getChannel().sendTyping().queue();
+		
+		// default to tp leaderboard
+		LeaderboardStatisticType lbStat = LeaderboardStatisticType.TP;
+		LeaderboardScope lbScope = LeaderboardScope.SUM;
 
-		String statisticType="";
-		String leaderboardScope = "Average";
-		if (args.length == 1) {statisticType = "wpm";}
-		else if (args.length == 2)
-		{
-			if (args[1].equalsIgnoreCase("-acc")) {statisticType = "accuracy";}
-			else if (args[1].equalsIgnoreCase("-wpm")) {statisticType = "wpm";}
-			else if (args[1].equalsIgnoreCase("-tp")) {statisticType = "tp"; leaderboardScope = "Total";}
-		}
-		else if (args.length == 3)
-		{
-			if (args[1].equalsIgnoreCase("-wpm") && args[2].equalsIgnoreCase("-best"))
-			{
-				statisticType = "wpm";
-				leaderboardScope = "Best";
+		for (String cmd : args) {
+			switch (cmd.toLowerCase()) {
+				case "-tp": lbStat = LeaderboardStatisticType.TP; break;
+				case "-wpm": lbStat = LeaderboardStatisticType.WPM; break;
+				case "-acc":
+				case "-accuracy": lbStat = LeaderboardStatisticType.ACCURACY; break;
+				case "-best": lbScope = LeaderboardScope.BEST; break;
+				case "-avg": 
+				case "-average": lbScope = LeaderboardScope.AVERAGE; break;
+				case "-sum": lbScope = LeaderboardScope.SUM; break;
 			}
-			else if (args[1].equalsIgnoreCase("-tp") && args[2].equalsIgnoreCase("-best"))
-			{
-				statisticType = "tp";
-				leaderboardScope = "Best";
-			}
-			else if (args[1].equalsIgnoreCase("-acc") && args[2].equalsIgnoreCase("-best")) {sendHelp.run(); return;}
 		}
-		else {sendHelp.run(); return;}
 
-		AggregateIterable<Document> lbList = Database.getLeaderboards(statisticType, leaderboardScope);
+		LeaderboardConfig lbConfig = new LeaderboardConfig(lbStat, lbScope);
+
+		AggregateIterable<Document> lbList = Database.getLeaderboards(lbConfig);
 
 		EmbedBuilder leaderboardEmbed = new EmbedBuilder()
-				.setTitle(String.format("Global %s %s Leaderboards",
-						leaderboardScope, StringUtils.capitalize(statisticType)));
+				.setTitle(lbConfig.getLeaderboardTitle());
 
 		int position = 0;
 		String userTag;
 		double statistic;
 
 		for (Document user : lbList) {
-			System.out.println(user.toJson());
 			userTag = jda.retrieveUserById(user.getString("_id")).complete().getAsTag();
-			statistic = user.getDouble(statisticType);
+			statistic = user.getDouble(lbConfig.getStatistic());
 
 			leaderboardEmbed.appendDescription(String.format("%n**#%d | %s**: `%.2f`", ++position, userTag, statistic));
-			System.out.println(String.format("%n**#%d | %s**: `%.2f`", position, userTag, statistic));
 		}
 
 		event.getChannel().sendMessageEmbeds(leaderboardEmbed.build()).queue();
-		System.out.println("done");
 	}
 }
