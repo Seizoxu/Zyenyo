@@ -1,7 +1,10 @@
 package asynchronous.typing;
 
+import java.util.Arrays;
+
 import org.bson.Document;
 
+import com.google.common.collect.Iterables;
 import com.mongodb.client.AggregateIterable;
 
 import dataStructures.InfoCard;
@@ -36,6 +39,7 @@ public class Leaderboard implements Runnable
 		// default to tp leaderboard
 		LeaderboardStatisticType lbStat = LeaderboardStatisticType.TP;
 		LeaderboardScope lbScope = LeaderboardScope.SUM;
+		int lbPage = 1;
 
 		for (String cmd : args) {
 			switch (cmd.toLowerCase()) {
@@ -47,9 +51,17 @@ public class Leaderboard implements Runnable
 				case "-avg": 
 				case "-average": lbScope = LeaderboardScope.AVERAGE; break;
 				case "-sum": lbScope = LeaderboardScope.SUM; break;
+				case "-p": lbPage = Integer.parseInt(args[Arrays.asList(args).indexOf("-p") + 1]); break;
+				case "-page": lbPage = Integer.parseInt(args[Arrays.asList(args).indexOf("-page") + 1]); break;
 			}
 		}
-
+		
+		// Avoid ridiculously high page numbers.
+		if (lbPage >= 500)
+		{
+			lbPage = 1;
+		}
+		
 		LeaderboardConfig lbConfig = new LeaderboardConfig(lbStat, lbScope);
 
 		AggregateIterable<Document> lbList = Database.getLeaderboards(lbConfig);
@@ -57,17 +69,25 @@ public class Leaderboard implements Runnable
 		EmbedBuilder leaderboardEmbed = new EmbedBuilder()
 				.setTitle(lbConfig.getLeaderboardTitle());
 
-		int position = 0;
+		final int initialPosition = (lbPage -1) * 20;
+		int position = (lbPage -1) * 20;
 		String userTag;
 		double statistic;
 
-		for (Document user : lbList) {
+		for (Document user : Iterables.skip(lbList, (lbPage-1) * 20)) {
+			if (position - 20 >= initialPosition) {break;}
+			
 			userTag = jda.retrieveUserById(user.getString("_id")).complete().getAsTag();
 			statistic = user.getDouble(lbConfig.getStatistic());
 
 			leaderboardEmbed.appendDescription(String.format("%n**#%d | %s**: `%.2f`", ++position, userTag, statistic));
 		}
 
+		leaderboardEmbed.setFooter
+		(
+				String.format("Showing user %d to %d on page %d.", initialPosition+1, initialPosition+20, lbPage)
+		);
+		
 		event.getChannel().sendMessageEmbeds(leaderboardEmbed.build()).queue();
 	}
 }
