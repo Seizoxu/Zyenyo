@@ -7,7 +7,6 @@ import org.bson.Document;
 import com.google.common.collect.Iterables;
 import com.mongodb.client.AggregateIterable;
 
-import dataStructures.InfoCard;
 import dataStructures.LeaderboardConfig;
 import dataStructures.LeaderboardScope;
 import dataStructures.LeaderboardStatisticType;
@@ -21,8 +20,6 @@ public class Leaderboard implements Runnable
 	private MessageReceivedEvent event;
 	private JDA jda;
 	private String[] args;
-	private Runnable sendHelp = new Runnable()
-	{@Override public void run() {event.getMessage().replyEmbeds(InfoCard.INCORRECT_SYNTAX.build()).queue();}};
 
 	public Leaderboard(MessageReceivedEvent event, String[] args)
 	{
@@ -40,7 +37,7 @@ public class Leaderboard implements Runnable
 		LeaderboardStatisticType lbStat = LeaderboardStatisticType.TP;
 		LeaderboardScope lbScope = LeaderboardScope.SUM;
 		int lbPage = 1;
-
+		
 		for (String cmd : args) {
 			switch (cmd.toLowerCase()) {
 				case "-tp": lbStat = LeaderboardStatisticType.TP; break;
@@ -51,15 +48,9 @@ public class Leaderboard implements Runnable
 				case "-avg": 
 				case "-average": lbScope = LeaderboardScope.AVERAGE; break;
 				case "-sum": lbScope = LeaderboardScope.SUM; break;
-				case "-p": lbPage = Integer.parseInt(args[Arrays.asList(args).indexOf("-p") + 1]); break;
-				case "-page": lbPage = Integer.parseInt(args[Arrays.asList(args).indexOf("-page") + 1]); break;
+				case "-p": lbPage = getValueArg(args, "-p"); break;
+				case "-page": lbPage = getValueArg(args, "-page"); break;
 			}
-		}
-		
-		// Avoid ridiculously high page numbers.
-		if (lbPage >= 500)
-		{
-			lbPage = 1;
 		}
 		
 		LeaderboardConfig lbConfig = new LeaderboardConfig(lbStat, lbScope);
@@ -74,20 +65,43 @@ public class Leaderboard implements Runnable
 		String userTag;
 		double statistic;
 
-		for (Document user : Iterables.skip(lbList, (lbPage-1) * 20)) {
+		for (Document user : Iterables.skip(lbList, (lbPage - 1) * 20))
+		{
 			if (position - 20 >= initialPosition) {break;}
 			
-			userTag = jda.retrieveUserById(user.getString("_id")).complete().getAsTag();
-			statistic = user.getDouble(lbConfig.getStatistic());
+			userTag = jda.retrieveUserById( user.getString("_id") ).complete().getAsTag();
+			statistic = user.getDouble( lbConfig.getStatistic() );
 
 			leaderboardEmbed.appendDescription(String.format("%n**#%d | %s**: `%.2f`", ++position, userTag, statistic));
 		}
 
-		leaderboardEmbed.setFooter
-		(
-				String.format("Showing user %d to %d on page %d.", initialPosition+1, initialPosition+20, lbPage)
+		leaderboardEmbed.setFooter(
+				String.format("Showing user %d to %d on page %d.",
+						initialPosition+1, initialPosition+20, lbPage)
 		);
 		
-		event.getChannel().sendMessageEmbeds(leaderboardEmbed.build()).queue();
+		event.getChannel().sendMessageEmbeds( leaderboardEmbed.build() ).queue();
+	}
+	
+	
+	public int getValueArg(String[] args, String checkArg)
+	{
+		String lbPageArg;
+		int lbPage;
+		
+		try
+		{
+			lbPageArg = args[ Arrays.asList(args).indexOf("-p") + 1 ];
+			lbPage = Integer.parseInt(lbPageArg);
+			
+			// Avoid ridiculously high page numbers.
+			if ( lbPage >= 500 ) {return 1;}
+		}
+		catch (ArrayIndexOutOfBoundsException | NullPointerException | NumberFormatException e)
+		{
+			return 1;
+		}
+		
+		return lbPage;
 	}
 }
