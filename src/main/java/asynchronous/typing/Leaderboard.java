@@ -91,7 +91,7 @@ public class Leaderboard implements Runnable
 		
 		try
 		{
-			lbPageArg = args[ Arrays.asList(args).indexOf("-p") + 1 ];
+			lbPageArg = args[ Arrays.asList(args).indexOf(checkArg) + 1 ];
 			lbPage = Integer.parseInt(lbPageArg);
 			
 			// Avoid ridiculously high page numbers.
