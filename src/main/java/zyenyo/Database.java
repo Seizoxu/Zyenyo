@@ -153,7 +153,6 @@ public class Database
 		MongoCollection<Document> collection = client.getDatabase(DB_NAME).getCollection(lbConfig.getCollection());
 
 		return collection.aggregate(Arrays.asList(
-			Aggregates.match(Filters.exists(lbConfig.getStatistic())),
 			Aggregates.group("$discordId", 
 				lbConfig.getAccumulationStrategy()
 					),

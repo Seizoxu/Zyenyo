@@ -4,4 +4,5 @@ public enum LeaderboardStatisticType {
 	TP,
 	ACCURACY,
 	WPM,
+	TESTS,
 }
