@@ -177,8 +177,18 @@ public class TypingTest extends ListenerAdapter implements Runnable
 
 	public void quitTest()
 	{
-		scheduledStop.cancel(true);
-		concludeTest.run();
+		try
+		{
+			scheduledStop.cancel(true);
+		}
+		catch (NullPointerException e)
+		{
+			System.out.println("[ERROR: TYPINGTEST] Could not quit test. Aborting...");
+		}
+		finally
+		{
+			concludeTest.run();
+		}
 	}
 
 	private Runnable concludeTest = new Runnable()
