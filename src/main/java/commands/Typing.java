@@ -4,10 +4,11 @@ import java.util.HashMap;
 
 import asynchronous.typing.Chart;
 import asynchronous.typing.Leaderboard;
+import asynchronous.typing.NumberRowTypingTest;
+import asynchronous.typing.TeamTypingTest;
 import asynchronous.typing.TypeStats;
 import asynchronous.typing.TypingTest;
-import asynchronous.typing.TeamTypingTest;
-import asynchronous.typing.NumberRowTypingTest;
+import asynchronous.typing.TypingTestTemplate;
 import dataStructures.Aliases;
 import dataStructures.InfoCard;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -18,8 +19,8 @@ import zyenyo.Zyenyo;
 
 public class Typing extends ListenerAdapter
 {
-	public static HashMap<Long, TypingTest> guildTestList = new HashMap<>(); // guildID : TestInstance
-	private TypingTest typingTest;
+	public static HashMap<Long, TypingTestTemplate> guildTestList = new HashMap<>(); // guildID : TestInstance
+	private TypingTestTemplate typingTest;
 	private MessageChannel channel;
 	private long serverID;
 	private String[] args;

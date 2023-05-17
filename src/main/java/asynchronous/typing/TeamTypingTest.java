@@ -1,11 +1,16 @@
 package asynchronous.typing;
 
 import java.util.Arrays;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import zyenyo.BotConfig;
 import zyenyo.Database;
 
 import commands.Typing;
@@ -13,10 +18,11 @@ import dataStructures.TypingSubmission;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class TeamTypingTest extends TypingTest
+public class TeamTypingTest extends TypingTestTemplate
 {
 	private String[] teamRed;
 	private String[] teamBlue;
+	private final static short WPM_MINIMUM = 30;
 
 	public TeamTypingTest(MessageReceivedEvent event, String[] args)
 	{
@@ -30,14 +36,66 @@ public class TeamTypingTest extends TypingTest
 	@Override
 	public void run() throws NumberFormatException
 	{
-		constructAndSendTest("none");
+		constructAndSendTest();
 		event.getJDA().addEventListener(this);
 	}
-	@Override
+	
+	
+	protected void constructAndSendTest()
+	{
+		int promptNumber = (int) (BotConfig.NUM_PROMPTS*Math.random() + 1);
+		
+		promptRating = BotConfig.promptRatingMap.get(promptNumber);
+
+		try (BufferedReader reader = new BufferedReader(new FileReader(
+								String.format("%sprompt%d.txt", TEST_PROMPTS_FILEPATH, promptNumber)));)
+		{
+			prompt = reader.readLine();
+			numChars = prompt.length();
+
+			// Sets ending time and sends typing test.
+			long endTime = (System.currentTimeMillis() / 1000) + (60*numChars / (WPM_MINIMUM * NUM_CHARS_IN_WORD));
+			fakePrompt = prompt.substring(0, prompt.length()/2)
+					+ ZERO_WIDTH_NON_JOINER
+					+ prompt.substring(prompt.length()/2, prompt.length());
+			
+			EmbedBuilder embed = new EmbedBuilder()
+					.setTitle("Typing Prompt:")
+					.setDescription(fakePrompt)
+					.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
+			
+			channel.sendMessageEmbeds(embed.build()).complete();
+			startTime = System.currentTimeMillis();
+
+			// Makes sure the typing test finishes on time.
+			long delay = endTime*1000 - startTime;
+			scheduledStop = schedulePool.schedule(concludeTest, delay, TimeUnit.MILLISECONDS);
+		}
+		catch (IOException e)
+		{
+			channel.sendMessageEmbeds(new EmbedBuilder()
+					.addField("Error", "Internal error — contact developer.", false)
+					.build())
+			.queue();
+		}
+	}
+	
+	
+	@Override // Override, because the original method will invoke the template's Runnables.
 	public void quitTest()
 	{
-		scheduledStop.cancel(true);
-		concludeTest.run();
+		try
+		{
+			scheduledStop.cancel(true);
+		}
+		catch (NullPointerException e)
+		{
+			System.out.println("[ERROR: TYPINGTEST] Could not quit test. Aborting...");
+		}
+		finally
+		{
+			concludeTest.run();
+		}
 	}
 
 
