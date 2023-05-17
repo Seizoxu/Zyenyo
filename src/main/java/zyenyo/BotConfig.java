@@ -10,27 +10,31 @@ import java.util.List;
 
 public class BotConfig
 {
-        public static char PREFIX;
+	public static char PREFIX;
 	public static HashMap<Integer, Double> promptRatingMap = new HashMap<>();
 	public static ArrayList<List<Integer>> promptDifficultyList = new ArrayList<List<Integer>>(4);
 	
+	public static int NUM_PROMPTS; // Set in CalculatePromptDifficulty.downloadAndUpdatePrompts.run();
 	public static final String BOT_DATA_FILEPATH = "ZBotData/";
 	public static final String SCRAPE_DATA_FILEPATH = "ZBotData/ScrapeData/";
 	public static final String INDEX_COUNTS_FILEPATH = "ZBotData/ScrapeData/COUNTS.zbif"; //ZBIF = ZyenyoBotIndexFile.
 	public static final String INDEX_IDS_FILEPATH = "ZBotData/ScrapeData/IDs.zbif";
-	public static final int NUM_PROMPTS = 34;
 	public static final List<Long> ADMINISTRATOR_IDS = List.of(642193466876493829l, 365691073156087819l);
 	
 	private static final File PROMPT_RATING_FILE = new File("ZBotData/TypingPrompts/PromptRatingMap.zbo");
 	private static final File PROMPT_DIFFICULTY_FILE = new File("ZBotData/TypingPrompts/SortedPromptsList.zbo");
 	
-	@SuppressWarnings("unchecked")
 	protected static void setConfigVars(String ENVIRONMENT)
 	{
-                PREFIX = ENVIRONMENT.equals("development") ? '.' : '\\';
-                
-		if (!PROMPT_RATING_FILE.exists() || !PROMPT_DIFFICULTY_FILE.exists()) {CalculatePromptDifficulty.recalculatePromptRatings();}
+		PREFIX = ENVIRONMENT.equals("development") ? '.' : '\\';
 		
+		CalculatePromptDifficulty.downloadAndUpdatePrompts.run();
+		loadBotObjects();
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected static void loadBotObjects()
+	{
 		ObjectInputStream ratingMapOIS=null, difficultyListOIS=null;
 		try
 		{
@@ -42,6 +46,8 @@ public class BotConfig
 			
 			promptDifficultyList = (ArrayList<List<Integer>>)difficultyListOIS.readObject();
 			System.out.println("[LOADED] Prompt Difficulty Categorisation File");
+			
+			System.out.println("[LOAD_INFO] Num Prompts: " + NUM_PROMPTS);
 		}
 		catch(IOException | ClassNotFoundException e) {e.printStackTrace();}
 		finally
