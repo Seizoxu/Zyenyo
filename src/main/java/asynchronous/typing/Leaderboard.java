@@ -68,7 +68,6 @@ public class Leaderboard implements Runnable
 
 		for (Document user : Iterables.skip(lbList, (lbPage - 1) * 20))
 		{
-			System.out.println(user);
 			if (position - 20 >= initialPosition) {break;}
 			
 			try {
