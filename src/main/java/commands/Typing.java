@@ -4,10 +4,11 @@ import java.util.HashMap;
 
 import asynchronous.typing.Chart;
 import asynchronous.typing.Leaderboard;
+import asynchronous.typing.TypingTestNumberRow;
+import asynchronous.typing.TypingTestTeam;
 import asynchronous.typing.TypeStats;
 import asynchronous.typing.TypingTest;
-import asynchronous.typing.TeamTypingTest;
-import asynchronous.typing.NumberRowTypingTest;
+import asynchronous.typing.TypingTestTemplate;
 import dataStructures.Aliases;
 import dataStructures.InfoCard;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -18,8 +19,8 @@ import zyenyo.Zyenyo;
 
 public class Typing extends ListenerAdapter
 {
-	public static HashMap<Long, TypingTest> guildTestList = new HashMap<>(); // guildID : TestInstance
-	private TypingTest typingTest;
+	public static HashMap<Long, TypingTestTemplate> guildTestList = new HashMap<>(); // guildID : TestInstance
+	private TypingTestTemplate typingTest;
 	private MessageChannel channel;
 	private long serverID;
 	private String[] args;
@@ -68,7 +69,7 @@ public class Typing extends ListenerAdapter
 			if (args.length == 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
 			if (guildTestList.containsKey(serverID)) {Zyenyo.masterThreadPool.submit(testAlreadyRunning); return;}
 
-			Zyenyo.masterThreadPool.submit(typingTest = new TeamTypingTest(event, args));
+			Zyenyo.masterThreadPool.submit(typingTest = new TypingTestTeam(event, args));
 			guildTestList.put(serverID, typingTest);
 
 		}
@@ -79,7 +80,7 @@ public class Typing extends ListenerAdapter
 			if (args.length > 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
 			if (guildTestList.containsKey(serverID)) {Zyenyo.masterThreadPool.submit(testAlreadyRunning); return;}
 
-			Zyenyo.masterThreadPool.submit(typingTest = new NumberRowTypingTest(event, args));
+			Zyenyo.masterThreadPool.submit(typingTest = new TypingTestNumberRow(event, args));
 			guildTestList.put(serverID, typingTest);
 
 		}
