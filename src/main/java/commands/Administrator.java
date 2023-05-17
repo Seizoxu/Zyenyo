@@ -25,7 +25,7 @@ public class Administrator extends ListenerAdapter
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event)
 	{
-		if (event.getAuthor().isBot() || !BotConfig.ADMINISTRATOR_IDS.contains(event.getAuthor().getIdLong())) {return;}
+		if ( !BotConfig.ADMINISTRATOR_IDS.contains(event.getAuthor().getIdLong()) ) {return;}
 		
 		channel = event.getChannel();
 		String args[] = event.getMessage().getContentRaw().split("\\s+");
@@ -75,10 +75,26 @@ public class Administrator extends ListenerAdapter
 			Zyenyo.masterThreadPool.submit(new Runnable()
 			{
 				@Override public void run() 
-                                {
-                                  CalculatePromptDifficulty.recalculatePromptRatings();
-                                  Database.recalcPrompts();
-                                }
+				{
+					CalculatePromptDifficulty.recalculatePromptRatings();
+					Database.recalcPrompts();
+				}
+			});
+		}
+		
+		// IF: Command is UPDATE_AND_RECALCULATE_PROMPTS...
+		else if (Aliases.UPDATE_AND_RECALCULATE_PROMPTS.contains(args[0].toLowerCase()))
+		{
+			Zyenyo.masterThreadPool.submit(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					CalculatePromptDifficulty.downloadAndUpdatePrompts.run();
+
+					channel.sendMessageFormat("Successfully downloaded, updated, and recalculated all prompts").queue();
+
+				}
 			});
 		}
 	
