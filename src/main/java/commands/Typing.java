@@ -4,8 +4,8 @@ import java.util.HashMap;
 
 import asynchronous.typing.Chart;
 import asynchronous.typing.Leaderboard;
-import asynchronous.typing.NumberRowTypingTest;
-import asynchronous.typing.TeamTypingTest;
+import asynchronous.typing.TypingTestNumberRow;
+import asynchronous.typing.TypingTestTeam;
 import asynchronous.typing.TypeStats;
 import asynchronous.typing.TypingTest;
 import asynchronous.typing.TypingTestTemplate;
@@ -69,7 +69,7 @@ public class Typing extends ListenerAdapter
 			if (args.length == 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
 			if (guildTestList.containsKey(serverID)) {Zyenyo.masterThreadPool.submit(testAlreadyRunning); return;}
 
-			Zyenyo.masterThreadPool.submit(typingTest = new TeamTypingTest(event, args));
+			Zyenyo.masterThreadPool.submit(typingTest = new TypingTestTeam(event, args));
 			guildTestList.put(serverID, typingTest);
 
 		}
@@ -80,7 +80,7 @@ public class Typing extends ListenerAdapter
 			if (args.length > 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
 			if (guildTestList.containsKey(serverID)) {Zyenyo.masterThreadPool.submit(testAlreadyRunning); return;}
 
-			Zyenyo.masterThreadPool.submit(typingTest = new NumberRowTypingTest(event, args));
+			Zyenyo.masterThreadPool.submit(typingTest = new TypingTestNumberRow(event, args));
 			guildTestList.put(serverID, typingTest);
 
 		}

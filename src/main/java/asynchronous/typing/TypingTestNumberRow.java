@@ -5,13 +5,13 @@ import java.util.concurrent.TimeUnit;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class NumberRowTypingTest extends TypingTestTemplate
+public class TypingTestNumberRow extends TypingTestTemplate
 {
 	private final static short WPM_MINIMUM = 10;
 	private final static short PROMPT_LENGTH = 40;
 
 
-	public NumberRowTypingTest(MessageReceivedEvent event, String[] args)
+	public TypingTestNumberRow(MessageReceivedEvent event, String[] args)
 	{
 		super(event, args);
 	}

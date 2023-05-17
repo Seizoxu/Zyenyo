@@ -18,13 +18,13 @@ import dataStructures.TypingSubmission;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class TeamTypingTest extends TypingTestTemplate
+public class TypingTestTeam extends TypingTestTemplate
 {
 	private String[] teamRed;
 	private String[] teamBlue;
 	private final static short WPM_MINIMUM = 30;
 
-	public TeamTypingTest(MessageReceivedEvent event, String[] args)
+	public TypingTestTeam(MessageReceivedEvent event, String[] args)
 	{
 		super(event, args);
 		String[] players = Arrays.copyOfRange(args, 1, args.length);
