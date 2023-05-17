@@ -129,9 +129,6 @@ public class TeamTypingTest extends TypingTestTemplate
 			for (int i = 0; i < submissions.getNumSubmissions(); i++)
 			{
 				TypingSubmission s = submissions.getSubmission(lbOrder.get(i));
-				System.out.println(s.userID());
-				Arrays.asList(teamRed).forEach((String a) -> System.out.println(a));
-				Arrays.asList(teamBlue).forEach((String a) -> System.out.println(a));
 				
 				if (Arrays.asList(teamRed).contains(String.format("<@%s>", s.userID())))
 				{
