@@ -54,7 +54,17 @@ public class LeaderboardConfig {
 						this.lbScope = LeaderboardScope.AVERAGE;
 						this.accumulator = Accumulators.avg(this.lbStatistic, "$" + this.lbStatistic);
 						
-			} break;
+				} break;
+			case TESTS:
+				this.lbStatistic = "totalTests";
+				switch(lbScope) {
+					case SUM:
+					default:
+						this.lbScope = LeaderboardScope.SUM;
+						// 1.0 so that this value is a double otherwise there will be headaches.
+						this.accumulator = Accumulators.sum(this.lbStatistic, 1.0);
+				} break;
+				
 		}
 	}
 

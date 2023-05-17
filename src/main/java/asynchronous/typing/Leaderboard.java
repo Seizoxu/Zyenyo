@@ -50,6 +50,7 @@ public class Leaderboard implements Runnable
 				case "-sum": lbScope = LeaderboardScope.SUM; break;
 				case "-p": lbPage = getValueArg(args, "-p"); break;
 				case "-page": lbPage = getValueArg(args, "-page"); break;
+				case "-tests": lbStat = LeaderboardStatisticType.TESTS; break;
 			}
 		}
 		
@@ -63,16 +64,22 @@ public class Leaderboard implements Runnable
 		final int initialPosition = (lbPage -1) * 20;
 		int position = (lbPage -1) * 20;
 		String userTag;
-		double statistic;
+		double statistic = 0;
 
 		for (Document user : Iterables.skip(lbList, (lbPage - 1) * 20))
 		{
 			if (position - 20 >= initialPosition) {break;}
 			
-			userTag = jda.retrieveUserById( user.getString("_id") ).complete().getAsTag();
-			statistic = user.getDouble( lbConfig.getStatistic() );
+			try {
+				userTag = jda.retrieveUserById( user.getString("_id") ).complete().getAsTag();
+				statistic = user.getDouble( lbConfig.getStatistic() );
+				leaderboardEmbed.appendDescription(String.format("%n**#%d | %s**: `%.2f`", ++position, userTag, statistic));
+			} catch (Exception e) {
+				System.out.println(e);
+				// The error might just be one faulty doc so just continue constructing the leaderboard
+				continue;
+			}
 
-			leaderboardEmbed.appendDescription(String.format("%n**#%d | %s**: `%.2f`", ++position, userTag, statistic));
 		}
 
 		leaderboardEmbed.setFooter(
