@@ -41,7 +41,7 @@ public class TeamTypingTest extends TypingTestTemplate
 	}
 	
 	
-	protected void constructAndSendTest()
+	protected void constructAndSendTest() // Essentially a duplicate of 
 	{
 		int promptNumber = (int) (BotConfig.NUM_PROMPTS*Math.random() + 1);
 		
@@ -115,61 +115,88 @@ public class TeamTypingTest extends TypingTestTemplate
 			List<Integer> lbOrder = leaderboardMap.keySet().stream()
 					.mapToInt(x -> (int)x)
 					.boxed()
-					.sorted((a,b)->Double.compare(submissions.getSubmission(b).typingPoints(), submissions.getSubmission(a).typingPoints()))
+					.sorted((a,b)->Double.compare(
+							submissions.getSubmission(b).typingPoints(),
+							submissions.getSubmission(a).typingPoints()))
 					.collect(Collectors.toList());
 
 			double teamRedTotal = 0;
 			double teamBlueTotal = 0;
 
-                        ArrayList<TypingSubmission> red = new ArrayList<TypingSubmission>();
-                        ArrayList<TypingSubmission> blue = new ArrayList<TypingSubmission>();
+			ArrayList<TypingSubmission> red = new ArrayList<TypingSubmission>();
+			ArrayList<TypingSubmission> blue = new ArrayList<TypingSubmission>();
 
 			for (int i = 0; i < submissions.getNumSubmissions(); i++)
 			{
-
-
 				TypingSubmission s = submissions.getSubmission(lbOrder.get(i));
 				System.out.println(s.userID());
 				Arrays.asList(teamRed).forEach((String a) -> System.out.println(a));
 				Arrays.asList(teamBlue).forEach((String a) -> System.out.println(a));
-				if (Arrays.asList(teamRed).contains(String.format("<@%s>", s.userID()))) {red.add(s); teamRedTotal += s.typingPoints();}
-				else if (Arrays.asList(teamBlue).contains(String.format("<@%s>", s.userID()))) {blue.add(s); teamBlueTotal += s.typingPoints();}
+				
+				if (Arrays.asList(teamRed).contains(String.format("<@%s>", s.userID())))
+				{
+					red.add(s);
+					teamRedTotal += s.typingPoints();
+				}
+				else if (Arrays.asList(teamBlue).contains(String.format("<@%s>", s.userID())))
+				{
+					blue.add(s);
+					teamBlueTotal += s.typingPoints();
+				}
 				else {continue;}
+				
 				Database.addTest(s.userID(), s.wordsPerMinute(), s.accuracy(), s.typingPoints());
-
 			}
 
-                        int i = 0;
-                        //add submissions strategically so that red and blue teams have thei own columns
-                        while (i < red.size() || i < blue.size()) {
-                          if (i < red.size()) {
-				embed.addField(
-						String.format("%s %s ", ":red_square:", red.get(i).userTag()),
-						String.format(
-								"TP: **`%.2f`**%n",
-										red.get(i).typingPoints()),
-						true);
-                          } else {embed.addField("","",true);}
-                          if (i < blue.size()) {
-				embed.addField(
-						String.format("%s %s ", ":blue_square:", blue.get(i).userTag()),
-						String.format(
-								"TP: **`%.2f`**%n",
-										blue.get(i).typingPoints()),
-						true);
-                          } else {embed.addField("","",true);}
-                          embed.addField("","", true);
+			int i = 0;
+			//add submissions strategically so that red and blue teams have their own columns
+			while (i < red.size() || i < blue.size())
+			{
+				if (i < red.size())
+				{
+					embed.addField(
+							String.format("%s %s ", ":red_square:",
+									red.get(i).userTag()),
+							String.format("TP: **`%.2f`**%n",
+									red.get(i).typingPoints()),
+							true);
+				}
+				else {embed.addField("","",true);}
+				
+				if (i < blue.size())
+				{
+					embed.addField(
+							String.format("%s %s ",
+									":blue_square:",
+									blue.get(i).userTag()),
+							String.format("TP: **`%.2f`**%n",
+									blue.get(i).typingPoints()),
+							true);
+				}
+				else {embed.addField("","",true);}
+				
+				embed.addField("","", true);
 
-                            i++;
-                        }
+				i++;
+			}
 
-			embed.addField("Team Results", String.format("*Team Red Total:* **`%.2f`**%n"
-					+ "*Team Blue Total:* **`%.2f`%n**", 
-					teamRedTotal, teamBlueTotal), false);
+			embed.addField(
+					"Team Results",
+					String.format("*Team Red Total:* **`%.2f`**%n"
+							+ "*Team Blue Total:* **`%.2f`%n**", 
+							teamRedTotal,
+							teamBlueTotal),
+					false);
+			
 			double difference = teamRedTotal - teamBlueTotal;
 			String winner = difference > 0 ? "Red" : "Blue";
 
-			embed.addField(String.format("**Team %s Wins By: `%.2f` Points!**", winner, Math.abs(difference)), "", false);
+			embed.addField(
+					String.format("**Team %s Wins By: `%.2f` Points!**",
+							winner,
+							Math.abs(difference)),
+					"",
+					false);
 
 			message.replyEmbeds(embed.build()).queue();
 			Typing.guildTestList.remove(event.getGuild().getIdLong());

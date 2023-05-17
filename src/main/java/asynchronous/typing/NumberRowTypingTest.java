@@ -25,14 +25,18 @@ public class NumberRowTypingTest extends TypingTestTemplate
 	}
 	
 	
-	protected void constructAndSendTest(String difficulty) {
+	protected void constructAndSendTest(String difficulty)
+	{
 		//TODO: implement difficulty at a later stage		
 		
 		int wordLength = (int)(Math.random() * 6 + 1);
 
-		for (int charIdx = 0; charIdx < PROMPT_LENGTH; charIdx++) {
+		for (int charIdx = 0; charIdx < PROMPT_LENGTH; charIdx++)
+		{
 			this.prompt += String.valueOf((int)(Math.random() * 9));
-			if (charIdx % wordLength == 0) {
+			
+			if (charIdx % wordLength == 0)
+			{
 				this.prompt += " ";
 				wordLength = (int)(Math.random() * 6 + 1);
 			}
@@ -42,7 +46,9 @@ public class NumberRowTypingTest extends TypingTestTemplate
 		numChars = prompt.length();
 		long endTime = (System.currentTimeMillis() / 1000) + (60*numChars / (WPM_MINIMUM * NUM_CHARS_IN_WORD));
 
-		fakePrompt = prompt.substring(0, prompt.length()/2) + ZERO_WIDTH_NON_JOINER + prompt.substring(prompt.length()/2, prompt.length());
+		fakePrompt = prompt.substring(0, prompt.length()/2)
+				+ ZERO_WIDTH_NON_JOINER
+				+ prompt.substring(prompt.length()/2, prompt.length());
 
 		EmbedBuilder embed = new EmbedBuilder()
 		.setTitle("Typing Prompt:")

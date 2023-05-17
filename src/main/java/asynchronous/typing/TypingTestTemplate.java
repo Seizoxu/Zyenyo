@@ -54,8 +54,6 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	@Override
 	public abstract void run();
 	
-//	protected abstract void constructAndSendTest();
-	
 	
 	/**
 	 * Checks whether a typing submission is valid, and calculates its statistics.
@@ -176,13 +174,13 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 			List<Integer> lbOrder = leaderboardMap.keySet().stream()
 					.mapToInt(x -> (int)x)
 					.boxed()
-					.sorted((a,b)->Double.compare(submissions.getSubmission(b).typingPoints(), submissions.getSubmission(a).typingPoints()))
+					.sorted((a,b)->Double.compare(
+							submissions.getSubmission(b).typingPoints(),
+							submissions.getSubmission(a).typingPoints()))
 					.collect(Collectors.toList());
 
 			for (int i = 0; i < submissions.getNumSubmissions(); i++)
 			{
-
-
 				TypingSubmission s = submissions.getSubmission(lbOrder.get(i));
 				double rawTp = Database.addTest(s.userID(), s.wordsPerMinute(), s.accuracy(), s.typingPoints());
 
@@ -195,8 +193,8 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 										+ "Raw TP gained: **`%.2f`**",
 										s.typingPoints(), s.wordsPerMinute(), s.accuracy(), rawTp),
 						false);
-
 			}
+			
 			message.replyEmbeds(embed.build()).queue();
 			Typing.guildTestList.remove(event.getGuild().getIdLong());
 		}
