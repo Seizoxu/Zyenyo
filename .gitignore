@@ -4,6 +4,7 @@ target/
 debug/
 test/
 .vim/
+ZBotData/
 
 # Files
 *.zbif
