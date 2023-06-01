@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import dataStructures.PromptHeadings;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import zyenyo.BotConfig;
@@ -75,7 +76,7 @@ public class TypingTest extends TypingTestTemplate
 					+ prompt.substring(prompt.length()/2, prompt.length());
 			
 			EmbedBuilder embed = new EmbedBuilder()
-					.setTitle("Typing Prompt:")
+					.setTitle(String.format("%s", PromptHeadings.get(promptNumber-1)))
 					.setDescription(fakePrompt)
 					.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
 			
