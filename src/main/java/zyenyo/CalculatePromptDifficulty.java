@@ -16,6 +16,8 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.bson.Document;
 
+import dataStructures.PromptHeadings;
+
 public class CalculatePromptDifficulty
 {
 	private final static Set<Character> SPECIAL_CHARS =	Set.of(
@@ -168,6 +170,7 @@ public class CalculatePromptDifficulty
 			for (int i = 0; i < prompts.size(); i++)
 			{
 				File newPrompt = new File( String.format("%sprompt%d.txt", newPromptsPath, i+1) );
+				PromptHeadings.addHeading(prompts.get(i).getString("title"));
 				
 				try (BufferedWriter promptWriter = new BufferedWriter( new FileWriter(newPrompt) );)
 				{
