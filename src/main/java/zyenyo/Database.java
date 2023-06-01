@@ -2,11 +2,15 @@ package zyenyo;
 
 import static com.mongodb.client.model.Sorts.descending;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 import com.mongodb.ConnectionString;
@@ -17,16 +21,26 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.BsonField;
 import com.mongodb.client.model.Field;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.event.CommandFailedEvent;
 import com.mongodb.event.CommandListener;
 import com.mongodb.event.CommandSucceededEvent;
 
 import dataStructures.LeaderboardConfig;
+import dataStructures.AddTestResult;
+
+enum streakStatus {
+	CLAIMED,
+	AVAILABLE,
+	MISSED,
+	INITIAL,
+}
+
+record streakStatusResult(Integer currentStreak, streakStatus status) {}
 
 class CommandMonitor implements CommandListener {
 	@Override
@@ -70,11 +84,12 @@ public class Database
 		prompts = client.getDatabase(DB_NAME).getCollection("prompts");
 	}
 
-	public static double addTest(long discordId, double wpm, double accuracy, double tp)
+	public static AddTestResult addTest(long discordId, double wpm, double accuracy, double tp)
 	{
 		double initialWeightedTp = getWeightedTp(discordId);
+		ArrayList<Bson> userUpdates = new ArrayList<Bson>();
 
-		tests.insertOne(new Document()
+		InsertOneResult result = tests.insertOne(new Document()
 				.append("_id", new ObjectId())
 				.append("discordId", String.valueOf(discordId))
 				.append("wpm", wpm)
@@ -84,14 +99,74 @@ public class Database
 				);
 		
 		double newWeightedTp = getWeightedTp(discordId);
-		
+		userUpdates.add(Updates.set("totalTp", newWeightedTp));
+
+		streakStatusResult streak = getStreakStatus(String.valueOf(discordId));
+		switch (streak.status()) {
+			case AVAILABLE:
+				userUpdates.add(Updates.inc("daily.currentStreak", 1));
+				// some other time :)
+				// userUpdates.add(Updates.max("daily.maxStreak", ));
+				userUpdates.add(Updates.set("daily.test", result.getInsertedId()));
+				// storing an instant instead of a normal date here otherwise it would push the server's local timezone to the db instead of UTC.
+				userUpdates.add(Updates.set("daily.updatedAt", new Date().toInstant().toString()));
+				break;
+			case CLAIMED:
+				break;
+			case INITIAL:
+				userUpdates.add(Updates.set("daily", new Document()
+					.append("currentStreak", 1)
+					.append("maxStreak", 1)
+					.append("test", result.getInsertedId())
+					.append("updatedAt", new Date().toInstant().toString())
+				));
+				break;
+			case MISSED:
+				userUpdates.add(Updates.set("daily.currentStreak", 1));
+				userUpdates.add(Updates.set("daily.test", result.getInsertedId()));
+				userUpdates.add(Updates.set("daily.updatedAt", new Date().toInstant().toString()));
+				break;
+			default:
+				break;
+
+		}
+
 		users.updateOne(
-				Filters.eq("discordId", String.valueOf(discordId)),
-				Updates.set("totalTp", newWeightedTp),
-				upsertTrue
-				);
-		
-		return newWeightedTp - initialWeightedTp;
+			Filters.eq("discordId", String.valueOf(discordId)),
+			Updates.combine(
+				userUpdates
+				),
+			upsertTrue
+		);
+
+		return new AddTestResult(newWeightedTp - initialWeightedTp, streak.currentStreak());
+	}
+
+	private static streakStatusResult getStreakStatus(String discordId) {
+		Document daily = users.find(Filters.eq("discordId", discordId)).first().get("daily", Document.class);
+		if (daily == null) {
+			return new streakStatusResult(1, streakStatus.INITIAL);
+		}
+
+		Date testDate = Date.from(Instant.parse(daily.getString("updatedAt")));
+
+		Calendar lockedUntilDate = Calendar.getInstance();
+		lockedUntilDate.setTime(testDate);
+		lockedUntilDate.add(Calendar.HOUR_OF_DAY, 24);
+
+		Calendar expiryDate = Calendar.getInstance();
+		expiryDate.setTime(testDate);
+		expiryDate.add(Calendar.HOUR_OF_DAY, 48);
+
+		if (new Date().before(lockedUntilDate.getTime())) {
+			return new streakStatusResult(0, streakStatus.CLAIMED);
+		}
+
+		if (new Date().after(expiryDate.getTime())) {
+			return new streakStatusResult(1, streakStatus.MISSED);
+		}
+
+		return new streakStatusResult(daily.getInteger("currentStreak") + 1, streakStatus.AVAILABLE);
 	}
 
 	public static double addPrompt(String title, String text)
@@ -146,7 +221,7 @@ public class Database
 		return stats.toJson();
 	}
 
-	//TODO
+	//TODO: merge this into just one stats command
 	public static String getGlobalStats(String discordId) {return "";}
 
 	public static AggregateIterable<Document> getLeaderboards(LeaderboardConfig lbConfig) {
