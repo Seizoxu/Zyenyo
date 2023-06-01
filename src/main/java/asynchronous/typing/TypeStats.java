@@ -122,6 +122,7 @@ public class TypeStats implements Runnable
 		else if (wpm < 150) {rank = "God";}
 		else if (wpm < 250) {rank = "Untouchable";}
 		else if (wpm >= 250) {rank = "Suspicious";}
+		// personally, I aim for Integer.MAX_VALUE WPM on my tests
 		
 		return rank;
 	}

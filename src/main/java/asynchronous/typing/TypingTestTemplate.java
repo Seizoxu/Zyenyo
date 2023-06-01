@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
 import commands.Typing;
+import dataStructures.AddTestResult;
 import dataStructures.TypingSubmission;
 import dataStructures.TypingTestLeaderboard;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -182,7 +183,11 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 			for (int i = 0; i < submissions.getNumSubmissions(); i++)
 			{
 				TypingSubmission s = submissions.getSubmission(lbOrder.get(i));
-				double rawTp = Database.addTest(s.userID(), s.wordsPerMinute(), s.accuracy(), s.typingPoints());
+				AddTestResult result = Database.addTest(s.userID(), s.wordsPerMinute(), s.accuracy(), s.typingPoints());
+				String dailyStreak = "";
+				if (result.dailyStreak() > 0) {
+					dailyStreak = String.format("Daily Streak: `**%d**`", result.dailyStreak());
+				}
 
 				embed.addField(
 						String.format("#%d.) %s", i+1, s.userTag()),
@@ -190,8 +195,9 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 								"TP: **`%.2f`**%n"
 										+ "WPM: **`%.2f`**%n"
 										+ "Accuracy: **`%.2f`**%%%n"
-										+ "Raw TP gained: **`%.2f`**",
-										s.typingPoints(), s.wordsPerMinute(), s.accuracy(), rawTp),
+										+ "Raw TP gained: **`%.2f`**%n"
+										+ dailyStreak,
+										s.typingPoints(), s.wordsPerMinute(), s.accuracy(), result.rawTp()),
 						false);
 			}
 			
