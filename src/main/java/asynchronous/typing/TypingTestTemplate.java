@@ -186,7 +186,7 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 				AddTestResult result = Database.addTest(s.userID(), s.wordsPerMinute(), s.accuracy(), s.typingPoints());
 				String dailyStreak = "";
 				if (result.dailyStreak() > 0) {
-					dailyStreak = String.format("Daily Streak: `**%d**`", result.dailyStreak());
+					dailyStreak = String.format("Daily Streak: **`%d`**", result.dailyStreak());
 				}
 
 				embed.addField(
