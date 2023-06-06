@@ -143,30 +143,32 @@ public class Database
 	}
 
 	private static streakStatusResult getStreakStatus(String discordId) {
-		Document daily = users.find(Filters.eq("discordId", discordId)).first().get("daily", Document.class);
-		if (daily == null) {
+		try {
+			Document daily = users.find(Filters.eq("discordId", discordId)).first().get("daily", Document.class);
+			Date testDate = Date.from(Instant.parse(daily.getString("updatedAt")));
+
+			Calendar lockedUntilDate = Calendar.getInstance();
+			lockedUntilDate.setTime(testDate);
+			lockedUntilDate.add(Calendar.HOUR_OF_DAY, 24);
+
+			Calendar expiryDate = Calendar.getInstance();
+			expiryDate.setTime(testDate);
+			expiryDate.add(Calendar.HOUR_OF_DAY, 48);
+
+			if (new Date().before(lockedUntilDate.getTime())) {
+				return new streakStatusResult(0, streakStatus.CLAIMED);
+			}
+
+			if (new Date().after(expiryDate.getTime())) {
+				return new streakStatusResult(1, streakStatus.MISSED);
+			}
+
+			return new streakStatusResult(daily.getInteger("currentStreak") + 1, streakStatus.AVAILABLE);
+		} catch (Exception e) {
+			System.out.println(e);
 			return new streakStatusResult(1, streakStatus.INITIAL);
 		}
 
-		Date testDate = Date.from(Instant.parse(daily.getString("updatedAt")));
-
-		Calendar lockedUntilDate = Calendar.getInstance();
-		lockedUntilDate.setTime(testDate);
-		lockedUntilDate.add(Calendar.HOUR_OF_DAY, 24);
-
-		Calendar expiryDate = Calendar.getInstance();
-		expiryDate.setTime(testDate);
-		expiryDate.add(Calendar.HOUR_OF_DAY, 48);
-
-		if (new Date().before(lockedUntilDate.getTime())) {
-			return new streakStatusResult(0, streakStatus.CLAIMED);
-		}
-
-		if (new Date().after(expiryDate.getTime())) {
-			return new streakStatusResult(1, streakStatus.MISSED);
-		}
-
-		return new streakStatusResult(daily.getInteger("currentStreak") + 1, streakStatus.AVAILABLE);
 	}
 
 	public static double addPrompt(String title, String text)
