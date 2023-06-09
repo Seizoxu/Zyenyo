@@ -90,7 +90,8 @@ public class Administrator extends ListenerAdapter
 				@Override
 				public void run()
 				{
-					CalculatePromptDifficulty.downloadAndUpdatePrompts.run();
+					CalculatePromptDifficulty.downloadAndUpdatePrompts();
+					Database.recalcPrompts();
 
 					channel.sendMessageFormat("Successfully downloaded, updated, and recalculated all prompts").queue();
 
