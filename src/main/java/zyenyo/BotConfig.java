@@ -28,7 +28,7 @@ public class BotConfig
 	{
 		PREFIX = ENVIRONMENT.equals("development") ? '.' : '\\';
 		
-		CalculatePromptDifficulty.downloadAndUpdatePrompts.run();
+		CalculatePromptDifficulty.downloadAndUpdatePrompts();
 		loadBotObjects();
 	}
 	

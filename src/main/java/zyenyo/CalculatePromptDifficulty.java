@@ -152,53 +152,50 @@ public class CalculatePromptDifficulty
 	}
 	
 	
-	public static Runnable downloadAndUpdatePrompts = new Runnable()
+	public static void downloadAndUpdatePrompts()
 	{
-		private String newPromptsPath = BotConfig.BOT_DATA_FILEPATH + "newPrompts/";
-		private String oldPromptsPath = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/";
+		String newPromptsPath = BotConfig.BOT_DATA_FILEPATH + "newPrompts/";
+		String oldPromptsPath = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/";
 		
-		@Override
-		public void run()
+		
+		ArrayList<Document> prompts = Database.getPrompts();
+		
+		// Creates temporary newPrompts directory.
+		File newPromptsFolder = new File(newPromptsPath);
+		if (!newPromptsFolder.exists()) {newPromptsFolder.mkdirs();}
+		
+		// Creates all the prompt files with their proper ID and text.
+		for (int i = 0; i < prompts.size(); i++)
 		{
-			ArrayList<Document> prompts = Database.getPrompts();
+			File newPrompt = new File( String.format("%sprompt%d.txt", newPromptsPath, i+1) );
+			PromptHeadings.addHeading(prompts.get(i).getString("title"));
 			
-			// Creates temporary newPrompts directory.
-			File newPromptsFolder = new File(newPromptsPath);
-			if (!newPromptsFolder.exists()) {newPromptsFolder.mkdirs();}
-			
-			// Creates all the prompt files with their proper ID and text.
-			for (int i = 0; i < prompts.size(); i++)
+			try (BufferedWriter promptWriter = new BufferedWriter( new FileWriter(newPrompt) );)
 			{
-				File newPrompt = new File( String.format("%sprompt%d.txt", newPromptsPath, i+1) );
-				PromptHeadings.addHeading(prompts.get(i).getString("title"));
-				
-				try (BufferedWriter promptWriter = new BufferedWriter( new FileWriter(newPrompt) );)
-				{
-					if (!newPrompt.exists()) {newPrompt.createNewFile();}					
-					promptWriter.write( prompts.get(i).get("text").toString() );
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-			
-			// Deletes old folder, and renames the new one to the old.
-			try
-			{
-				File oldPromptsFolder = new File(oldPromptsPath);
-				FileUtils.deleteDirectory(oldPromptsFolder);
-				
-				newPromptsFolder.renameTo(oldPromptsFolder);
+				if (!newPrompt.exists()) {newPrompt.createNewFile();}					
+				promptWriter.write( prompts.get(i).get("text").toString() );
 			}
 			catch (IOException e)
 			{
 				e.printStackTrace();
 			}
-			
-			BotConfig.NUM_PROMPTS = prompts.size();
-			recalculatePromptRatings();
 		}
+		
+		// Deletes old folder, and renames the new one to the old.
+		try
+		{
+			File oldPromptsFolder = new File(oldPromptsPath);
+			FileUtils.deleteDirectory(oldPromptsFolder);
+			
+			newPromptsFolder.renameTo(oldPromptsFolder);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
+		BotConfig.NUM_PROMPTS = prompts.size();
+		recalculatePromptRatings();
 	};
 }
 
