@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import asynchronous.typing.Chart;
 import asynchronous.typing.Leaderboard;
+import asynchronous.typing.Daily;
 import asynchronous.typing.TypingTestNumberRow;
 import asynchronous.typing.TypingTestTeam;
 import asynchronous.typing.TypeStats;
@@ -112,6 +113,12 @@ public class Typing extends ListenerAdapter
 		else if (Aliases.LEADERBOARD.contains(args[0].toLowerCase()))
 		{
 			Zyenyo.masterThreadPool.submit(new Leaderboard(event, args));
+		}
+
+		// IF: Command is DAILY...
+		else if (Aliases.DAILY.contains(args[0].toLowerCase()))
+		{
+			Zyenyo.masterThreadPool.submit(new Daily(event, args));
 		}
 	}
 }
