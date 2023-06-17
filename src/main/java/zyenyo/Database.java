@@ -32,15 +32,9 @@ import com.mongodb.event.CommandSucceededEvent;
 
 import dataStructures.LeaderboardConfig;
 import dataStructures.AddTestResult;
+import dataStructures.streakStatus;
+import dataStructures.streakStatusResult;
 
-enum streakStatus {
-	CLAIMED,
-	AVAILABLE,
-	MISSED,
-	INITIAL,
-}
-
-record streakStatusResult(Integer currentStreak, streakStatus status) {}
 
 class CommandMonitor implements CommandListener {
 	@Override
@@ -142,7 +136,7 @@ public class Database
 		return new AddTestResult(newWeightedTp - initialWeightedTp, streak.currentStreak());
 	}
 
-	private static streakStatusResult getStreakStatus(String discordId) {
+	public static streakStatusResult getStreakStatus(String discordId) {
 		try {
 			Document daily = users.find(Filters.eq("discordId", discordId)).first().get("daily", Document.class);
 			Date testDate = Date.from(Instant.parse(daily.getString("updatedAt")));
@@ -156,17 +150,17 @@ public class Database
 			expiryDate.add(Calendar.HOUR_OF_DAY, 48);
 
 			if (new Date().before(lockedUntilDate.getTime())) {
-				return new streakStatusResult(0, streakStatus.CLAIMED);
+				return new streakStatusResult(0, streakStatus.CLAIMED, lockedUntilDate);
 			}
 
 			if (new Date().after(expiryDate.getTime())) {
-				return new streakStatusResult(1, streakStatus.MISSED);
+				return new streakStatusResult(1, streakStatus.MISSED, lockedUntilDate);
 			}
 
-			return new streakStatusResult(daily.getInteger("currentStreak") + 1, streakStatus.AVAILABLE);
+			return new streakStatusResult(daily.getInteger("currentStreak") + 1, streakStatus.AVAILABLE, lockedUntilDate);
 		} catch (Exception e) {
 			System.out.println(e);
-			return new streakStatusResult(1, streakStatus.INITIAL);
+			return new streakStatusResult(1, streakStatus.INITIAL, null);
 		}
 
 	}

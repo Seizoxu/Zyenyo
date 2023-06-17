@@ -56,6 +56,7 @@ public final class Aliases
 			BotConfig.PREFIX + "leaderboard",
 			BotConfig.PREFIX + "lboard",
 			BotConfig.PREFIX + "lb");
+	public static final Set<String> DAILY = Collections.singleton(BotConfig.PREFIX + "daily");
 	
 	
 	/*————————————————————————————————————|
