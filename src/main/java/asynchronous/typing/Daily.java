@@ -39,7 +39,7 @@ public class Daily implements Runnable
 				long availableOn = result.availableOnDate().getTimeInMillis();	
 				long minutes = TimeUnit.MILLISECONDS.toMinutes(Math.abs(availableOn - today));
 				int hours = (int) minutes / 60 ;
-				channel.sendMessage(String.format("Next daily available in **%dh %dm**", hours, minutes % hours)).queue();
+				channel.sendMessage(String.format("Next daily available in **%dh %dm**", hours, minutes % 60)).queue();
 			} else {
 				channel.sendMessage("Daily available! Complete a test with `\\tt` to continue your streak.").queue();
 			}
