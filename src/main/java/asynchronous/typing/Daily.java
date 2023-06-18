@@ -2,51 +2,59 @@ package asynchronous.typing;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import zyenyo.Database;
 
-import java.util.Calendar;
-import java.util.concurrent.TimeUnit;
-
-import dataStructures.streakStatus;
+import java.awt.Color;
 import dataStructures.streakStatusResult;
 
-public class Daily implements Runnable
-{
+public class Daily implements Runnable {
 	private MessageReceivedEvent event;
-	private JDA jda;
-	private String[] args;
 	private String idStr;
 	private MessageChannel channel;
 
-	public Daily(MessageReceivedEvent event, String[] args)
-	{
+	public Daily(MessageReceivedEvent event, String[] args) {
 		this.event = event;
-		this.jda = event.getJDA();
-		this.args = args;
 		this.idStr = event.getAuthor().getId();
 		this.channel = event.getChannel();
 	}
+
 	@Override
 	public void run() {
 		event.getChannel().sendTyping().queue();
 		try {
 			streakStatusResult result = Database.getStreakStatus(idStr);
+			EmbedBuilder embed = new EmbedBuilder().setColor(Color.black);
 
-			if (result.status() == streakStatus.CLAIMED) {
-				long today = Calendar.getInstance().getTimeInMillis();
-				long availableOn = result.availableOnDate().getTimeInMillis();	
-				long minutes = TimeUnit.MILLISECONDS.toMinutes(Math.abs(availableOn - today));
-				int hours = (int) minutes / 60 ;
-				channel.sendMessage(String.format("Next daily available in **%dh %dm**", hours, minutes % 60)).queue();
-			} else {
-				channel.sendMessage("Daily available! Complete a test with `\\tt` to continue your streak.").queue();
+			switch (result.status()) {
+				case CLAIMED:
+					embed.setTitle(String.format("Next daily available <t:%d:R>", result.referenceDate().getTimeInMillis() / 1000));
+					break;
+				case MISSED:
+					embed.setTitle(String.format("Your streak expired <t:%d:R>", result.referenceDate().getTimeInMillis() / 1000))
+							.setDescription("Type `\\tt` to start a new streak");
+					break;
+				case AVAILABLE:
+					embed.setTitle("Daily Available!").setDescription(
+							"Complete a test with `\\tt` to continue your streak")
+							.addField("", String.format("Streak expires <t:%d:R>",
+									result.referenceDate().getTimeInMillis() / 1000), false);
+					break;
+				case INITIAL:
+					embed.setTitle("Daily Available!").setDescription(
+							"Complete a test with `\\tt` to begin your streak");
+					break;
+				default:
+					break;
+
 			}
+
+			channel.sendMessageEmbeds(embed.build()).queue();
+
 		} catch (Exception e) {
 			System.err.println(e);
 		}
-		
+
 	}
 
 }

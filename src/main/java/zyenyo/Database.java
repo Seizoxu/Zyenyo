@@ -154,10 +154,10 @@ public class Database
 			}
 
 			if (new Date().after(expiryDate.getTime())) {
-				return new streakStatusResult(1, streakStatus.MISSED, lockedUntilDate);
+				return new streakStatusResult(1, streakStatus.MISSED, expiryDate);
 			}
 
-			return new streakStatusResult(daily.getInteger("currentStreak") + 1, streakStatus.AVAILABLE, lockedUntilDate);
+			return new streakStatusResult(daily.getInteger("currentStreak") + 1, streakStatus.AVAILABLE, expiryDate);
 		} catch (Exception e) {
 			System.out.println(e);
 			return new streakStatusResult(1, streakStatus.INITIAL, null);
