@@ -28,7 +28,6 @@ import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.event.CommandFailedEvent;
 import com.mongodb.event.CommandListener;
-import com.mongodb.event.CommandSucceededEvent;
 
 import dataStructures.LeaderboardConfig;
 import dataStructures.AddTestResult;
@@ -37,10 +36,6 @@ import dataStructures.streakStatusResult;
 
 
 class CommandMonitor implements CommandListener {
-	@Override
-	public synchronized void commandSucceeded(final CommandSucceededEvent event) {
-		System.out.println(event.getCommandName() + " command " + event.getRequestId());
-	}
 	@Override
 	public void commandFailed(final CommandFailedEvent event) {
 		System.out.println(String.format("Failed execution of command '%s' cause: %s",
