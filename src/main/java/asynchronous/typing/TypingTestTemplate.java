@@ -34,6 +34,7 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	protected long startTime = -1;
 	protected TypingTestTemplate thisInstance = this;
 	protected TypingTestLeaderboard submissions = new TypingTestLeaderboard();
+	protected String promptTitle;
 
 	protected final static String TEST_PROMPTS_FILEPATH = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/";
 	protected final static String ZERO_WIDTH_NON_JOINER = "‌";
@@ -97,7 +98,7 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 		double wpmMultiplier = 0.2 * Math.pow(wordsPerMinute, 1.5);
 		double accuracyMultiplier = Math.pow(0.95, 100-accuracy);
 		double typingPoints = (wpmMultiplier * promptRating) * accuracyMultiplier;
-
+		
 		sendResult(
 				event.getChannel(),
 				new TypingSubmission(
@@ -105,9 +106,11 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 						userTag,
 						wordsPerMinute,
 						accuracy,
-						typingPoints
-						),
-				timeTakenMillis
+						typingPoints,
+						timeTakenMillis,
+						userTypingSubmission,
+						promptTitle	
+						)
 				);
 	}
 	
@@ -119,7 +122,7 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	 * @param submission
 	 * @param timeTakenMillis
 	 */
-	protected void sendResult(MessageChannel channel, TypingSubmission submission, double timeTakenMillis)
+	protected void sendResult(MessageChannel channel, TypingSubmission submission)
 	{
 		submissions.addSubmission(submission);
 
@@ -128,10 +131,10 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 						"<@%s> has completed the prompt in **`%.3f` seconds `[%.2f WPM]`**, "
 						+ "with an accuracy of **`%.2f%%`**.%nTyping Points: **`%.2f TP`**.",
 						submission.userID(),
-						timeTakenMillis/1000,
+						submission.timeTakenMillis()/1000,
 						submission.wordsPerMinute(),
 						submission.accuracy(),
-						submission.typingPoints() ))
+						submission.typingPoints()))
 		.queue();
 	}
 	
@@ -184,6 +187,8 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 			{
 				TypingSubmission s = submissions.getSubmission(lbOrder.get(i));
 				AddTestResult result = Database.addTest(s.userID(), s.wordsPerMinute(), s.accuracy(), s.typingPoints());
+				// TODO: replace with this after tpv2
+				// AddTestResult result = Database.addTestV2(s)
 				String dailyStreak = "";
 				if (result.dailyStreak() > 0) {
 					dailyStreak = String.format("Daily Streak: **`%d`**", result.dailyStreak());
