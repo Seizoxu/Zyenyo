@@ -74,9 +74,11 @@ public class TypingTest extends TypingTestTemplate
 			fakePrompt = prompt.substring(0, prompt.length()/2)
 					+ ZERO_WIDTH_NON_JOINER
 					+ prompt.substring(prompt.length()/2, prompt.length());
+
+			promptTitle = PromptHeadings.get(promptNumber-1);
 			
 			EmbedBuilder embed = new EmbedBuilder()
-					.setTitle(String.format("%s", PromptHeadings.get(promptNumber-1)))
+					.setTitle(String.format("%s", promptTitle))
 					.setDescription(fakePrompt)
 					.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
 			

@@ -23,6 +23,7 @@ import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Field;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.InsertOneResult;
@@ -30,6 +31,7 @@ import com.mongodb.event.CommandFailedEvent;
 import com.mongodb.event.CommandListener;
 
 import dataStructures.LeaderboardConfig;
+import dataStructures.TypingSubmission;
 import dataStructures.AddTestResult;
 import dataStructures.streakStatus;
 import dataStructures.streakStatusResult;
@@ -50,6 +52,7 @@ public class Database
 	private static String DB_NAME;
 	private static MongoClient client;
 	private static MongoCollection<Document> tests;
+	private static MongoCollection<Document> testsV2;
 	private static MongoCollection<Document> users;
 	private static MongoCollection<Document> prompts;
 	
@@ -69,6 +72,10 @@ public class Database
 		client = MongoClients.create(settings);
 
 		tests = client.getDatabase(DB_NAME).getCollection("tests");
+		testsV2 = client.getDatabase(DB_NAME).getCollection("testsv2");
+		// tests will be queried very often for a user's top 100 tp scores. This needs to be fast.
+		testsV2.createIndex(Indexes.descending("tp"));
+
 		users = client.getDatabase(DB_NAME).getCollection("users");
 		prompts = client.getDatabase(DB_NAME).getCollection("prompts");
 	}
@@ -129,6 +136,71 @@ public class Database
 		);
 
 		return new AddTestResult(newWeightedTp - initialWeightedTp, streak.currentStreak());
+	}
+
+
+	// TODO: make this the default addtest when tpv2 is done
+	public static AddTestResult addTestV2(TypingSubmission submission) {
+		double initialWeightedTp = getWeightedTp(submission.userID());
+		ArrayList<Bson> userUpdates = new ArrayList<Bson>();
+
+		InsertOneResult result = testsV2.insertOne(new Document()
+				.append("_id", new ObjectId())
+				.append("discordId", String.valueOf(submission.userID()))
+				.append("wpm", submission.wordsPerMinute())
+				.append("accuracy", submission.accuracy())
+				.append("tp", submission.typingPoints())
+				.append("timeTaken", submission.timeTakenMillis())
+				.append("prompt", submission.promptTitle())
+				.append("submittedText", submission.userTypingSubmission())
+				.append("date", LocalDateTime.now())
+				);
+
+		double newWeightedTp = getWeightedTp(submission.userID());
+		userUpdates.add(Updates.set("totalTp", newWeightedTp));
+
+		streakStatusResult streak = getStreakStatus(String.valueOf(submission.userID()));
+		switch (streak.status()) {
+			case AVAILABLE:
+				userUpdates.add(Updates.inc("daily.currentStreak", 1));
+				// some other time :)
+				// userUpdates.add(Updates.max("daily.maxStreak", ));
+				userUpdates.add(Updates.set("daily.test", result.getInsertedId()));
+				// storing an instant instead of a normal date here otherwise it would push the server's local timezone to the db instead of UTC.
+				userUpdates.add(Updates.set("daily.updatedAt", new Date().toInstant().toString()));
+				break;
+			case CLAIMED:
+				break;
+			case INITIAL:
+				userUpdates.add(Updates.set("daily", new Document()
+					.append("currentStreak", 1)
+					.append("maxStreak", 1)
+					.append("test", result.getInsertedId())
+					.append("updatedAt", new Date().toInstant().toString())
+				));
+				break;
+			case MISSED:
+				userUpdates.add(Updates.set("daily.currentStreak", 1));
+				userUpdates.add(Updates.set("daily.test", result.getInsertedId()));
+				userUpdates.add(Updates.set("daily.updatedAt", new Date().toInstant().toString()));
+				break;
+			default:
+				break;
+
+		}
+
+		userUpdates.add(Updates.inc("playtime", submission.timeTakenMillis()));
+
+		users.updateOne(
+			Filters.eq("discordId", String.valueOf(submission.userID())),
+			Updates.combine(
+				userUpdates
+				),
+			upsertTrue
+		);
+
+		return new AddTestResult(newWeightedTp - initialWeightedTp, streak.currentStreak());
+
 	}
 
 	public static streakStatusResult getStreakStatus(String discordId) {
@@ -194,6 +266,7 @@ public class Database
 
 	public static String getStats(String discordId)
 	{
+		tests.find(Filters.eq("discordId", discordId)).sort(descending("tp"));
 
 		Document stats = tests.aggregate(Arrays.asList(
 				Aggregates.match(Filters.eq("discordId", discordId)),
@@ -205,7 +278,8 @@ public class Database
 						Accumulators.max("bestWpm", "$wpm"),
 						Accumulators.stdDevPop("deviation", "$wpm")
 						),
-				Aggregates.set(new Field<Double>("weightedTp", getWeightedTp(Long.valueOf(discordId))))
+				Aggregates.set(new Field<Double>("weightedTp", getWeightedTp(Long.valueOf(discordId)))),
+				Aggregates.set(new Field<Double>("playtime", users.find(Filters.eq("discordId", discordId)).first().getDouble("playtime")))
 				)).first();
 
 
