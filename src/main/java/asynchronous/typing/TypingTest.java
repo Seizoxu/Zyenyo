@@ -43,23 +43,26 @@ public class TypingTest extends TypingTestTemplate
 		// Sets a random prompt number, based on the difficulty.
 		int promptNumber = 1;
 		Random r = ThreadLocalRandom.current();
-		
-		switch(difficulty) // Gets prompt number from the appropriate ArrayList in promptDifficultyList
+
+		// Gets prompt number from the appropriate ArrayList in promptDifficultyList
+		switch(difficulty)
 		{
+		/* The bounds here don't increment the exclusive high by 1, since NUM_PROMPTS (and others) come from .size();
+		 * [0, x) should be <x if x is size. */
 		case "none":
-			promptNumber = Math.abs(r.nextInt()) % BotConfig.NUM_PROMPTS;
+			promptNumber = Math.abs(r.nextInt(0, BotConfig.NUM_PROMPTS));
 			break;
 		case "easy":
-			promptNumber = BotConfig.promptDifficultyList.get(0).get(Math.abs(r.nextInt()) % NUM_PROMPTS_EASY);
+			promptNumber = BotConfig.promptDifficultyList.get(0).get(Math.abs(r.nextInt(0, NUM_PROMPTS_EASY)));
 			break;
 		case "medium":
-			promptNumber = BotConfig.promptDifficultyList.get(1).get(Math.abs(r.nextInt()) % NUM_PROMPTS_MEDIUM);
+			promptNumber = BotConfig.promptDifficultyList.get(1).get(Math.abs(r.nextInt(0, NUM_PROMPTS_MEDIUM)));
 			break;
 		case "hard":
-			promptNumber = BotConfig.promptDifficultyList.get(2).get(Math.abs(r.nextInt()) % NUM_PROMPTS_HARD);
+			promptNumber = BotConfig.promptDifficultyList.get(2).get(Math.abs(r.nextInt(0, NUM_PROMPTS_HARD)));
 			break;
 		case "diabolical":
-			promptNumber = BotConfig.promptDifficultyList.get(3).get(Math.abs(r.nextInt()) % NUM_PROMPTS_DIABOLICAL);
+			promptNumber = BotConfig.promptDifficultyList.get(3).get(Math.abs(r.nextInt(0, NUM_PROMPTS_DIABOLICAL)));
 			break;
 		}
 		
