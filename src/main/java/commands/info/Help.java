@@ -48,16 +48,22 @@ public class Help extends ListenerAdapter
 					break;
 				case "mesticsread": case "msread": case "read":
 					embed = InfoCard.MESTICS_READ;
+					break;
 				case "typestart": case "typetest": case "ttest": case "tt":
 					embed = InfoCard.TYPING_TEST;
+					break;
 				case "typestop": case "typequit": case "tquit": case "tq":
 					embed = InfoCard.TYPING_QUIT;
+					break;
 				case "typestats": case "tstats": case "ts":
 					embed = InfoCard.TYPING_STATS;
+					break;
 				case "leaderboard": case "lboard": case "lb":
 					embed = InfoCard.LEADERBOARD;
-				case "chart":
-					embed = InfoCard.CHART;
+					break;
+//				case "chart":
+//					embed = InfoCard.CHART;
+//					break;
 				}
 			}
 			else {embed = InfoCard.FULL_HELP;}
