@@ -3,7 +3,9 @@ package asynchronous.typing;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import dataStructures.PromptHeadings;
@@ -40,25 +42,25 @@ public class TypingTest extends TypingTestTemplate
 	{
 		// Sets a random prompt number, based on the difficulty.
 		int promptNumber = 1;
+		Random r = ThreadLocalRandom.current();
 		
-		if (difficulty.equals("none")) {promptNumber = (int) (BotConfig.NUM_PROMPTS*Math.random() + 1);}
-		else
+		switch(difficulty) // Gets prompt number from the appropriate ArrayList in promptDifficultyList
 		{
-			switch(difficulty) // Gets prompt number from the appropriate ArrayList in promptDifficultyList
-			{
-			case "easy":
-				promptNumber = BotConfig.promptDifficultyList.get(0).get((int) (NUM_PROMPTS_EASY*Math.random()));
-				break;
-			case "medium":
-				promptNumber = BotConfig.promptDifficultyList.get(1).get((int) (NUM_PROMPTS_MEDIUM*Math.random()));
-				break;
-			case "hard":
-				promptNumber = BotConfig.promptDifficultyList.get(2).get((int) (NUM_PROMPTS_HARD*Math.random()));
-				break;
-			case "diabolical":
-				promptNumber = BotConfig.promptDifficultyList.get(3).get((int) (NUM_PROMPTS_DIABOLICAL*Math.random()));
-				break;
-			}
+		case "none":
+			promptNumber = Math.abs(r.nextInt()) % BotConfig.NUM_PROMPTS;
+			break;
+		case "easy":
+			promptNumber = BotConfig.promptDifficultyList.get(0).get(Math.abs(r.nextInt()) % NUM_PROMPTS_EASY);
+			break;
+		case "medium":
+			promptNumber = BotConfig.promptDifficultyList.get(1).get(Math.abs(r.nextInt()) % NUM_PROMPTS_MEDIUM);
+			break;
+		case "hard":
+			promptNumber = BotConfig.promptDifficultyList.get(2).get(Math.abs(r.nextInt()) % NUM_PROMPTS_HARD);
+			break;
+		case "diabolical":
+			promptNumber = BotConfig.promptDifficultyList.get(3).get(Math.abs(r.nextInt()) % NUM_PROMPTS_DIABOLICAL);
+			break;
 		}
 		
 		promptRating = BotConfig.promptRatingMap.get(promptNumber);
