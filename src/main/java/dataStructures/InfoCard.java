@@ -4,22 +4,29 @@ import net.dv8tion.jda.api.EmbedBuilder;
 
 public class InfoCard
 {
+	/*——————————————————————————————————————————|
+	|————————————————INFORMATION————————————————|
+	|——————————————————————————————————————————*/
+
 	public static final EmbedBuilder FULL_HELP =
 		new EmbedBuilder()
-		.setTitle("Commands help.")
-		.setDescription("These commands have no particular order for the moment. They will be managed later. To obtain more information "
-				+ "about a command, type `\\help [command]`. Keep in mind that brackets `[]` are used for optional parameters, and "
-				+ "pointed brackets `<>` are used for required parameters.")
+		.setTitle("Commands Help.")
+		.setDescription("To obtain more information about a command, type `\\help [command]`.\n"
+				+ "Keep in mind that brackets `[]` are used for optional parameters, and "
+				+ "arrow brackets `<>` are used for required parameters.")
 		.addField("Help", "Shows this message.", false)
 		.addField("Info", "Shows general bot information.", false)
 		.addField("Ping", "Returns the bot and gateway latency.", false)
 		.addField("MesticsScrape", "Scrapes a specified number of messages and stores the statistics on a local file.", false)
 		.addField("MesticsRead", "Reads a specified scrape file, given an MS-Recall ID.", false)
 		.addField("TypeTest", "Starts a typing test.", false)
+		.addField("TeamVs", "Starts a team typing test.", false)
+		.addField("Numrow", "Starts a numrow typing test.", false)
 		.addField("TypeQuit", "Stops a typing test, if there is one currently running in the server.", false)
 		.addField("TypeStats", "Shows Typing Statistics.", false)
+//		.addField("Chart", "Shows a chart of a user's typing stats.", false)
 		.addField("Leaderboard", "Shows the typing stats leaderboard of a specified statistic.", false)
-		.addField("Chart", "Shows a chart of a user's typing stats.", false)
+		.addField("Daily", "Shows daily streak information.", false)
 //		.addField("DpiConverter", "Converts fullscreen DPI on one screen to another (not implemented).", false)
 		.setColor(0x8D538D);
 	
@@ -41,9 +48,12 @@ public class InfoCard
 		.addField("Syntax", "`\\help [command]`", false);
 	
 	
-	public static final EmbedBuilder INCORRECT_SYNTAX =
+	public static final EmbedBuilder PING = 
 		new EmbedBuilder()
-		.setTitle("Incorrect Syntax!")
+		.setTitle("CMD: Ping.")
+		.setDescription("This command will output both the bot and gateway latency, in milliseconds.")
+		.addField("Aliases", "`None`", false)
+		.addField("Syntax", "\\ping", false)
 		.setColor(0x8D538D);
 	
 	public static final EmbedBuilder INFO =
@@ -51,8 +61,13 @@ public class InfoCard
 		.setTitle("CMD: Bot Information.")
 		.setDescription("This command provides information pertaining to this bot (that's me!)")
 		.setColor(0x8D538D)
-		.addField("Aliases", "`None.`", false)
-		.addField("Syntax", "`\\info`", false);
+		.addField("Aliases", "`info`", false)
+		.addField("Syntax", "`\\information`", false);
+
+	public static final EmbedBuilder INCORRECT_SYNTAX =
+		new EmbedBuilder()
+		.setTitle("Incorrect Syntax!")
+		.setColor(0x8D538D);
 	
 	public static EmbedBuilder commandNotFound(String command)
 	{
@@ -61,6 +76,12 @@ public class InfoCard
 		.setColor(0x8D538D);
 	}
 	
+
+	
+	/*——————————————————————————————————————|
+	|————————————————MESTICS————————————————|
+	|——————————————————————————————————————*/
+
 	public static final EmbedBuilder MESTICS_SCRAPE =
 		new EmbedBuilder()
 		.setTitle("CMD: Message Statistics Update.")
@@ -69,7 +90,7 @@ public class InfoCard
 				+ "As of now, there is no limit on the number of messages to scrape on a server. Do not abuse this.")
 		.setColor(0x8D538D)
 		.addField("Aliases", "`msscrape, scrape`", false)
-		.addField("Syntax", "`\\mesticsscrape <channel:#channel> <limit:integer>`", false);
+		.addField("Syntax", "`\\mesticsscrape <#channel> <limit:integer>`", false);
 	
 	public static final EmbedBuilder MESTICS_READ =
 		new EmbedBuilder()
@@ -80,39 +101,40 @@ public class InfoCard
 		.addField("Aliases","`msread`, `read`", false)
 		.addField("Syntax", "`\\mesticsread <MSRecall-ID:integer>`", false);
 	
-	public static final EmbedBuilder PING = 
-		new EmbedBuilder()
-		.setTitle("CMD: Ping.")
-		.setDescription("This command will output both the bot and gateway latency, in milliseconds.")
-		.addField("Aliases", "`None.`", false)
-		.addField("Syntax", "\\ping", false)
-		.setColor(0x8D538D);
+
 	
-	public static final EmbedBuilder DPI_CONVERTER =
-		new EmbedBuilder()
-		.setTitle("CMD: DPI Converter.")
-		.setDescription("This command will convert the fullscreen mouse DPI (PPI) in one resolution to another, taking"
-				+ " screen sizes into account, as well.")
-		.addField("Aliases", "`dpiconv, dpicalculator, dpicalc`", false)
-		.addField("Syntax", "\\dpiconverter", false)
-		.setColor(0x8D538D);
-	
+	/*—————————————————————————————————————|
+	|————————————————TYPING————————————————|
+	|—————————————————————————————————————*/
+
 	public static final EmbedBuilder TYPING_TEST =
 		new EmbedBuilder()
 		.setTitle("CMD: Typing Test.")
-		.setDescription("This command starts a typing test. One paragraph shall be randomly selected from a pool or paragraphs, "
-				+ "and the typist will have a fixed amount of time to complete it, with an adjustable speed via difficulty adjustment.")
+		.setDescription("This command starts a typing test. One paragraph shall be randomly selected from a "
+				+ "pool or paragraphs, and the typist will have a fixed amount of time to complete it.")
 		.setColor(0x8D538D)
 		.addField("Aliases","`typestart`, `ttest`, `tt`", false)
-		.addField("Syntax", "`\\typetest [difficulty: easy | medium | hard | diabolical]`", false);
+		.addField("Syntax", "`\\typetest`", false);
+//		.addField("Syntax", "`\\typetest [difficulty: easy | medium | hard | diabolical]`", false);
 	
-	public static final EmbedBuilder TYPING_STATS =
+	public static final EmbedBuilder TYPING_TEAMVS =
 		new EmbedBuilder()
-		.setTitle("CMD: Typing Statistics.")
-		.setDescription("This command displays metrics of a user's typing statistics, collected from his/her typing tests so far.")
+		.setTitle("CMD: Team Typing Test.")
+		.setDescription("This command starts a team typing test with the specified users. The specified "
+				+ "player list will be divided in half, with the first half being one team, and the second "
+				+ "half representing the other.")
 		.setColor(0x8D538D)
-		.addField("Aliases","`tstats`, `ts`", false)
-		.addField("Syntax", "`\\typestats [User : Mention] [-g : Global]`", false);
+		.addField("Aliases","`None`", false)
+		.addField("Syntax", "`\\teamvs [@RedPlayer1] [@RedPlayer2] [...] [@BluePlayer1] [@BluePlayer2] [...]`", false);
+	
+	public static final EmbedBuilder TYPING_NUMROW =
+		new EmbedBuilder()
+		.setTitle("CMD: Numrow Typing Test.")
+		.setDescription("This command starts a number row typing test. The user will be prompted with a random "
+				+ "string of numbers to type out.") 
+		.setColor(0x8D538D)
+		.addField("Aliases","`None`", false)
+		.addField("Syntax", "`\\numrow`", false);
 	
 	public static final EmbedBuilder TYPING_QUIT =
 		new EmbedBuilder()
@@ -122,19 +144,56 @@ public class InfoCard
 		.addField("Aliases","`typestop`, `tquit`, `tq`", false)
 		.addField("Syntax", "`\\typequit`", false);
 	
-	public static final EmbedBuilder LEADERBOARD =
-			new EmbedBuilder()
-			.setTitle("CMD: Leaderboard.")
-			.setDescription("This command displays the global leaderboard for a user-specified statistic.")
-			.setColor(0x8D538D)
-			.addField("Aliases","`lboard`, `lb`", false)
-			.addField("Syntax", "`\\leaderboard [-wpm | -acc] [-best]`", false);
-
+	public static final EmbedBuilder TYPING_STATS =
+		new EmbedBuilder()
+		.setTitle("CMD: Typing Statistics.")
+		.setDescription("This command displays metrics of a user's typing statistics, collected "
+				+ "from his/her typing tests so far.")
+		.setColor(0x8D538D)
+		.addField("Aliases","`tstats`, `ts`", false)
+		.addField("Syntax", "`\\typestats [@User]`", false);
+	
 	public static final EmbedBuilder CHART =
 			new EmbedBuilder()
 			.setTitle("CMD: Chart.")
 			.setDescription("This command displays a chart for a user's recent typing tests.")
 			.setColor(0x8D538D)
 			.addField("Aliases","`None`", false)
-			.addField("Syntax", "`\\chart`", false);
+			.addField("Syntax", "`\\chart [@User]`", false);
+
+	public static final EmbedBuilder LEADERBOARD =
+			new EmbedBuilder()
+			.setTitle("CMD: Leaderboard.")
+			.setDescription("This command displays the global leaderboard for a user-specified statistic.")
+			.setColor(0x8D538D)
+			.addField("Aliases","`lboard`, `lb`", false)
+			.addField("Syntax", "`\\leaderboard [-wpm | -acc] [-best | -avg]`", false)
+			.addField("Options",
+					  "`-wpm  :` Sorts by WPM.\n"
+					+ "`-acc  :` Sorts by accuracy.\n"
+					+ "`-best :` Sorts by global (overall) stats.\n"
+					+ "`-avg  :` Sorts by average (recent 10 tests) stats", false);
+
+	public static final EmbedBuilder DAILY =
+			new EmbedBuilder()
+			.setTitle("CMD: Daily.")
+			.setDescription("Displays a user's daily streak information, and when the next daily is available.")
+			.setColor(0x8D538D)
+			.addField("Aliases","`None`", false)
+			.addField("Syntax", "`\\daily`", false);
+
+	
+	
+	/*—————————————————————————————————————|
+	|————————————————IN-DEV————————————————|
+	|—————————————————————————————————————*/
+
+	public static final EmbedBuilder DPI_CONVERTER =
+		new EmbedBuilder()
+		.setTitle("CMD: DPI Converter.")
+		.setDescription("This command will convert the fullscreen mouse DPI (PPI) in one resolution to another, taking"
+				+ " screen sizes into account, as well.")
+		.addField("Aliases", "`dpiconv, dpicalculator, dpicalc`", false)
+		.addField("Syntax", "\\dpiconverter", false)
+		.setColor(0x8D538D);
 }
