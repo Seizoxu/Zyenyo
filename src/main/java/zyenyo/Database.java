@@ -278,8 +278,9 @@ public class Database
 						Accumulators.max("bestWpm", "$wpm"),
 						Accumulators.stdDevPop("deviation", "$wpm")
 						),
-				Aggregates.set(new Field<Double>("weightedTp", getWeightedTp(Long.valueOf(discordId)))),
-				Aggregates.set(new Field<Double>("playtime", users.find(Filters.eq("discordId", discordId)).first().getDouble("playtime")))
+				Aggregates.set(new Field<Double>("weightedTp", getWeightedTp(Long.valueOf(discordId))))
+				// For TPv2:
+//				Aggregates.set(new Field<Double>("playtime", users.find(Filters.eq("discordId", discordId)).first().getDouble("playtime")))
 				)).first();
 
 
