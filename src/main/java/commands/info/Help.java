@@ -34,6 +34,9 @@ public class Help extends ListenerAdapter
 				
 				switch(args[1].toLowerCase())
 				{
+				case "ping":
+					embed = InfoCard.PING;
+					break;
 				case "help":
 					embed = InfoCard.HELP_EASTER_EGG;
 					break;
@@ -43,21 +46,33 @@ public class Help extends ListenerAdapter
 				case "mesticsscrape": case "msscrape": case "scrape":
 					embed = InfoCard.MESTICS_SCRAPE;
 					break;
-				case "ping":
-					embed = InfoCard.PING;
-					break;
 				case "mesticsread": case "msread": case "read":
 					embed = InfoCard.MESTICS_READ;
+					break;
 				case "typestart": case "typetest": case "ttest": case "tt":
 					embed = InfoCard.TYPING_TEST;
+					break;
+				case "teamvs":
+					embed = InfoCard.TYPING_TEAMVS;
+					break;
+				case "numrow":
+					embed = InfoCard.TYPING_NUMROW;
+					break;
 				case "typestop": case "typequit": case "tquit": case "tq":
 					embed = InfoCard.TYPING_QUIT;
+					break;
 				case "typestats": case "tstats": case "ts":
 					embed = InfoCard.TYPING_STATS;
+					break;
+//				case "chart":
+//					embed = InfoCard.CHART;
+//					break;
 				case "leaderboard": case "lboard": case "lb":
 					embed = InfoCard.LEADERBOARD;
-				case "chart":
-					embed = InfoCard.CHART;
+					break;
+				case "daily":
+					embed = InfoCard.DAILY;
+					break;
 				}
 			}
 			else {embed = InfoCard.FULL_HELP;}
