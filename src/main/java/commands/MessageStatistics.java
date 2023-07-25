@@ -21,9 +21,6 @@ public class MessageStatistics extends ListenerAdapter
 		this.event = event;
 		String[] args = event.getMessage().getContentRaw().split("\\s+");
 		
-		// IF: User requests for help...
-		if (args.length == 2 && args[1].equalsIgnoreCase("help")) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
-		
 		// IF: Command is MesticsRead...
 		if (Aliases.MESTICSREAD.contains(args[0].toLowerCase()))
 		{

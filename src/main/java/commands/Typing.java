@@ -49,9 +49,6 @@ public class Typing extends ListenerAdapter
 		serverID = event.getGuild().getIdLong();
 		args = event.getMessage().getContentRaw().split("\\s+");
 
-		// IF: User requests for help...
-		if (args.length == 2 && args[1].equalsIgnoreCase("help")) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
-		
 		
 		
 		// IF: Command is TYPESTART...
