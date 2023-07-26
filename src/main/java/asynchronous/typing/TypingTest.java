@@ -3,7 +3,6 @@ package asynchronous.typing;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -116,7 +115,7 @@ public class TypingTest extends TypingTestTemplate
 	
 	private int parseDifficulty(int promptNumber, String difficulty)
 	{
-		Random r = ThreadLocalRandom.current();
+		ThreadLocalRandom r = ThreadLocalRandom.current();
 
 		if (promptNumber == -1)
 		{
