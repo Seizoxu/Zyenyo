@@ -55,16 +55,16 @@ public class CalculatePromptDifficulty
 			for (int i = 0; i < 4; i++) {promptsSortedByDifficulty.add(new ArrayList<Integer>());} // Initialise 2DArrayList.
 			for (int i = 0; i < BotConfig.NUM_PROMPTS; i++)
 			{
-				reader = new BufferedReader(new FileReader(String.format("%sTypingPrompts/prompt%d.txt", BotConfig.BOT_DATA_FILEPATH, i+1)));
+				reader = new BufferedReader(new FileReader(String.format("%sTypingPrompts/prompt%d.txt", BotConfig.BOT_DATA_FILEPATH, i)));
 				prompt = reader.readLine().toCharArray();
 				promptData pd = calculateSinglePrompt(prompt);
 				
-				promptRatingMap.put(i+1, pd.typeRating());
+				promptRatingMap.put(i, pd.typeRating());
 				
-				if (pd.typeRating() < 0.8) {promptsSortedByDifficulty.get(0).add(i+1);} // Easy.
-				else if (pd.typeRating() < 1.0) {promptsSortedByDifficulty.get(1).add(i+1);} // Medium.
-				else if (pd.typeRating() < 1.5) {promptsSortedByDifficulty.get(2).add(i+1);} // Hard.
-				else {promptsSortedByDifficulty.get(3).add(i+1);} // Diabolical.
+				if (pd.typeRating() < 0.8) {promptsSortedByDifficulty.get(0).add(i);} // Easy.
+				else if (pd.typeRating() < 1.0) {promptsSortedByDifficulty.get(1).add(i);} // Medium.
+				else if (pd.typeRating() < 1.5) {promptsSortedByDifficulty.get(2).add(i);} // Hard.
+				else {promptsSortedByDifficulty.get(3).add(i);} // Diabolical.
 			}
 			
 			new File(BotConfig.BOT_DATA_FILEPATH+"TypingPrompts/").mkdirs();
@@ -167,7 +167,7 @@ public class CalculatePromptDifficulty
 		// Creates all the prompt files with their proper ID and text.
 		for (int i = 0; i < prompts.size(); i++)
 		{
-			File newPrompt = new File( String.format("%sprompt%d.txt", newPromptsPath, i+1) );
+			File newPrompt = new File( String.format("%sprompt%d.txt", newPromptsPath, i) );
 			PromptHeadings.addHeading(prompts.get(i).getString("title"));
 			
 			try (BufferedWriter promptWriter = new BufferedWriter( new FileWriter(newPrompt) );)
