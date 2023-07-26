@@ -3,12 +3,13 @@ package commands;
 import java.util.HashMap;
 
 import asynchronous.typing.Chart;
-import asynchronous.typing.Leaderboard;
 import asynchronous.typing.Daily;
-import asynchronous.typing.TypingTestNumberRow;
-import asynchronous.typing.TypingTestTeam;
+import asynchronous.typing.Leaderboard;
+import asynchronous.typing.TypeList;
 import asynchronous.typing.TypeStats;
 import asynchronous.typing.TypingTest;
+import asynchronous.typing.TypingTestNumberRow;
+import asynchronous.typing.TypingTestTeam;
 import asynchronous.typing.TypingTestTemplate;
 import dataStructures.Aliases;
 import dataStructures.InfoCard;
@@ -51,7 +52,6 @@ public class Typing extends ListenerAdapter
 
 		
 		
-		// IF: Command is TYPESTART...
 		if (Aliases.TYPESTART.contains(args[0].toLowerCase()))
 		{
 			if (args.length > 2) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
@@ -61,7 +61,6 @@ public class Typing extends ListenerAdapter
 			guildTestList.put(serverID, typingTest);
 		}
 
-                // IF: Command is TEAMVS...
 		else if (Aliases.TEAMVS.contains(args[0].toLowerCase()))
 		{
 			if (args.length == 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
@@ -72,7 +71,6 @@ public class Typing extends ListenerAdapter
 
 		}
 
-                // IF: Command is NUMROWTEST...
 		else if (Aliases.NUMROWTEST.contains(args[0].toLowerCase()))
 		{
 			if (args.length > 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
@@ -84,7 +82,6 @@ public class Typing extends ListenerAdapter
 		}
 
 		
-		// IF: Command is TYPEQUIT...
 		else if (Aliases.TYPEQUIT.contains(args[0].toLowerCase()))
 		{
 			if (args.length != 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
@@ -94,11 +91,16 @@ public class Typing extends ListenerAdapter
 			guildTestList.remove(serverID);
 		}
 
-		// IF: Command is TYPESTATS...
 		else if (Aliases.TYPESTATS.contains(args[0].toLowerCase()))
-			{Zyenyo.masterThreadPool.submit(new TypeStats(event, args));}
+		{
+			Zyenyo.masterThreadPool.submit(new TypeStats(event, args));
+		}
 		
-		// IF: Command is CHART...
+		else if (Aliases.TYPELIST.contains(args[0].toLowerCase()))
+		{
+			Zyenyo.masterThreadPool.submit(new TypeList(event, args));
+		}
+		
 		else if (Aliases.CHART.contains(args[0].toLowerCase()))
 		{
 			if (args.length != 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
@@ -106,13 +108,11 @@ public class Typing extends ListenerAdapter
 			Zyenyo.masterThreadPool.submit(new Chart(event));
 		}
 		
-		// IF: Command is LEADERBOARD...
 		else if (Aliases.LEADERBOARD.contains(args[0].toLowerCase()))
 		{
 			Zyenyo.masterThreadPool.submit(new Leaderboard(event, args));
 		}
 
-		// IF: Command is DAILY...
 		else if (Aliases.DAILY.contains(args[0].toLowerCase()))
 		{
 			Zyenyo.masterThreadPool.submit(new Daily(event, args));

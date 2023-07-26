@@ -68,6 +68,8 @@ public class TypingTest extends TypingTestTemplate
 					.setDescription(fakePrompt)
 					.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
 			
+			/* .complete() is used here instead of .queue(), since we need to
+			 * wait for the message to be sent. */
 			channel.sendMessageEmbeds(embed.build()).complete();
 			startTime = System.currentTimeMillis();
 
