@@ -29,7 +29,7 @@ public class TypingTest extends TypingTestTemplate
 	@Override
 	public void run() throws NumberFormatException
 	{
-		int promptSelect = 0;
+		int promptSelect = -1;
 		
 		//TODO: Implement difficulty.
 		if (args.length >=2)
