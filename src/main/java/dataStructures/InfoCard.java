@@ -24,6 +24,7 @@ public class InfoCard
 		.addField("Numrow", "Starts a numrow typing test.", false)
 		.addField("TypeQuit", "Stops a typing test, if there is one currently running in the server.", false)
 		.addField("TypeStats", "Shows Typing Statistics.", false)
+		.addField("TypeList", "Shows a list of prompts.", false)
 //		.addField("Chart", "Shows a chart of a user's typing stats.", false)
 		.addField("Leaderboard", "Shows the typing stats leaderboard of a specified statistic.", false)
 		.addField("Daily", "Shows daily streak information.", false)
@@ -114,7 +115,7 @@ public class InfoCard
 				+ "pool or paragraphs, and the typist will have a fixed amount of time to complete it.")
 		.setColor(0x8D538D)
 		.addField("Aliases","`typestart`, `ttest`, `tt`", false)
-		.addField("Syntax", "`\\typetest`", false);
+		.addField("Syntax", "`\\typetest [Prompt Number]`", false);
 //		.addField("Syntax", "`\\typetest [difficulty: easy | medium | hard | diabolical]`", false);
 	
 	public static final EmbedBuilder TYPING_TEAMVS =
@@ -153,6 +154,14 @@ public class InfoCard
 		.addField("Aliases","`tstats`, `ts`", false)
 		.addField("Syntax", "`\\typestats [@User]`", false);
 	
+	public static final EmbedBuilder TYPING_LIST =
+		new EmbedBuilder()
+		.setTitle("CMD: Typing Prompts List.")
+		.setDescription("This command displays a list of all available prompts.")
+		.setColor(0x8D538D)
+		.addField("Aliases","`tlist`, `tl`", false)
+		.addField("Syntax", "`\\typelist [Page Number]`", false);
+	
 	public static final EmbedBuilder CHART =
 			new EmbedBuilder()
 			.setTitle("CMD: Chart.")
@@ -167,12 +176,16 @@ public class InfoCard
 			.setDescription("This command displays the global leaderboard for a user-specified statistic.")
 			.setColor(0x8D538D)
 			.addField("Aliases","`lboard`, `lb`", false)
-			.addField("Syntax", "`\\leaderboard [-wpm | -acc] [-best | -avg]`", false)
+			.addField("Syntax", "`\\leaderboard [-wpm | -acc] [-best | -avg] [...]`", false)
 			.addField("Options",
-					  "`-wpm  :` Sorts by WPM.\n"
+					  "`-tp   :` Sorts by TP.\n"
+					+ "`-wpm  :` Sorts by WPM.\n"
 					+ "`-acc  :` Sorts by accuracy.\n"
 					+ "`-best :` Sorts by global (overall) stats.\n"
-					+ "`-avg  :` Sorts by average (recent 10 tests) stats", false);
+					+ "`-avg  :` Sorts by average (recent 10 tests) stats.\n"
+					+ "`-sum  :` Sorts by cumulative TP.\n"
+					+ "`-tests:` Sorts by number of tests.\n"
+					+ "`-p    :` Specifies a page number (Eg: `-p 2`).\n", false);
 
 	public static final EmbedBuilder DAILY =
 			new EmbedBuilder()
