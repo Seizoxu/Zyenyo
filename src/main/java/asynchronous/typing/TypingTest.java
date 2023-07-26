@@ -3,7 +3,8 @@ package asynchronous.typing;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Set;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import dataStructures.PromptHeadings;
@@ -13,7 +14,7 @@ import zyenyo.BotConfig;
 
 public class TypingTest extends TypingTestTemplate
 {
-	private final static Set<String> DIFFICULTIES = Set.of("easy", "medium", "hard", "diabolical");
+//	private final static Set<String> DIFFICULTIES = Set.of("easy", "medium", "hard", "diabolical");
 	private static final int NUM_PROMPTS_EASY = BotConfig.promptDifficultyList.get(0).size();
 	private static final int NUM_PROMPTS_MEDIUM = BotConfig.promptDifficultyList.get(1).size();
 	private static final int NUM_PROMPTS_HARD = BotConfig.promptDifficultyList.get(2).size();
@@ -28,39 +29,24 @@ public class TypingTest extends TypingTestTemplate
 	@Override
 	public void run() throws NumberFormatException
 	{
-		String difficulty;
-		if ( (args.length == 1) || !DIFFICULTIES.contains(args[1].toLowerCase()) ) {difficulty = "none";}
-		else {difficulty = args[1].toLowerCase();}
-
-		constructAndSendTest(difficulty);
+		int promptSelect = -1;
+		
+		//TODO: Implement difficulty.
+		if (args.length >=2)
+		{
+			promptSelect = parsePromptSelect(args[1]);
+		
+			// Second argument will be EITHER promptSelect or difficulty.
+//			String difficulty = parseDifficultySelect(args[1]);
+		}
+		
+		constructAndSendTest(promptSelect, "none");
 		event.getJDA().addEventListener(this);
 	}
 
-	protected void constructAndSendTest(String difficulty)
+	protected void constructAndSendTest(int promptNumber, String difficulty)
 	{
-		// Sets a random prompt number, based on the difficulty.
-		int promptNumber = 1;
-		
-		if (difficulty.equals("none")) {promptNumber = (int) (BotConfig.NUM_PROMPTS*Math.random() + 1);}
-		else
-		{
-			switch(difficulty) // Gets prompt number from the appropriate ArrayList in promptDifficultyList
-			{
-			case "easy":
-				promptNumber = BotConfig.promptDifficultyList.get(0).get((int) (NUM_PROMPTS_EASY*Math.random()));
-				break;
-			case "medium":
-				promptNumber = BotConfig.promptDifficultyList.get(1).get((int) (NUM_PROMPTS_MEDIUM*Math.random()));
-				break;
-			case "hard":
-				promptNumber = BotConfig.promptDifficultyList.get(2).get((int) (NUM_PROMPTS_HARD*Math.random()));
-				break;
-			case "diabolical":
-				promptNumber = BotConfig.promptDifficultyList.get(3).get((int) (NUM_PROMPTS_DIABOLICAL*Math.random()));
-				break;
-			}
-		}
-		
+		promptNumber = parseDifficulty(promptNumber, difficulty);
 		promptRating = BotConfig.promptRatingMap.get(promptNumber);
 
 		try (BufferedReader reader = new BufferedReader(new FileReader(
@@ -75,13 +61,15 @@ public class TypingTest extends TypingTestTemplate
 					+ ZERO_WIDTH_NON_JOINER
 					+ prompt.substring(prompt.length()/2, prompt.length());
 
-			promptTitle = PromptHeadings.get(promptNumber-1);
+			promptTitle = PromptHeadings.get(promptNumber);
 			
 			EmbedBuilder embed = new EmbedBuilder()
 					.setTitle(String.format("%s", promptTitle))
 					.setDescription(fakePrompt)
 					.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
 			
+			/* .complete() is used here instead of .queue(), since we need to
+			 * wait for the message to be sent. */
 			channel.sendMessageEmbeds(embed.build()).complete();
 			startTime = System.currentTimeMillis();
 
@@ -96,5 +84,60 @@ public class TypingTest extends TypingTestTemplate
 					.build())
 			.queue();
 		}
+	}
+	
+	
+	private int parsePromptSelect(String promptSelect)
+	{
+		try
+		{
+			int promptSelectInt = Integer.parseInt(promptSelect);
+			if (promptSelectInt >= BotConfig.NUM_PROMPTS)
+			{
+				return -1;
+			}
+			
+			return promptSelectInt;
+		}
+		catch (NumberFormatException e)
+		{
+			return -1;
+		}
+	}
+	
+	
+//	private String parseDifficultySelect(String difficulty)
+//	{
+//		if (!DIFFICULTIES.contains(difficulty)) {return "none";}
+//		
+//		return difficulty.toLowerCase();
+//	}
+	
+	
+	private int parseDifficulty(int promptNumber, String difficulty)
+	{
+		Random r = ThreadLocalRandom.current();
+
+		if (promptNumber == -1)
+		{
+			switch(difficulty)
+			{
+			/* The bounds here don't increment the exclusive high by 1, since NUM_PROMPTS (and others) come from .size();
+			 * [0, x) should be <x if x is size.
+			 * Finally, no break; statements, as it would be unreachable. */
+			case "none":
+				return Math.abs(r.nextInt(0, BotConfig.NUM_PROMPTS));
+			case "easy":
+				return BotConfig.promptDifficultyList.get(0).get(Math.abs(r.nextInt(0, NUM_PROMPTS_EASY)));
+			case "medium":
+				return BotConfig.promptDifficultyList.get(1).get(Math.abs(r.nextInt(0, NUM_PROMPTS_MEDIUM)));
+			case "hard":
+				return BotConfig.promptDifficultyList.get(2).get(Math.abs(r.nextInt(0, NUM_PROMPTS_HARD)));
+			case "diabolical":
+				return BotConfig.promptDifficultyList.get(3).get(Math.abs(r.nextInt(0, NUM_PROMPTS_DIABOLICAL)));
+			}
+		}
+		
+		return promptNumber;
 	}
 }
