@@ -42,6 +42,10 @@ public class CalculatePromptDifficulty
 	private static ArrayList<List<Integer>> promptsSortedByDifficulty = new ArrayList<List<Integer>>(4);
 	
 	// Typing Points v0.2.3_2
+	/**
+	 * Refreshes ZBO indexes with existing prompts in the
+	 * <b>{@code TypingPrompts/}</b> directory.
+	 */
 	public static void recalculatePromptRatings()
 	{
 		BufferedReader reader = null;
@@ -90,6 +94,12 @@ public class CalculatePromptDifficulty
 	}
 	
 	
+	/**
+	 * Calculates the Type Rating of a single prompt.
+	 * @param prompt
+	 * @version <b>3.0.0-SNAPSHOT_01</b>
+	 * @return <b>{@code promptData}</b>
+	 */
 	public static promptData calculateSinglePrompt(char[] prompt)
 	{
 		char currentChar;
@@ -144,14 +154,23 @@ public class CalculatePromptDifficulty
 		return new promptData(typeRating, lengthBonus, specialCharacterBonus);
 	}
 	
-	
+	/**
+	 * Calculates "Hand Combo," or the points obtained when typing with
+	 * one hand for a certain number of times in a row.
+	 * @comboRange 10 [0-9]
+	 * @param handCombo
+	 * @return points
+	 */
 	private static double calculateComboPoints(int handCombo)
 	{
 		if (handCombo > 9) {return 0.75*Math.pow(9, COMBO_EXPONENT_CONSTANT);} // 10 max combo bonus (40.50 points per char).
 		return 0.75*Math.pow(handCombo, COMBO_EXPONENT_CONSTANT);
 	}
 	
-	
+	/**
+	 * <p>Populates the {@code TypingsPrompts/} directory with prompts from the database.</p>
+	 * <p>Enumeration starts at 0.</p>
+	 */
 	public static void downloadAndUpdatePrompts()
 	{
 		String newPromptsPath = BotConfig.BOT_DATA_FILEPATH + "newPrompts/";
