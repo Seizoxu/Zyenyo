@@ -4,6 +4,7 @@ import asynchronous.typing.AddTest;
 import asynchronous.typing.AddPrompt;
 import asynchronous.typing.ClearProfile;
 import asynchronous.typing.FindCheaters;
+import asynchronous.typing.RefreshUsers;
 import asynchronous.typing.RemoveCheaters;
 import dataStructures.Aliases;
 import dataStructures.InfoCard;
@@ -30,7 +31,6 @@ public class Administrator extends ListenerAdapter
 		channel = event.getChannel();
 		String args[] = event.getMessage().getContentRaw().split("\\s+");
 		
-		// IF: Command is ADDTEST...
 		if (Aliases.ADDTEST.contains(args[0].toLowerCase()))
 		{
 			if (args.length < 4 || args.length > 5) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
@@ -38,7 +38,6 @@ public class Administrator extends ListenerAdapter
 			Zyenyo.masterThreadPool.submit(new AddTest(event));
 		}
 		
-		// IF: Command is CLEARPROFILE...
 		else if (Aliases.CLEARPROFILE.contains(args[0].toLowerCase()))
 		{
 			if (args.length != 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
@@ -46,7 +45,6 @@ public class Administrator extends ListenerAdapter
 			Zyenyo.masterThreadPool.submit(new ClearProfile(event));
 		}
 		
-		// IF: Command is FINDCHEATERS
 		else if (Aliases.FINDCHEATERS.contains(args[0].toLowerCase()))
 		{
 			if (args.length != 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
@@ -54,7 +52,6 @@ public class Administrator extends ListenerAdapter
 			Zyenyo.masterThreadPool.submit(new FindCheaters(event));
 		}
 		
-		// IF: Command is REMOVECHEATERS...
 		else if (Aliases.REMOVECHEATERS.contains(args[0].toLowerCase()))
 		{
 			if (args.length != 1) {Zyenyo.masterThreadPool.submit(sendHelp); return;}
@@ -62,14 +59,18 @@ public class Administrator extends ListenerAdapter
 			Zyenyo.masterThreadPool.submit(new RemoveCheaters(event));
 		}
 
-		// IF: Command is ADDPROMPT...
 		else if (Aliases.ADDPROMPT.contains(args[0].toLowerCase()))
 		{
 			
 			Zyenyo.masterThreadPool.submit(new AddPrompt(event));
 		}
+
+		else if (Aliases.REFRESHUSERS.contains(args[0].toLowerCase()))
+		{
+			
+			Zyenyo.masterThreadPool.submit(new RefreshUsers(event));
+		}
 		
-		// IF: Command is RECALCULATEPROMPTS...
 		else if (Aliases.RECALCULATEPROMPTS.contains(args[0].toLowerCase()))
 		{
 			Zyenyo.masterThreadPool.submit(new Runnable()
@@ -82,7 +83,6 @@ public class Administrator extends ListenerAdapter
 			});
 		}
 		
-		// IF: Command is UPDATE_AND_RECALCULATE_PROMPTS...
 		else if (Aliases.UPDATE_AND_RECALCULATE_PROMPTS.contains(args[0].toLowerCase()))
 		{
 			Zyenyo.masterThreadPool.submit(new Runnable()
@@ -99,7 +99,6 @@ public class Administrator extends ListenerAdapter
 			});
 		}
 	
-		// IF: Command is SHUTDOWN...
 		else if (Aliases.SHUTDOWN.contains(args[0].toLowerCase()))
 		{
 			channel.sendMessageFormat("Shutting down...").queue();

@@ -30,11 +30,14 @@ import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.event.CommandFailedEvent;
 import com.mongodb.event.CommandListener;
 
-import dataStructures.LeaderboardConfig;
-import dataStructures.TypingSubmission;
 import dataStructures.AddTestResult;
+import dataStructures.LeaderboardConfig;
+import dataStructures.RefreshUserNamesResult;
+import dataStructures.TypingSubmission;
 import dataStructures.streakStatus;
 import dataStructures.streakStatusResult;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 
 class CommandMonitor implements CommandListener {
@@ -77,6 +80,8 @@ public class Database
 		testsV2.createIndex(Indexes.descending("tp"));
 
 		users = client.getDatabase(DB_NAME).getCollection("users");
+		users.createIndex(Indexes.descending("totalTp"));
+
 		prompts = client.getDatabase(DB_NAME).getCollection("prompts");
 	}
 
@@ -264,6 +269,24 @@ public class Database
 		}
 	}
 
+	public static RefreshUserNamesResult refreshUserNames(MessageReceivedEvent event) {
+		JDA jda = event.getJDA();
+		long start = System.currentTimeMillis();
+		int outdatedTagsCount = 0;
+
+		for (Document user : users.find()) {
+			//TODO: this needs to be updated soon when discriminators no longer exist in tags. for now, if the tag ends with #0000 that most likely means that the user has updated their tag.
+			String userTag = jda.retrieveUserById( user.getString("discordId") ).complete().getAsTag();
+			if (userTag.endsWith("#0000")) userTag = userTag.substring(0, userTag.length() - 5);
+
+			outdatedTagsCount += users.updateOne(Filters.eq("_id", user.getObjectId("_id")), Updates.set("userTag", userTag)).getModifiedCount();
+		}
+		
+		long timeTakenMillis = System.currentTimeMillis() - start;
+
+		return new RefreshUserNamesResult(timeTakenMillis, outdatedTagsCount);
+	}
+
 	public static String getStats(String discordId)
 	{
 		tests.find(Filters.eq("discordId", discordId)).sort(descending("tp"));
@@ -295,7 +318,7 @@ public class Database
 
 		return collection.aggregate(Arrays.asList(
 			Aggregates.group("$discordId", 
-				lbConfig.getAccumulationStrategy()
+				lbConfig.getAccumulationStrategies()
 					),
 			Aggregates.sort(descending(lbConfig.getStatistic()))
 		));

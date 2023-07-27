@@ -3,6 +3,9 @@ package dataStructures;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.BsonField;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 
 /*
@@ -13,7 +16,7 @@ public class LeaderboardConfig {
 	private LeaderboardScope lbScope;
 	private String lbStatistic;
 	private String collection = "tests";
-	private BsonField accumulator;
+	private ArrayList<BsonField> accumulators = new ArrayList<BsonField>();
 
 	public LeaderboardConfig(LeaderboardStatisticType lbStatistic, LeaderboardScope lbScope) {
 		this.lbScope = lbScope;
@@ -25,25 +28,26 @@ public class LeaderboardConfig {
 					case SUM: 
 						this.lbStatistic = "totalTp";
 						this.collection = "users";
-						this.accumulator = Accumulators.sum(this.lbStatistic, "$" + this.lbStatistic);
+						this.accumulators.add(Accumulators.sum(this.lbStatistic, "$" + this.lbStatistic));
+						this.accumulators.add(Accumulators.first("userTag", "$userTag"));
 						break;
 					case AVERAGE:
-						this.accumulator = Accumulators.avg(this.lbStatistic, "$" + this.lbStatistic);
+						this.accumulators.add(Accumulators.avg(this.lbStatistic, "$" + this.lbStatistic));
 						break;
 					case BEST:
-						this.accumulator = Accumulators.max(this.lbStatistic, "$" + this.lbStatistic);
+						this.accumulators.add(Accumulators.max(this.lbStatistic, "$" + this.lbStatistic));
 						break;
 				} break;
 			case WPM: 
 				this.lbStatistic = "wpm";
 				switch(lbScope) {
 					case BEST: 
-						this.accumulator = Accumulators.max(this.lbStatistic, "$" + this.lbStatistic);
+						this.accumulators.add(Accumulators.max(this.lbStatistic, "$" + this.lbStatistic));
 						break;
 					case AVERAGE:
 					default: 
 						this.lbScope = LeaderboardScope.AVERAGE;
-						this.accumulator = Accumulators.avg(this.lbStatistic, "$" + this.lbStatistic);
+						this.accumulators.add(Accumulators.avg(this.lbStatistic, "$" + this.lbStatistic));
 						
 				} break;
 			case ACCURACY: 
@@ -52,7 +56,7 @@ public class LeaderboardConfig {
 					case AVERAGE:
 					default:
 						this.lbScope = LeaderboardScope.AVERAGE;
-						this.accumulator = Accumulators.avg(this.lbStatistic, "$" + this.lbStatistic);
+						this.accumulators.add(Accumulators.avg(this.lbStatistic, "$" + this.lbStatistic));
 						
 				} break;
 			case TESTS:
@@ -62,7 +66,7 @@ public class LeaderboardConfig {
 					default:
 						this.lbScope = LeaderboardScope.SUM;
 						// 1.0 so that this value is a double otherwise there will be headaches.
-						this.accumulator = Accumulators.sum(this.lbStatistic, 1.0);
+						this.accumulators.add(Accumulators.sum(this.lbStatistic, 1.0));
 				} break;
 				
 		}
@@ -76,8 +80,8 @@ public class LeaderboardConfig {
 		return this.collection;
 	}
 
-	public BsonField getAccumulationStrategy() {
-		return this.accumulator;
+	public List<BsonField> getAccumulationStrategies() {
+		return this.accumulators;
 	}
 
 	public String getLeaderboardTitle() {
