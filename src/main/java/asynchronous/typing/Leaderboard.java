@@ -71,7 +71,8 @@ public class Leaderboard implements Runnable
 			if (position - 20 >= initialPosition) {break;}
 			
 			try {
-				userTag = jda.retrieveUserById( user.getString("_id") ).complete().getAsTag();
+				//TODO: preferably get rid of jda call altogether as it is astonishingly slow
+				userTag = !(user.getString("userTag") == null) ? user.getString("userTag") : jda.retrieveUserById( user.getString("_id") ).complete().getAsTag();
 				statistic = user.getDouble( lbConfig.getStatistic() );
 				leaderboardEmbed.appendDescription(String.format("%n**#%d | %s**: `%.2f`", ++position, userTag, statistic));
 			} catch (Exception e) {
