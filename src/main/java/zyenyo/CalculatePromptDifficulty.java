@@ -38,7 +38,7 @@ public class CalculatePromptDifficulty
 	private final static Set<Character> BOTH_HANDS_CHARS =	Set.of('6','b','^','B',' ');
 	
 	private final static double COMBO_EXPONENT_CONSTANT = 2;
-	private final static String CHARACTER_FREQUENCY_MAP_FILEPATH = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/CharacterFrequencyMap.json";
+	private final static String CHARACTER_FREQUENCY_MAP_FILEPATH = BotConfig.BOT_DATA_FILEPATH + "CharFreqMaps/CharacterFrequencyMap-TRv3.json";
 	
 	private static HashMap<Integer, Double> promptRatingMap = new HashMap<>();
 	private static ArrayList<List<Integer>> promptsSortedByDifficulty = new ArrayList<List<Integer>>(4);
