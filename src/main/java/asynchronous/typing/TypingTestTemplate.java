@@ -64,6 +64,10 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event)
 	{
+		// Data
+		double timeTakenMillis = (System.currentTimeMillis()) - startTime;
+		double wordsPerMinute = (numChars / timeTakenMillis) * 12000;
+				
 		long userID = event.getAuthor().getIdLong();
 		MessageChannel answerChannel = event.getChannel();
 
@@ -75,9 +79,7 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 		String userTypingSubmission = event.getMessage().getContentRaw();
 		String userTag = event.getAuthor().getAsTag();
 
-		// Data
-		double timeTakenMillis = (System.currentTimeMillis()) - startTime;
-		double wordsPerMinute = (numChars / timeTakenMillis) * 12000;
+		
 		
 		int editDistance = new LevenshteinDistance().apply(prompt, userTypingSubmission);
 		double accuracy = 100* (double)(prompt.length() - editDistance) / (double)prompt.length();
