@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.bson.Document;
+import org.json.JSONObject;
 
 import dataStructures.PromptHeadings;
 
@@ -37,6 +38,7 @@ public class CalculatePromptDifficulty
 	private final static Set<Character> BOTH_HANDS_CHARS =	Set.of('6','b','^','B',' ');
 	
 	private final static double COMBO_EXPONENT_CONSTANT = 2;
+	private final static String CHARACTER_FREQUENCY_MAP_FILEPATH = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/CharacterFrequencyMap.json";
 	
 	private static HashMap<Integer, Double> promptRatingMap = new HashMap<>();
 	private static ArrayList<List<Integer>> promptsSortedByDifficulty = new ArrayList<List<Integer>>(4);
@@ -95,12 +97,45 @@ public class CalculatePromptDifficulty
 	
 	
 	/**
-	 * Recalculates the difficulty of each character from the provided keymap flavours,
-	 * and inputs the data into <b>{@code BotConfig.characterRatingMap}</b>
+	 * <p>Recalculates the difficulty of each character from the provided keymap frequency maps,
+	 * and inputs the data into <b>{@code BotConfig.characterRatingMap}</b><\p>
+	 * <p>This map must only consist of those characters specified x_CHARS variables above.</p>
 	 */
 	public static void recalculateCharacterRatingMap()
 	{
-		//TODO: Read from flavour maps and assign 1-5 with 5 being hardest.
+		recalc: try (BufferedReader reader = new BufferedReader(new FileReader(CHARACTER_FREQUENCY_MAP_FILEPATH));)
+		{
+			JSONObject mapJson = new JSONObject(reader.readLine());
+			Set<String> charMapKeys = mapJson.keySet();
+			int highestValue = 0;
+			int currentValue;
+			
+			// Gets highest value of all keys.
+			for (String s : charMapKeys)
+			{
+				currentValue = mapJson.getInt(s);
+				if (currentValue > highestValue) {highestValue = currentValue;}
+			}
+			if (highestValue == 0)
+			{
+				System.out.println("[LOAD_INFO] ERROR: Highest value of Character Frequency Map is 0.");
+				break recalc;
+			}
+			
+			// Fills BotConfig.characterRatingMap.
+			for (String s : charMapKeys)
+			{
+				BotConfig.characterRatingMap.putIfAbsent(
+						s,
+						5 - (5*( mapJson.getDouble(s) / highestValue )));
+			}
+			
+			System.out.println("[LOAD_INFO] Loaded Character Rating Map.");
+			return;
+		}
+		catch (Exception e) {e.printStackTrace();}
+		
+		System.out.println("[LOAD_INFO] ERROR: Failed to load Character Frequency Map");
 	}
 	
 	
