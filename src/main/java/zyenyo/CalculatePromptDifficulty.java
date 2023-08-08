@@ -41,6 +41,69 @@ public class CalculatePromptDifficulty
 	private static HashMap<Integer, Double> promptRatingMap = new HashMap<>();
 	private static ArrayList<List<Integer>> promptsSortedByDifficulty = new ArrayList<List<Integer>>(4);
 	
+
+	/**
+	 * <p>Populates the {@code TypingsPrompts/} directory with prompts from the database. Enumeration starts at 0.</p>
+	 * <p>This will also call <b>{@code recalculatePromptRatings()}</b> and <b>{@code recalculateCharacterRatingMap()}</b></p>
+	 */
+	public static void downloadAndUpdatePrompts()
+	{
+		String newPromptsPath = BotConfig.BOT_DATA_FILEPATH + "newPrompts/";
+		String oldPromptsPath = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/";
+		
+		
+		ArrayList<Document> prompts = Database.getPrompts();
+		
+		// Creates temporary newPrompts directory.
+		File newPromptsFolder = new File(newPromptsPath);
+		if (!newPromptsFolder.exists()) {newPromptsFolder.mkdirs();}
+		
+		// Creates all the prompt files with their proper ID and text.
+		for (int i = 0; i < prompts.size(); i++)
+		{
+			File newPrompt = new File( String.format("%sprompt%d.txt", newPromptsPath, i) );
+			PromptHeadings.addHeading(prompts.get(i).getString("title"));
+			
+			try (BufferedWriter promptWriter = new BufferedWriter( new FileWriter(newPrompt) );)
+			{
+				if (!newPrompt.exists()) {newPrompt.createNewFile();}					
+				promptWriter.write( prompts.get(i).get("text").toString() );
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		// Deletes old folder, and renames the new one to the old.
+		try
+		{
+			File oldPromptsFolder = new File(oldPromptsPath);
+			FileUtils.deleteDirectory(oldPromptsFolder);
+			
+			newPromptsFolder.renameTo(oldPromptsFolder);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
+		BotConfig.NUM_PROMPTS = prompts.size();
+		recalculateCharacterRatingMap();
+		recalculatePromptRatings();
+	}
+	
+	
+	/**
+	 * Recalculates the difficulty of each character from the provided keymap flavours,
+	 * and inputs the data into <b>{@code BotConfig.characterRatingMap}</b>
+	 */
+	public static void recalculateCharacterRatingMap()
+	{
+		//TODO: Read from flavour maps and assign 1-5 with 5 being hardest.
+	}
+	
+	
 	// Typing Points v0.2.3_2
 	/**
 	 * Refreshes ZBO indexes with existing prompts in the
@@ -49,11 +112,10 @@ public class CalculatePromptDifficulty
 	public static void recalculatePromptRatings()
 	{
 		BufferedReader reader = null;
-		ObjectOutputStream mapObjectWriter = null,
-				listObjectWriter = null;
-		File promptRatingFile = new File(BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/PromptRatingMap.zbo");
-		File categorisedPrompts = new File(BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/SortedPromptsList.zbo");
-		try
+		try (
+				ObjectOutputStream mapObjectWriter = new ObjectOutputStream(new FileOutputStream(BotConfig.PROMPT_RATING_FILE));
+				ObjectOutputStream listObjectWriter = new ObjectOutputStream(new FileOutputStream(BotConfig.PROMPT_DIFFICULTY_FILE));
+			)
 		{
 			char[] prompt;
 			for (int i = 0; i < 4; i++) {promptsSortedByDifficulty.add(new ArrayList<Integer>());} // Initialise 2DArrayList.
@@ -72,23 +134,16 @@ public class CalculatePromptDifficulty
 			}
 			
 			new File(BotConfig.BOT_DATA_FILEPATH+"TypingPrompts/").mkdirs();
-			mapObjectWriter = new ObjectOutputStream(new FileOutputStream(promptRatingFile));
 			mapObjectWriter.writeObject(promptRatingMap);
 			System.out.println("[CREATED] Prompt Rating Map File");
 			
-			listObjectWriter = new ObjectOutputStream(new FileOutputStream(categorisedPrompts));
 			listObjectWriter.writeObject(promptsSortedByDifficulty);
 			System.out.println("[CREATED] Prompt Difficulty Categorisation File");
 		}
 		catch (IOException e) {e.printStackTrace();}
 		finally
 		{
-			try
-			{
-				if (reader != null) {reader.close();}
-				if (mapObjectWriter != null) {mapObjectWriter.close();}
-				if (listObjectWriter != null) {listObjectWriter.close();}
-			}
+			try {if (reader != null) {reader.close();}}
 			catch (IOException e) {e.printStackTrace();}
 		}
 	}
@@ -154,6 +209,7 @@ public class CalculatePromptDifficulty
 		return new promptData(typeRating, lengthBonus, specialCharacterBonus);
 	}
 	
+	
 	/**
 	 * Calculates "Hand Combo," or the points obtained when typing with
 	 * one hand for a certain number of times in a row.
@@ -166,56 +222,6 @@ public class CalculatePromptDifficulty
 		if (handCombo > 9) {return 0.75*Math.pow(9, COMBO_EXPONENT_CONSTANT);} // 10 max combo bonus (40.50 points per char).
 		return 0.75*Math.pow(handCombo, COMBO_EXPONENT_CONSTANT);
 	}
-	
-	/**
-	 * <p>Populates the {@code TypingsPrompts/} directory with prompts from the database.</p>
-	 * <p>Enumeration starts at 0.</p>
-	 */
-	public static void downloadAndUpdatePrompts()
-	{
-		String newPromptsPath = BotConfig.BOT_DATA_FILEPATH + "newPrompts/";
-		String oldPromptsPath = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/";
-		
-		
-		ArrayList<Document> prompts = Database.getPrompts();
-		
-		// Creates temporary newPrompts directory.
-		File newPromptsFolder = new File(newPromptsPath);
-		if (!newPromptsFolder.exists()) {newPromptsFolder.mkdirs();}
-		
-		// Creates all the prompt files with their proper ID and text.
-		for (int i = 0; i < prompts.size(); i++)
-		{
-			File newPrompt = new File( String.format("%sprompt%d.txt", newPromptsPath, i) );
-			PromptHeadings.addHeading(prompts.get(i).getString("title"));
-			
-			try (BufferedWriter promptWriter = new BufferedWriter( new FileWriter(newPrompt) );)
-			{
-				if (!newPrompt.exists()) {newPrompt.createNewFile();}					
-				promptWriter.write( prompts.get(i).get("text").toString() );
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-		}
-		
-		// Deletes old folder, and renames the new one to the old.
-		try
-		{
-			File oldPromptsFolder = new File(oldPromptsPath);
-			FileUtils.deleteDirectory(oldPromptsFolder);
-			
-			newPromptsFolder.renameTo(oldPromptsFolder);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		
-		BotConfig.NUM_PROMPTS = prompts.size();
-		recalculatePromptRatings();
-	};
 }
 
 record promptData(double typeRating, double lengthBonus, double specialCharacterBonus) {}
