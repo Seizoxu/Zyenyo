@@ -5,6 +5,7 @@ debug/
 test/
 .vim/
 ZBotData/
+bin/
 
 # Files
 *.zbif

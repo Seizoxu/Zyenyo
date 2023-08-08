@@ -64,12 +64,12 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event)
 	{
-		// Gather data.
+		// Gather Data.
+		long timeTakenMillis = (System.currentTimeMillis()) - startTime;
 		long userID = event.getAuthor().getIdLong();
 		MessageChannel answerChannel = event.getChannel();
 		String userTypingSubmission = event.getMessage().getContentRaw();
 		String userTag = event.getAuthor().getAsTag();
-		long timeTakenMillis = (System.currentTimeMillis()) - startTime;
 		
 		// Filter invalid messages.
 		if (answerChannel.getIdLong() != channel.getIdLong()) {return;}
