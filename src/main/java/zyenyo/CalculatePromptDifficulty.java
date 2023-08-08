@@ -118,7 +118,7 @@ public class CalculatePromptDifficulty
 			}
 			if (highestValue == 0)
 			{
-				System.out.println("[LOAD_INFO] ERROR: Highest value of Character Frequency Map is 0.");
+				System.out.println("[ERROR] Highest value of Character Frequency Map is 0.");
 				break recalc;
 			}
 			
@@ -130,12 +130,12 @@ public class CalculatePromptDifficulty
 						5 - (5*( mapJson.getDouble(s) / highestValue )));
 			}
 			
-			System.out.println("[LOAD_INFO] Loaded Character Rating Map.");
+			System.out.println("[LOADED] Character Rating Map.");
 			return;
 		}
 		catch (Exception e) {e.printStackTrace();}
 		
-		System.out.println("[LOAD_INFO] ERROR: Failed to load Character Frequency Map");
+		System.out.println("[ERROR] Failed to load Character Frequency Map");
 	}
 	
 	
