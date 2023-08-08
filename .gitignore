@@ -10,6 +10,7 @@ bin/
 # Files
 *.zbif
 *.zbsf
+*.zbo
 *.log
 *.prefs
 credentials.json
