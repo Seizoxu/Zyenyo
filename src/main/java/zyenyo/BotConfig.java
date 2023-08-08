@@ -35,12 +35,9 @@ public class BotConfig
 	@SuppressWarnings("unchecked")
 	protected static void loadBotObjects()
 	{
-		ObjectInputStream ratingMapOIS=null, difficultyListOIS=null;
-		try
+		try (ObjectInputStream ratingMapOIS = new ObjectInputStream(new FileInputStream(PROMPT_RATING_FILE));
+				ObjectInputStream difficultyListOIS = new ObjectInputStream(new FileInputStream(PROMPT_DIFFICULTY_FILE));)
 		{
-			ratingMapOIS = new ObjectInputStream(new FileInputStream(PROMPT_RATING_FILE));
-			difficultyListOIS = new ObjectInputStream(new FileInputStream(PROMPT_DIFFICULTY_FILE));
-			
 			promptRatingMap = (HashMap<Integer, Double>)ratingMapOIS.readObject();
 			System.out.println("[LOADED] Prompt Rating Map File");
 			
@@ -50,14 +47,5 @@ public class BotConfig
 			System.out.println("[LOAD_INFO] Num Prompts: " + NUM_PROMPTS);
 		}
 		catch(IOException | ClassNotFoundException e) {e.printStackTrace();}
-		finally
-		{
-			try
-			{
-				if (ratingMapOIS != null) {ratingMapOIS.close();}
-				if (difficultyListOIS != null) {difficultyListOIS.close();}
-			}
-			catch (IOException e) {e.printStackTrace();}
-		}
 	}
 }
