@@ -162,9 +162,6 @@ public class CalculatePromptDifficulty
 				
 				promptRatingMap.put(i, pd.typeRating());
 				
-				//TODO: REMOVE
-				System.out.println("Prompt " + i + ": " + pd.typeRating());
-				
 				if (pd.typeRating() < 0.8) {promptsSortedByDifficulty.get(0).add(i);} // Easy.
 				else if (pd.typeRating() < 1.0) {promptsSortedByDifficulty.get(1).add(i);} // Medium.
 				else if (pd.typeRating() < 1.5) {promptsSortedByDifficulty.get(2).add(i);} // Hard.
