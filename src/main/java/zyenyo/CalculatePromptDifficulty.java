@@ -162,6 +162,9 @@ public class CalculatePromptDifficulty
 				
 				promptRatingMap.put(i, pd.typeRating());
 				
+				//TODO: REMOVE
+				System.out.println("Prompt " + i + ": " + pd.typeRating());
+				
 				if (pd.typeRating() < 0.8) {promptsSortedByDifficulty.get(0).add(i);} // Easy.
 				else if (pd.typeRating() < 1.0) {promptsSortedByDifficulty.get(1).add(i);} // Medium.
 				else if (pd.typeRating() < 1.5) {promptsSortedByDifficulty.get(2).add(i);} // Hard.
@@ -175,7 +178,7 @@ public class CalculatePromptDifficulty
 			listObjectWriter.writeObject(promptsSortedByDifficulty);
 			System.out.println("[CREATED] Prompt Difficulty Categorisation File");
 		}
-		catch (IOException e) {e.printStackTrace();}
+		catch (IOException | NullPointerException e) {e.printStackTrace();}
 		finally
 		{
 			try {if (reader != null) {reader.close();}}
@@ -197,6 +200,7 @@ public class CalculatePromptDifficulty
 		Hand previousHand = Hand.LEFT;
 		double totalDifficulty = 0;
 		double specialCharacterBonus = 0;
+		double characterRarityBonus = 0;
 		int handCombo = 0;
 		
 		for (int j = 0; j < prompt.length; j++)
@@ -229,11 +233,12 @@ public class CalculatePromptDifficulty
 			
 			currentPoints = calculateComboPoints(handCombo);
 			specialCharacterBonus += (SPECIAL_CHARS.contains(currentChar)) ? 2.5*currentPoints : 0;
+			characterRarityBonus += BotConfig.characterRatingMap.get( (currentChar+"").toUpperCase() ) / 4;
 			
 			totalDifficulty += currentPoints;
 		}
-		
-		totalDifficulty += specialCharacterBonus;
+
+		totalDifficulty += specialCharacterBonus + characterRarityBonus;
 		double lengthBonus = (prompt.length < 200)
 				? Math.sqrt(prompt.length/200)
 				: (Math.log(prompt.length/200) / Math.log(50)) + 1;
@@ -254,8 +259,8 @@ public class CalculatePromptDifficulty
 	 */
 	private static double calculateComboPoints(int handCombo)
 	{
-		if (handCombo > 9) {return 0.75*Math.pow(9, COMBO_EXPONENT_CONSTANT);} // 10 max combo bonus (40.50 points per char).
-		return 0.75*Math.pow(handCombo, COMBO_EXPONENT_CONSTANT);
+		if (handCombo > 9) {return 0.25*Math.pow(9, COMBO_EXPONENT_CONSTANT);} // 10 max combo bonus (25 points per char).
+		return 0.25*Math.pow(handCombo, COMBO_EXPONENT_CONSTANT);
 	}
 }
 
