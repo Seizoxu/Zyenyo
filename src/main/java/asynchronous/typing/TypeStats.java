@@ -3,8 +3,7 @@ package asynchronous.typing;
 import java.awt.Color;
 import java.util.concurrent.ExecutionException;
 
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
+import org.json.JSONObject;
 
 import dataStructures.InfoCard;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -60,13 +59,13 @@ public class TypeStats implements Runnable
 			
 			if (requestGlobal)
 			{
-				json = (JSONObject) JSONValue.parse(Database.getGlobalStats(idStr));
+				json = new JSONObject(Database.getGlobalStats(idStr));
 				testsTaken = String.format("Tests Taken: **`%s`**%n", json.get("tests").toString());
 				title = "Global Typing Statistics for " + event.getJDA().retrieveUserById(id).submit().get().getAsTag();
 			}
 			else
 			{
-				json = (JSONObject) JSONValue.parse(Database.getStats(idStr));
+				json = new JSONObject(Database.getStats(idStr));
 				title = "Recent Typing Statistics for " + event.getJDA().retrieveUserById(id).submit().get().getAsTag();
 			}
 			

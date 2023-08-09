@@ -58,35 +58,30 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	
 	
 	/**
-	 * Checks whether a typing submission is valid, and calculates its statistics.
+	 * Checks whether a typing submission is valid, and replies in turn.
 	 * @param event
 	 */
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event)
 	{
-		// Data
-		double timeTakenMillis = (System.currentTimeMillis()) - startTime;
-		double wordsPerMinute = (numChars / timeTakenMillis) * 12000;
-				
+		// Gather Data.
+		long timeTakenMillis = (System.currentTimeMillis()) - startTime;
 		long userID = event.getAuthor().getIdLong();
 		MessageChannel answerChannel = event.getChannel();
-
+		String userTypingSubmission = event.getMessage().getContentRaw();
+		String userTag = event.getAuthor().getAsTag();
+		
+		// Filter invalid messages.
 		if (answerChannel.getIdLong() != channel.getIdLong()) {return;}
 		else if (submissions.getUserIDs().contains(userID)) {return;}
 		else if (event.getAuthor().isBot()) {return;}
-
-		// Definitions.
-		String userTypingSubmission = event.getMessage().getContentRaw();
-		String userTag = event.getAuthor().getAsTag();
-
 		
+		// Calculation.
+		TpCalculation calc = calculateTypingPoints(prompt, userTypingSubmission, timeTakenMillis, promptRating);
 		
-		int editDistance = new LevenshteinDistance().apply(prompt, userTypingSubmission);
-		double accuracy = 100* (double)(prompt.length() - editDistance) / (double)prompt.length();
-
-		
-		if (accuracy < 75.0) {return;}
-		if (wordsPerMinute >= 250.0 || userTypingSubmission.contains(ZERO_WIDTH_NON_JOINER))
+		// Filter scores.
+		if (calc.accuracy() < 75.0) {return;}
+		if (calc.wordsPerMinute() >= 250.0 || userTypingSubmission.contains(ZERO_WIDTH_NON_JOINER))
 		{
 			event.getMessage()
 			.replyFormat("Cheater detected. What a naughty user...")
@@ -94,26 +89,49 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 			
 			return;
 		}
-		
-		
-		// Metrics
-		double wpmMultiplier = 0.2 * Math.pow(wordsPerMinute, 1.5);
-		double accuracyMultiplier = Math.pow(0.95, 100-accuracy);
-		double typingPoints = (wpmMultiplier * promptRating) * accuracyMultiplier;
-		
+
+		// Send result.
 		sendResult(
 				event.getChannel(),
 				new TypingSubmission(
 						userID,
 						userTag,
-						wordsPerMinute,
-						accuracy,
-						typingPoints,
+						calc.wordsPerMinute(),
+						calc.accuracy(),
+						calc.typingPoints(),
 						timeTakenMillis,
 						userTypingSubmission,
 						promptTitle	
 						)
 				);
+	}
+	
+	
+	/**
+	 * Calculates typing points, WPM, and accuracy.
+	 * @param originalPrompt
+	 * : The original prompt to base accuracy off of.
+	 * @param userPrompt
+	 * : The user's prompt, which is to be compared to the original.
+	 * @param timeTakenMillis
+	 * : The time, in milliseconds, the user took to complete the prompt.
+	 * @param typeRating
+	 * : The Type Rating (difficulty) of the original prompt.
+	 * @version 3.0.0
+	 * @return TpCalculation
+	 */
+	protected TpCalculation calculateTypingPoints(String originalPrompt, String userPrompt, long timeTakenMillis, double typeRating)
+	{
+		double wordsPerMinute = (numChars / (double)timeTakenMillis) * 12000;
+		
+		int editDistance = new LevenshteinDistance().apply(prompt, userPrompt);
+		double accuracy = 100* (double)(originalPrompt.length() - editDistance) / (double)originalPrompt.length();
+
+		double wpmMultiplier = 0.2 * Math.pow(wordsPerMinute, 1.5);
+		double accuracyMultiplier = Math.pow(0.95, 100-accuracy);
+		double typingPoints = (wpmMultiplier * promptRating) * accuracyMultiplier;
+		
+		return new TpCalculation(typingPoints, wordsPerMinute, accuracy);
 	}
 	
 	
@@ -213,3 +231,5 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 		}
 	};
 }
+
+record TpCalculation(double typingPoints, double wordsPerMinute, double accuracy) {}
