@@ -56,6 +56,7 @@ public class Database
 	private static MongoClient client;
 	private static MongoCollection<Document> tests;
 	private static MongoCollection<Document> testsV2;
+	private static MongoCollection<Document> usersV2;
 	private static MongoCollection<Document> users;
 	private static MongoCollection<Document> prompts;
 	
@@ -76,73 +77,22 @@ public class Database
 
 		tests = client.getDatabase(DB_NAME).getCollection("tests");
 		testsV2 = client.getDatabase(DB_NAME).getCollection("testsv2");
-		// tests will be queried very often for a user's top 100 tp scores. This needs to be fast.
-		testsV2.createIndex(Indexes.descending("tp"));
 
 		users = client.getDatabase(DB_NAME).getCollection("users");
-		users.createIndex(Indexes.descending("totalTp"));
+		usersV2 = client.getDatabase(DB_NAME).getCollection("usersv2");
 
 		prompts = client.getDatabase(DB_NAME).getCollection("prompts");
+			
+		// Indexes for common statistics in order to speed up leaderboard commands
+		testsV2.createIndex(Indexes.descending("tp"));
+		testsV2.createIndex(Indexes.descending("wpm"));
+		testsV2.createIndex(Indexes.descending("accuracy"));
+		testsV2.createIndex(Indexes.descending("date"));
+
+		usersV2.createIndex(Indexes.descending("totalTp"));
+		usersV2.createIndex(Indexes.descending("playtime"));
+
 	}
-
-	public static AddTestResult addTest(long discordId, double wpm, double accuracy, double tp)
-	{
-		double initialWeightedTp = getWeightedTp(discordId);
-		ArrayList<Bson> userUpdates = new ArrayList<Bson>();
-
-		InsertOneResult result = tests.insertOne(new Document()
-				.append("_id", new ObjectId())
-				.append("discordId", String.valueOf(discordId))
-				.append("wpm", wpm)
-				.append("accuracy", accuracy)
-				.append("tp", tp)
-				.append("date", LocalDateTime.now())
-				);
-		
-		double newWeightedTp = getWeightedTp(discordId);
-		userUpdates.add(Updates.set("totalTp", newWeightedTp));
-
-		streakStatusResult streak = getStreakStatus(String.valueOf(discordId));
-		switch (streak.status()) {
-			case AVAILABLE:
-				userUpdates.add(Updates.inc("daily.currentStreak", 1));
-				// some other time :)
-				// userUpdates.add(Updates.max("daily.maxStreak", ));
-				userUpdates.add(Updates.set("daily.test", result.getInsertedId()));
-				// storing an instant instead of a normal date here otherwise it would push the server's local timezone to the db instead of UTC.
-				userUpdates.add(Updates.set("daily.updatedAt", new Date().toInstant().toString()));
-				break;
-			case CLAIMED:
-				break;
-			case INITIAL:
-				userUpdates.add(Updates.set("daily", new Document()
-					.append("currentStreak", 1)
-					.append("maxStreak", 1)
-					.append("test", result.getInsertedId())
-					.append("updatedAt", new Date().toInstant().toString())
-				));
-				break;
-			case MISSED:
-				userUpdates.add(Updates.set("daily.currentStreak", 1));
-				userUpdates.add(Updates.set("daily.test", result.getInsertedId()));
-				userUpdates.add(Updates.set("daily.updatedAt", new Date().toInstant().toString()));
-				break;
-			default:
-				break;
-
-		}
-
-		users.updateOne(
-			Filters.eq("discordId", String.valueOf(discordId)),
-			Updates.combine(
-				userUpdates
-				),
-			upsertTrue
-		);
-
-		return new AddTestResult(newWeightedTp - initialWeightedTp, streak.currentStreak());
-	}
-
 
 	// TODO: make this the default addtest when tpv2 is done
 	public static AddTestResult addTestV2(TypingSubmission submission) {
@@ -196,7 +146,7 @@ public class Database
 
 		userUpdates.add(Updates.inc("playtime", submission.timeTakenMillis()));
 
-		users.updateOne(
+		usersV2.updateOne(
 			Filters.eq("discordId", String.valueOf(submission.userID())),
 			Updates.combine(
 				userUpdates
@@ -287,8 +237,12 @@ public class Database
 		return new RefreshUserNamesResult(timeTakenMillis, outdatedTagsCount);
 	}
 
-	public static String getStats(String discordId)
+	public static String getStats(String discordId, Boolean old)
 	{
+		
+		MongoCollection<Document> tests = client.getDatabase(DB_NAME).getCollection(old ? "tests" : "testsv2");
+		MongoCollection<Document> users = client.getDatabase(DB_NAME).getCollection(old ? "users" : "usersv2");
+
 		tests.find(Filters.eq("discordId", discordId)).sort(descending("tp"));
 
 		Document stats = tests.aggregate(Arrays.asList(
@@ -301,9 +255,8 @@ public class Database
 						Accumulators.max("bestWpm", "$wpm"),
 						Accumulators.stdDevPop("deviation", "$wpm")
 						),
-				Aggregates.set(new Field<Double>("weightedTp", getWeightedTp(Long.valueOf(discordId))))
-				// For TPv2:
-//				Aggregates.set(new Field<Double>("playtime", users.find(Filters.eq("discordId", discordId)).first().getDouble("playtime")))
+				Aggregates.set(new Field<Double>("weightedTp", getWeightedTp(Long.valueOf(discordId)))),
+				Aggregates.set(new Field<Double>("playtime", users.find(Filters.eq("discordId", discordId)).first().getDouble("playtime")))
 				)).first();
 
 
@@ -327,7 +280,7 @@ public class Database
 
 	private static double getWeightedTp(long id)
 	{
-		AggregateIterable<Document> tpList = tests.aggregate(Arrays.asList(
+		AggregateIterable<Document> tpList = testsV2.aggregate(Arrays.asList(
 				Aggregates.match(Filters.eq("discordId", String.valueOf(id))),
 				Aggregates.match(Filters.exists("tp")),
 				Aggregates.sort(descending("tp")),
