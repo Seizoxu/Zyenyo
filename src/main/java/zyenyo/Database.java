@@ -94,7 +94,6 @@ public class Database
 
 	}
 
-	// TODO: make this the default addtest when tpv2 is done
 	public static AddTestResult addTestV2(TypingSubmission submission) {
 		double initialWeightedTp = getWeightedTp(submission.userID());
 		ArrayList<Bson> userUpdates = new ArrayList<Bson>();
@@ -160,7 +159,7 @@ public class Database
 
 	public static streakStatusResult getStreakStatus(String discordId) {
 		try {
-			Document daily = users.find(Filters.eq("discordId", discordId)).first().get("daily", Document.class);
+			Document daily = usersV2.find(Filters.eq("discordId", discordId)).first().get("daily", Document.class);
 			Date testDate = Date.from(Instant.parse(daily.getString("updatedAt")));
 
 			Calendar lockedUntilDate = Calendar.getInstance();
