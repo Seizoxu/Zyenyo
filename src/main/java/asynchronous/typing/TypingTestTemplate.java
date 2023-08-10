@@ -206,9 +206,7 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 			for (int i = 0; i < submissions.getNumSubmissions(); i++)
 			{
 				TypingSubmission s = submissions.getSubmission(lbOrder.get(i));
-				AddTestResult result = Database.addTest(s.userID(), s.wordsPerMinute(), s.accuracy(), s.typingPoints());
-				// TODO: replace with this after tpv2
-				// AddTestResult result = Database.addTestV2(s)
+				AddTestResult result = Database.addTestV2(s);
 				String dailyStreak = "";
 				if (result.dailyStreak() > 0) {
 					dailyStreak = String.format("Daily Streak: **`%d`**", result.dailyStreak());

@@ -142,7 +142,7 @@ public class TypingTestTeam extends TypingTestTemplate
 				}
 				else {continue;}
 				
-				Database.addTest(s.userID(), s.wordsPerMinute(), s.accuracy(), s.typingPoints());
+				Database.addTestV2(s);
 			}
 
 			int i = 0;

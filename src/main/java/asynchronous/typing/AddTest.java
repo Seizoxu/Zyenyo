@@ -3,7 +3,6 @@ package asynchronous.typing;
 import dataStructures.InfoCard;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import zyenyo.Database;
 
 public class AddTest implements Runnable
 {
@@ -28,8 +27,9 @@ public class AddTest implements Runnable
 			long userID;
 			if (args.length == 4) {userID = event.getAuthor().getIdLong();}
 			else {userID = Long.parseLong(args[4].substring(2, args[4].length() - 1));} // Only other case possible is args.length == 5.
-			
-			Database.addTest(userID, wpm, accuracy, tp);
+				
+			// this command is never used anyway 
+			// Database.addTest(userID, wpm, accuracy, tp);
 			
 			channel.sendMessageFormat("_`[SA] Successfully added test.`_").queue();
 		}

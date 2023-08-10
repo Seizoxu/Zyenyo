@@ -1,6 +1,7 @@
 package dataStructures;
 
 import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.BsonField;
 
 import java.util.ArrayList;
@@ -15,11 +16,14 @@ import org.apache.commons.lang3.StringUtils;
 public class LeaderboardConfig {
 	private LeaderboardScope lbScope;
 	private String lbStatistic;
-	private String collection = "tests";
+	private String collection;
+	Boolean old;
 	private ArrayList<BsonField> accumulators = new ArrayList<BsonField>();
 
-	public LeaderboardConfig(LeaderboardStatisticType lbStatistic, LeaderboardScope lbScope) {
+	public LeaderboardConfig(LeaderboardStatisticType lbStatistic, LeaderboardScope lbScope, Boolean old) {
 		this.lbScope = lbScope;
+		this.old = old;
+		this.collection = old ? "tests" : "testsv2";
 
 		switch (lbStatistic) {
 			case TP: 
@@ -27,7 +31,7 @@ public class LeaderboardConfig {
 				switch(lbScope) {
 					case SUM: 
 						this.lbStatistic = "totalTp";
-						this.collection = "users";
+						this.collection = old ?"users" : "usersv2";
 						this.accumulators.add(Accumulators.sum(this.lbStatistic, "$" + this.lbStatistic));
 						this.accumulators.add(Accumulators.first("userTag", "$userTag"));
 						break;
@@ -85,7 +89,7 @@ public class LeaderboardConfig {
 	}
 
 	public String getLeaderboardTitle() {
-		return String.format("Global %s %s Leaderboards", StringUtils.capitalize(lbScope.toString().toLowerCase()), StringUtils.capitalize(String.join(" ", StringUtils.splitByCharacterTypeCamelCase(this.lbStatistic))));
+		return String.format("Global %s %s Leaderboards %s", StringUtils.capitalize(lbScope.toString().toLowerCase()), StringUtils.capitalize(String.join(" ", StringUtils.splitByCharacterTypeCamelCase(this.lbStatistic))), this.old ? "(old)" : "");
 	}
 
 }
