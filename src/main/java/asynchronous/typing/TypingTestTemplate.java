@@ -145,7 +145,6 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	protected void sendResult(MessageChannel channel, TypingSubmission submission)
 	{
 		submissions.addSubmission(submission);
-
 		channel.sendMessage(
 				String.format(
 						"<@%s> has completed the prompt in **`%.3f` seconds `[%.2f WPM]`**, "
@@ -186,7 +185,7 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	{
 		@Override
 		public void run()
-		{
+		{	
 			// Print leaderboard.
 			event.getJDA().removeEventListener(thisInstance);
 			channel.sendTyping().queue();
@@ -202,7 +201,11 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 							submissions.getSubmission(b).typingPoints(),
 							submissions.getSubmission(a).typingPoints()))
 					.collect(Collectors.toList());
-
+			
+			if(submissions.getNumSubmissions() == 0) {
+				embed.setTitle("Stopped Typing");
+				embed.setDescription("Hint, you can choose your prompt with \\TypeList");
+			}
 			for (int i = 0; i < submissions.getNumSubmissions(); i++)
 			{
 				TypingSubmission s = submissions.getSubmission(lbOrder.get(i));
@@ -223,9 +226,9 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 										s.typingPoints(), s.wordsPerMinute(), s.accuracy(), result.rawTp()),
 						false);
 			}
-			
 			message.replyEmbeds(embed.build()).queue();
 			Typing.guildTestList.remove(event.getGuild().getIdLong());
+			
 		}
 	};
 }
