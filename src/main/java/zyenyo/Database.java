@@ -1,6 +1,7 @@
 package zyenyo;
 
 import static com.mongodb.client.model.Sorts.descending;
+import static com.mongodb.client.model.Sorts.ascending;;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -30,6 +32,7 @@ import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.event.CommandFailedEvent;
 import com.mongodb.event.CommandListener;
 
+import dataStructures.AchievementDetails;
 import dataStructures.AddTestResult;
 import dataStructures.LeaderboardConfig;
 import dataStructures.RefreshUserNamesResult;
@@ -59,6 +62,7 @@ public class Database
 	private static MongoCollection<Document> usersV2;
 	private static MongoCollection<Document> users;
 	private static MongoCollection<Document> prompts;
+	private static MongoCollection<Document> achievements;
 	
 	private static UpdateOptions upsertTrue = new UpdateOptions().upsert(true);
 
@@ -82,6 +86,7 @@ public class Database
 		usersV2 = client.getDatabase(DB_NAME).getCollection("usersv2");
 
 		prompts = client.getDatabase(DB_NAME).getCollection("prompts");
+		achievements = client.getDatabase(DB_NAME).getCollection("achievements");
 			
 		// Indexes for common statistics in order to speed up leaderboard commands
 		testsV2.createIndex(Indexes.descending("tp"));
@@ -291,6 +296,24 @@ public class Database
 		for (Document test : tpList) {weightedTp += (test.getDouble("tp") * Math.pow(0.95, index++));}
 
 		return weightedTp;
+	}
+
+	public static AchievementDetails getAchievement(String title) {
+		try {
+		Document doc = achievements.find(Filters.regex("title", Pattern.compile(title, Pattern.CASE_INSENSITIVE))).first();
+		return new AchievementDetails(doc.getString("title"), doc.getString("description"), doc.getString("thumbnail"));
+		} catch (Exception e) {
+			System.err.println(e);
+			return null;
+		}
+	}
+
+	public static AggregateIterable<Document> getAchievementList(int page) {
+		return achievements.aggregate(Arrays.asList(
+			Aggregates.sort(ascending("_id")),
+			Aggregates.skip(10*(page - 1)),
+			Aggregates.limit(10)
+		));
 	}
 
 }

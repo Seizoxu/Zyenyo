@@ -2,6 +2,8 @@ package commands;
 
 import java.util.HashMap;
 
+import asynchronous.typing.Achievement;
+import asynchronous.typing.AchievementList;
 import asynchronous.typing.Chart;
 import asynchronous.typing.Daily;
 import asynchronous.typing.Leaderboard;
@@ -116,6 +118,16 @@ public class Typing extends ListenerAdapter
 		else if (Aliases.DAILY.contains(args[0].toLowerCase()))
 		{
 			Zyenyo.masterThreadPool.submit(new Daily(event, args));
+		}
+
+		else if (Aliases.ACHIEVEMENTLIST.contains(args[0].toLowerCase()))
+		{
+			Zyenyo.masterThreadPool.submit(new AchievementList(event, args));
+		}
+
+		else if (Aliases.ACHIEVEMENT.contains(args[0].toLowerCase()))
+		{
+			Zyenyo.masterThreadPool.submit(new Achievement(event, args));
 		}
 	}
 }
