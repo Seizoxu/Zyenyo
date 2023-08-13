@@ -223,12 +223,12 @@ public class Database
 		long start = System.currentTimeMillis();
 		int outdatedTagsCount = 0;
 
-		for (Document user : users.find()) {
+		for (Document user : usersV2.find()) {
 			//TODO: this needs to be updated soon when discriminators no longer exist in tags. for now, if the tag ends with #0000 that most likely means that the user has updated their tag.
 			String userTag = jda.retrieveUserById( user.getString("discordId") ).complete().getAsTag();
 			if (userTag.endsWith("#0000")) userTag = userTag.substring(0, userTag.length() - 5);
 
-			outdatedTagsCount += users.updateOne(Filters.eq("_id", user.getObjectId("_id")), Updates.set("userTag", userTag)).getModifiedCount();
+			outdatedTagsCount += usersV2.updateOne(Filters.eq("_id", user.getObjectId("_id")), Updates.set("userTag", userTag)).getModifiedCount();
 		}
 		
 		long timeTakenMillis = System.currentTimeMillis() - start;
