@@ -60,8 +60,7 @@ public class TypingTest extends TypingTestTemplate
 					+ ZERO_WIDTH_NON_JOINER
 					+ prompt.substring(prompt.length()/2, prompt.length());
 
-			promptTitle = PromptHeadings.get(promptNumber);
-			
+			promptTitle = PromptHeadings.get(promptNumber);						
 			EmbedBuilder embed = new EmbedBuilder()
 					.setTitle(String.format("%s", promptTitle))
 					.setDescription(fakePrompt)
