@@ -17,6 +17,7 @@ import dataStructures.Aliases;
 import dataStructures.InfoCard;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import zyenyo.Zyenyo;
@@ -128,6 +129,18 @@ public class Typing extends ListenerAdapter
 		else if (Aliases.ACHIEVEMENT.contains(args[0].toLowerCase()))
 		{
 			Zyenyo.masterThreadPool.submit(new Achievement(event, args));
+		}
+	}
+
+	@Override
+	public void onButtonClick(ButtonClickEvent event) {
+		switch (event.getComponentId()) {
+			case "achievementListNext":
+				AchievementList.onNextPage(event);
+				break;
+			case "achievementListPrev":
+				AchievementList.onPrevPage(event);
+				break;
 		}
 	}
 }
