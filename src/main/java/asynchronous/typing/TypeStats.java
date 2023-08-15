@@ -51,7 +51,8 @@ public class TypeStats implements Runnable
 				requestGlobal = true;
 			}
 			else {sendHelp.run(); return;}
-			// Yes, the above line blocks the curr. thread, but this class is already another thread, and it doesn't need to go further.
+			// Yes, the above line blocks the curr. thread, but this class is already another thread,
+			// and it doesn't need to go further.
 			
 			Long id = Long.parseLong(idStr); // Used for error checking; will change later.
 			String testsTaken="", title;
@@ -87,7 +88,9 @@ public class TypeStats implements Runnable
 									+ "Average Accuracy: **`%.2f%%`**%n"
 									+ "Playtime: **`%.0f hours %.0f minutes`**%n"
 									+ "Rank: **`%s`**",
-									testsTaken, typingPoints, bestWpm, averageWpm, deviation, averageAcc, playtime / (1000 * 60 * 60), playtime / (1000 * 60), rank), false)
+									testsTaken, typingPoints, bestWpm, averageWpm, deviation, averageAcc,
+									Math.floor(playtime / (1000 * 60 * 60)), Math.floor( (playtime / (1000 * 60))%60 ),
+									rank), false)
 					.setColor(new Color(180, 50, 80))
 					.build())
 			.queue();
