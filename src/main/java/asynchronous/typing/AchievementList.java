@@ -16,9 +16,13 @@ import org.bson.Document;
 import com.mongodb.client.AggregateIterable;
 
 public class AchievementList implements Runnable {
+	// limit on the number button clicks allowed, so that users don't keep bumping old messages and send unnecessary calls to the bot
+	private static final Integer BUTTONCLICK_MAX = 50;
 	private MessageReceivedEvent event;
 	private MessageChannel channel;
+	// TODO: using a static variable for pages causes problems when a user interacts with multiple messages of the same command. 
 	static Integer page;
+	static Integer buttonClickCount;
 
 	public AchievementList(MessageReceivedEvent event, String[] args) {
 		this.event = event;
@@ -29,6 +33,7 @@ public class AchievementList implements Runnable {
 	public void run() {
 		event.getChannel().sendTyping().queue();
 		page = 1;
+		buttonClickCount = 0;
 		
 		try {
 
@@ -71,22 +76,24 @@ public class AchievementList implements Runnable {
 
 	public static void onNextPage(ButtonClickEvent event) {
 		page++;
+		buttonClickCount++;
 
 		event.editMessageEmbeds(makeAchievementList().build())
 			.setActionRow(
-				Button.secondary("achievementListPrev", Emoji.fromUnicode("U+25C0")).withDisabled(page <=1), // arrow backward
-				Button.secondary("achievementListNext", Emoji.fromUnicode("U+25B6")).withDisabled(page >= 20) // arrow forward
+				Button.secondary("achievementListPrev", Emoji.fromUnicode("U+25C0")).withDisabled(page <=1 || buttonClickCount >= BUTTONCLICK_MAX), // arrow backward
+				Button.secondary("achievementListNext", Emoji.fromUnicode("U+25B6")).withDisabled(page >= 20 || buttonClickCount >= BUTTONCLICK_MAX) // arrow forward
 			)
 			.queue();
 	}
 
 	public static void onPrevPage(ButtonClickEvent event) {
 		page--;
+		buttonClickCount++;
 
 		event.editMessageEmbeds(makeAchievementList().build())
 			.setActionRow(
-				Button.secondary("achievementListPrev", Emoji.fromUnicode("U+25C0")).withDisabled(page <=1), // arrow backward
-				Button.secondary("achievementListNext", Emoji.fromUnicode("U+25B6")).withDisabled(page >= 20) // arrow forward
+				Button.secondary("achievementListPrev", Emoji.fromUnicode("U+25C0")).withDisabled(page <=1 || buttonClickCount >= BUTTONCLICK_MAX), // arrow backward
+				Button.secondary("achievementListNext", Emoji.fromUnicode("U+25B6")).withDisabled(page >= 20 || buttonClickCount >= BUTTONCLICK_MAX) // arrow forward
 			)
 			.queue();
 	}

@@ -1,3 +1,5 @@
 package dataStructures;
 
-public record AddTestResult(double rawTp, Integer dailyStreak ) {}
+import java.util.List;
+
+public record AddTestResult(double rawTp, Integer dailyStreak, List<AchievementDetails> achievements ) {}
