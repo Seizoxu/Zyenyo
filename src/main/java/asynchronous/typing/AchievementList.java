@@ -41,7 +41,7 @@ public class AchievementList implements Runnable {
 
 			channel.sendMessageEmbeds(embed.build())
 				.setActionRow(
-					Button.secondary("prev", Emoji.fromUnicode("U+25C0")).asDisabled(), // arrow backward
+					Button.secondary("achievementListPrev", Emoji.fromUnicode("U+25C0")).asDisabled(), // arrow backward
 					Button.secondary("achievementListNext", Emoji.fromUnicode("U+25B6")) // arrow forward
 				)
 				.queue();
