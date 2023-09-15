@@ -441,11 +441,8 @@ public class Database
 		
 		// STATISTICAL SYMMETRY
 		if (submission.wordsPerMinute() == submission.accuracy()) {
-			System.out.println(submission.wordsPerMinute());
-			System.out.println(submission.accuracy());
 
 			if (!Objects.requireNonNullElse(currentUserAchievements.getBoolean("statisticalSymmetry"), false)) {
-				System.out.println("aa");
 				userUpdates.add(Updates.set("achievements.statisticalSymmetry", true));
 				achievedList.add(getAchievement("Statistical Symmetry"));
 			}
@@ -463,7 +460,6 @@ public class Database
 			boolean allSS = true;
 			int count = 0;
 			for (Document test : stats) {
-				System.out.println(test);
 				if (test.getDouble("accuracy") != 100.0) {
 					allSS = false;
 				}

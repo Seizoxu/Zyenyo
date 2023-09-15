@@ -65,8 +65,8 @@ public final class Aliases
 
 	public final static Set<String> ACHIEVEMENTLIST = Set.of(
 			BotConfig.PREFIX + "achievementlist",
-			BotConfig.PREFIX + "al",
-			BotConfig.PREFIX + "achievements");
+			BotConfig.PREFIX + "achievements",
+			BotConfig.PREFIX + "al");
 	
 	
 	/*————————————————————————————————————|
