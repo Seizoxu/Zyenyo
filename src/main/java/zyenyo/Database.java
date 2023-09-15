@@ -71,6 +71,11 @@ public class Database
 	
 	private static UpdateOptions upsertTrue = new UpdateOptions().upsert(true);
 
+	/**
+	 * Connects to a mongo database, sets up the necessary indexes and generates a MongoClient.
+	 * @param uri : the connection URI for the database.
+	 * @param ENVIRONMENT : The environment that this is running. This should be "development" for dev bots.
+	 */
 	public static void connect(String uri, String ENVIRONMENT)
 	{
 
@@ -104,6 +109,11 @@ public class Database
 
 	}
 
+	/**
+	 * Adds a typing submission to the database. Includes daily streak checks and user updates.
+	 * @param submission : {@link TypingSubmission}
+	 * @return {@link AddTestResult}
+	 */
 	public static AddTestResult addTestV2(TypingSubmission submission) {
 		double initialWeightedTp = getWeightedTp(submission.userID());
 		ArrayList<Bson> userUpdates = new ArrayList<Bson>();
@@ -311,6 +321,11 @@ public class Database
 		return weightedTp;
 	}
 
+	/**
+	 * Get an achievement by the title.
+	 * @param title : Name of the achievement
+	 * @return {@link AchievementDetails}
+	 */
 	public static AchievementDetails getAchievement(String title) {
 		try {
 		Document doc = achievements.find(Filters.regex("title", Pattern.compile(title, Pattern.CASE_INSENSITIVE))).first();
@@ -321,6 +336,12 @@ public class Database
 		}
 	}
 
+	/**
+	 * Get a progressive achievement by the level of the achievement
+	 * @param levelField : the group of achivements, eg "wpmLevel", "tpLevel"
+	 * @param level : the level of the achievement
+	 * @return {@link AchievementDetails}
+	 */
 	public static AchievementDetails getAchievement(String levelField, int level) {
 		try {
 		Document doc = achievements.find(Filters.eq(levelField, level)).first();
@@ -331,6 +352,11 @@ public class Database
 		}
 	}
 
+	/**
+	 * Get a list of paginated achievements
+	 * @param page : page number of achievements
+	 * @return {@link AggregateIterable}
+	 */
 	public static AggregateIterable<Document> getAchievementList(int page) {
 		return achievements.aggregate(Arrays.asList(
 			Aggregates.sort(ascending("_id")),
@@ -340,6 +366,13 @@ public class Database
 	}
 
 
+	/**
+	 * Checks whether a user has received any achievements, after a test submission. 
+	 * @param submission : {@link TypingSubmission}
+	 * @param user : The updated user document
+	 * @param rawTp : rawTp that has been gained as a result of the test
+	 * @return a List of {@link AchievementDetails}
+	 */
 	private static List<AchievementDetails> checkForAchievements(TypingSubmission submission, Document user, double rawTp) {
 
 		ArrayList<AchievementDetails> achievedList = new ArrayList<AchievementDetails>();
