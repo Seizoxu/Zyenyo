@@ -161,7 +161,8 @@ public class InfoCard
 		.setDescription("This command displays a list of all available prompts.")
 		.setColor(0x8D538D)
 		.addField("Aliases","`tlist`, `tl`", false)
-		.addField("Syntax", "`\\typelist [Page Number]`", false);
+		.addField("Syntax", "`\\typelist [Page Number]`", false)
+		.addField("Hint", "You can choose your own prompt with `\\tt [prompt number]`", false);
 	
 	public static final EmbedBuilder CHART =
 			new EmbedBuilder()
