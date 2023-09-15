@@ -50,8 +50,8 @@ public class CalculatePromptDifficulty
 	 */
 	public static void downloadAndUpdatePrompts()
 	{
-		String newPromptsPath = BotConfig.BOT_DATA_FILEPATH + "newPrompts/";
-		String oldPromptsPath = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/";
+		String newPromptsPath = BotConfig.BOT_DATA_FILEPATH + "/cache/newPrompts/";
+		String oldPromptsPath = BotConfig.BOT_DATA_FILEPATH + "/cache/TypingPrompts/";
 		
 		
 		ArrayList<Document> prompts = Database.getPrompts();
@@ -156,7 +156,7 @@ public class CalculatePromptDifficulty
 			for (int i = 0; i < 4; i++) {promptsSortedByDifficulty.add(new ArrayList<Integer>());} // Initialise 2DArrayList.
 			for (int i = 0; i < BotConfig.NUM_PROMPTS; i++)
 			{
-				reader = new BufferedReader(new FileReader(String.format("%sTypingPrompts/prompt%d.txt", BotConfig.BOT_DATA_FILEPATH, i)));
+				reader = new BufferedReader(new FileReader(String.format("%s/cache/TypingPrompts/prompt%d.txt", BotConfig.BOT_DATA_FILEPATH, i)));
 				prompt = reader.readLine().toCharArray();
 				promptData pd = calculateSinglePrompt(prompt);
 				
@@ -168,7 +168,7 @@ public class CalculatePromptDifficulty
 				else {promptsSortedByDifficulty.get(3).add(i);} // Diabolical.
 			}
 			
-			new File(BotConfig.BOT_DATA_FILEPATH+"TypingPrompts/").mkdirs();
+			new File(BotConfig.BOT_DATA_FILEPATH+"/cache/TypingPrompts/").mkdirs();
 			mapObjectWriter.writeObject(promptRatingMap);
 			System.out.println("[CREATED] Prompt Rating Map File");
 			
