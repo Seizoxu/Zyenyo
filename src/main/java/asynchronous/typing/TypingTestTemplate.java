@@ -46,6 +46,10 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	protected Future<?> scheduledStop;
 	
 	
+	/**
+	 * @param event : jda message event
+	 * @param args : args that have been passed in to this command
+	 */
 	public TypingTestTemplate(MessageReceivedEvent event, String[] args)
 	{
 		this.event = event;
@@ -209,7 +213,7 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 				embed.setDescription("Hint, you can choose your prompt with \\TypeList");
 			}
 			
-			HashMap<String, List<AchievementDetails>> achievementsUsers = new HashMap<String, List<AchievementDetails>>();
+			HashMap<String, List<AchievementDetails>> achievementsUsers = new HashMap<>();
 
 			for (int i = 0; i < submissions.getNumSubmissions(); i++)
 			{
@@ -237,21 +241,21 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 			message.replyEmbeds(embed.build()).queue();
 			Typing.guildTestList.remove(event.getGuild().getIdLong());
 
-			if (!achievementsUsers.isEmpty()) {
-				for (String user : achievementsUsers.keySet()) {
-					List<AchievementDetails> achievementList = achievementsUsers.get(user);
+			if (achievementsUsers.isEmpty()) return;
 
-					EmbedBuilder achievementEmbed = new EmbedBuilder().setTitle(String.format("Achievements Unlocked for %s", user));
-					for (AchievementDetails achievement : achievementList) {
-						achievementEmbed.addField(achievement.title(), achievement.description(), false);
-						achievementEmbed.setThumbnail("attachment://thumbnail.png");
-					}
+			for (String user : achievementsUsers.keySet()) {
+				List<AchievementDetails> achievementList = achievementsUsers.get(user);
 
-					// use the first achievement image only since we can't put more than 1 thumbnail on an embed
-					File file = new File(achievementList.get(0).thumbnail());
-					channel.sendMessageEmbeds(achievementEmbed.build()).addFile(file, "thumbnail.png").queue();
-
+				EmbedBuilder achievementEmbed = new EmbedBuilder().setTitle(String.format("Achievements Unlocked for %s", user));
+				for (AchievementDetails achievement : achievementList) {
+					achievementEmbed.addField(achievement.title(), achievement.description(), false);
+					achievementEmbed.setThumbnail("attachment://thumbnail.png");
 				}
+
+				// use the first achievement image only since we can't put more than 1 thumbnail on an embed
+				File file = new File(achievementList.get(0).thumbnail());
+				channel.sendMessageEmbeds(achievementEmbed.build()).addFile(file, "thumbnail.png").queue();
+
 			}
 			
 		}
