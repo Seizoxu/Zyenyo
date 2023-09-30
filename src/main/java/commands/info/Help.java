@@ -76,6 +76,9 @@ public class Help extends ListenerAdapter
 				case "daily":
 					embed = InfoCard.DAILY;
 					break;
+				case "achievements": case "achievementlist": case "al":
+					embed = InfoCard.ACHIEVEMENTS;
+					break;
 				}
 			}
 			else {embed = InfoCard.FULL_HELP;}

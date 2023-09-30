@@ -4,13 +4,10 @@ target/
 debug/
 test/
 .vim/
-ZBotData/
+ZBotData/cache/
 bin/
 
 # Files
-*.zbif
-*.zbsf
-*.zbo
 *.log
 *.prefs
 credentials.json

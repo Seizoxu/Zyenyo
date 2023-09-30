@@ -1,13 +1,18 @@
 package zyenyo;
 
 import static com.mongodb.client.model.Sorts.descending;
+import static com.mongodb.client.model.Sorts.ascending;
 
+import java.io.ObjectStreamClass;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -23,13 +28,16 @@ import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Field;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.Indexes;
+import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.event.CommandFailedEvent;
 import com.mongodb.event.CommandListener;
 
+import dataStructures.AchievementDetails;
 import dataStructures.AddTestResult;
 import dataStructures.LeaderboardConfig;
 import dataStructures.RefreshUserNamesResult;
@@ -59,9 +67,15 @@ public class Database
 	private static MongoCollection<Document> usersV2;
 	private static MongoCollection<Document> users;
 	private static MongoCollection<Document> prompts;
+	private static MongoCollection<Document> achievements;
 	
 	private static UpdateOptions upsertTrue = new UpdateOptions().upsert(true);
 
+	/**
+	 * Connects to a mongo database, sets up the necessary indexes and generates a MongoClient.
+	 * @param uri : the connection URI for the database.
+	 * @param ENVIRONMENT : The environment that this is running. This should be "development" for dev bots.
+	 */
 	public static void connect(String uri, String ENVIRONMENT)
 	{
 
@@ -82,6 +96,7 @@ public class Database
 		usersV2 = client.getDatabase(DB_NAME).getCollection("usersv2");
 
 		prompts = client.getDatabase(DB_NAME).getCollection("prompts");
+		achievements = client.getDatabase(DB_NAME).getCollection("achievements");
 			
 		// Indexes for common statistics in order to speed up leaderboard commands
 		testsV2.createIndex(Indexes.descending("tp"));
@@ -94,6 +109,11 @@ public class Database
 
 	}
 
+	/**
+	 * Adds a typing submission to the database. Includes daily streak checks and user updates.
+	 * @param submission : {@link TypingSubmission}
+	 * @return {@link AddTestResult}
+	 */
 	public static AddTestResult addTestV2(TypingSubmission submission) {
 		double initialWeightedTp = getWeightedTp(submission.userID());
 		ArrayList<Bson> userUpdates = new ArrayList<Bson>();
@@ -145,15 +165,23 @@ public class Database
 
 		userUpdates.add(Updates.inc("playtime", submission.timeTakenMillis()));
 
-		usersV2.updateOne(
+		FindOneAndUpdateOptions options = new FindOneAndUpdateOptions();
+		options.returnDocument(ReturnDocument.AFTER);
+		options.upsert(true);
+
+		Document user = usersV2.findOneAndUpdate(
 			Filters.eq("discordId", String.valueOf(submission.userID())),
 			Updates.combine(
 				userUpdates
 				),
-			upsertTrue
+			options
 		);
 
-		return new AddTestResult(newWeightedTp - initialWeightedTp, streak.currentStreak());
+		double rawTp = newWeightedTp - initialWeightedTp;
+
+		List<AchievementDetails> achievements = checkForAchievements(submission, user, rawTp);
+
+		return new AddTestResult(rawTp, streak.currentStreak(), achievements);
 
 	}
 
@@ -291,6 +319,195 @@ public class Database
 		for (Document test : tpList) {weightedTp += (test.getDouble("tp") * Math.pow(0.95, index++));}
 
 		return weightedTp;
+	}
+
+	/**
+	 * Get an achievement by the title.
+	 * @param title : Name of the achievement
+	 * @return {@link AchievementDetails}
+	 */
+	public static AchievementDetails getAchievement(String title) {
+		try {
+		Document doc = achievements.find(Filters.regex("title", Pattern.compile(title, Pattern.CASE_INSENSITIVE))).first();
+		return new AchievementDetails(doc.getString("title"), doc.getString("description"), doc.getString("thumbnail"));
+		} catch (Exception e) {
+			System.err.println(e);
+			return null;
+		}
+	}
+
+	/**
+	 * Get a progressive achievement by the level of the achievement
+	 * @param levelField : the group of achivements, eg "wpmLevel", "tpLevel"
+	 * @param level : the level of the achievement
+	 * @return {@link AchievementDetails}
+	 */
+	public static AchievementDetails getAchievement(String levelField, int level) {
+		try {
+		Document doc = achievements.find(Filters.eq(levelField, level)).first();
+		return new AchievementDetails(doc.getString("title"), doc.getString("description"), doc.getString("thumbnail"));
+		} catch (Exception e) {
+			System.err.println(e);
+			return null;
+		}
+	}
+
+	/**
+	 * Get a list of paginated achievements
+	 * @param page : page number of achievements
+	 * @return {@link AggregateIterable}
+	 */
+	public static AggregateIterable<Document> getAchievementList(int page) {
+		return achievements.aggregate(Arrays.asList(
+			Aggregates.sort(ascending("_id")),
+			Aggregates.skip(10*(page - 1)),
+			Aggregates.limit(10)
+		));
+	}
+
+
+	/**
+	 * Checks whether a user has received any achievements, after a test submission. 
+	 * @param submission : {@link TypingSubmission}
+	 * @param user : The updated user document
+	 * @param rawTp : rawTp that has been gained as a result of the test
+	 * @return a List of {@link AchievementDetails}
+	 */
+	private static List<AchievementDetails> checkForAchievements(TypingSubmission submission, Document user, double rawTp) {
+
+		ArrayList<AchievementDetails> achievedList = new ArrayList<AchievementDetails>();
+		ArrayList<Bson> userUpdates = new ArrayList<Bson>();
+		Document currentUserAchievements = user.get("achievements", Document.class);
+
+		// check if achievement object exists, if not, create it
+		if (currentUserAchievements == null) {
+			usersV2.updateOne(
+				Filters.eq("discordId", String.valueOf(submission.userID())),
+				Updates.set("achievements", new Document())
+			);
+			currentUserAchievements = new Document();
+		}
+
+		int wpmLevel = 0;
+
+		// WPM ACHIEVEMENTS
+		if (submission.wordsPerMinute() >= 150)	wpmLevel = 8;
+		else if (submission.wordsPerMinute() >= 140) wpmLevel = 7;
+		else if (submission.wordsPerMinute() >= 130) wpmLevel = 6;
+		else if (submission.wordsPerMinute() >= 120) wpmLevel = 5;
+		else if (submission.wordsPerMinute() >= 110) wpmLevel = 4;
+		else if (submission.wordsPerMinute() >= 100) wpmLevel = 3;
+		else if (submission.wordsPerMinute() >= 80) wpmLevel = 2;
+		else if (submission.wordsPerMinute() >= 60) wpmLevel = 1;
+		
+		// TODO: this looks like it can easily be abstracted into a function, since it's the same thing for every single achievement
+		if (Objects.requireNonNullElse(currentUserAchievements.getInteger("wpmLevel"), 0) < wpmLevel) {
+			userUpdates.add(Updates.set("achievements.wpmLevel", wpmLevel));
+			achievedList.add(getAchievement("wpmLevel", wpmLevel));
+		}
+
+		//TP ACHIEVEMENTS
+		double tp = user.getDouble("totalTp");
+		int tpLevel = 0;
+
+		if (tp >= 9000) tpLevel = 9;
+		else if (tp >= 8000) tpLevel = 8;
+		else if (tp >= 7000) tpLevel = 7;
+		else if (tp >= 6000) tpLevel = 6;
+		else if (tp >= 5000) tpLevel = 5;
+		else if (tp >= 4000) tpLevel = 4;
+		else if (tp >= 3000) tpLevel = 3;
+		else if (tp >= 2000) tpLevel = 2;
+		else if (tp >= 1000) tpLevel = 1;
+
+		if (Objects.requireNonNullElse(currentUserAchievements.getInteger("tpLevel"), 0) < tpLevel) {
+			userUpdates.add(Updates.set("achievements.tpLevel", tpLevel));
+			achievedList.add(getAchievement("tpLevel", tpLevel));
+		}
+
+		// PLAYTIME ACHIEVEMENTS
+		double playtimeHours = user.getDouble("playtime") / (1000 * 60 * 60);
+		int playtimeLevel = 0;
+
+		if (playtimeHours >= 500) playtimeLevel = 4;
+		else if (playtimeHours >= 250) playtimeLevel = 3;
+		else if (playtimeHours >= 100) playtimeLevel = 2;
+		else if (playtimeHours >= 50) playtimeLevel = 1;
+
+		if (Objects.requireNonNullElse(currentUserAchievements.getInteger("playtimeLevel"), 0) < playtimeLevel) {
+			userUpdates.add(Updates.set("achievements.playtimeLevel", playtimeLevel));
+			achievedList.add(getAchievement("playtimeLevel", playtimeLevel));
+		}
+		
+		// STATISTICAL SYMMETRY
+		if (submission.wordsPerMinute() == submission.accuracy()) {
+
+			if (!Objects.requireNonNullElse(currentUserAchievements.getBoolean("statisticalSymmetry"), false)) {
+				userUpdates.add(Updates.set("achievements.statisticalSymmetry", true));
+				achievedList.add(getAchievement("Statistical Symmetry"));
+			}
+			
+		}
+
+		// SSGOD
+		if (submission.accuracy() == 100.0) {
+			AggregateIterable<Document> stats = testsV2.aggregate(Arrays.asList(
+					Aggregates.match(Filters.eq("discordId", String.valueOf(submission.userID()))),
+					Aggregates.sort(descending("date")),
+					Aggregates.limit(10)
+					));
+
+			boolean allSS = true;
+			int count = 0;
+			for (Document test : stats) {
+				if (test.getDouble("accuracy") != 100.0) {
+					allSS = false;
+				}
+				count++;
+			}
+
+			if (allSS && count == 10) {
+				if (!Objects.requireNonNullElse(currentUserAchievements.getBoolean("SSGod"), false)) {
+					userUpdates.add(Updates.set("achievements.SSGod", true));
+					achievedList.add(getAchievement("SSGod"));
+				}
+			}
+			
+		}
+
+		// PROMPT CRITICAL
+		// skip over this if no TP is gained, save us an unnecessary db call
+		if (rawTp != 0.0) {
+			Document topUser = usersV2.find().sort(descending("totalTp")).limit(1).first();
+
+			if (String.valueOf(submission.userID()).equals(topUser.getString("discordId"))) {
+				if (!Objects.requireNonNullElse(currentUserAchievements.getBoolean("promptCritical"), false)) {
+					userUpdates.add(Updates.set("achievements.promptCritical", true));
+					achievedList.add(getAchievement("Prompt Critical"));
+				}
+			}
+
+		}
+
+		// MAX DEDICATION
+		if (submission.promptTitle().equals("Chromebook Chronicles")) {
+			if (!Objects.requireNonNullElse(currentUserAchievements.getBoolean("maximumDedication"), false)) {
+				userUpdates.add(Updates.set("achievements.maximumDedication", true));
+				achievedList.add(getAchievement("Maximum Dedication"));
+			}
+		}
+
+		if (userUpdates.size() > 0) {
+			usersV2.updateOne(
+				Filters.eq("discordId", String.valueOf(submission.userID())),
+				Updates.combine(
+					userUpdates
+					),
+				upsertTrue
+			);
+		}
+		
+		return achievedList;
 	}
 
 }

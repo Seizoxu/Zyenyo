@@ -61,6 +61,12 @@ public final class Aliases
 			BotConfig.PREFIX + "lboard",
 			BotConfig.PREFIX + "lb");
 	public static final Set<String> DAILY = Collections.singleton(BotConfig.PREFIX + "daily");
+	public static final Set<String> ACHIEVEMENT = Collections.singleton(BotConfig.PREFIX + "achievement");
+
+	public final static Set<String> ACHIEVEMENTLIST = Set.of(
+			BotConfig.PREFIX + "achievementlist",
+			BotConfig.PREFIX + "achievements",
+			BotConfig.PREFIX + "al");
 	
 	
 	/*————————————————————————————————————|

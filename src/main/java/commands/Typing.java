@@ -2,6 +2,8 @@ package commands;
 
 import java.util.HashMap;
 
+import asynchronous.typing.Achievement;
+import asynchronous.typing.AchievementList;
 import asynchronous.typing.Chart;
 import asynchronous.typing.Daily;
 import asynchronous.typing.Leaderboard;
@@ -15,6 +17,7 @@ import dataStructures.Aliases;
 import dataStructures.InfoCard;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import zyenyo.Zyenyo;
@@ -116,6 +119,28 @@ public class Typing extends ListenerAdapter
 		else if (Aliases.DAILY.contains(args[0].toLowerCase()))
 		{
 			Zyenyo.masterThreadPool.submit(new Daily(event, args));
+		}
+
+		else if (Aliases.ACHIEVEMENTLIST.contains(args[0].toLowerCase()))
+		{
+			Zyenyo.masterThreadPool.submit(new AchievementList(event, args));
+		}
+
+		else if (Aliases.ACHIEVEMENT.contains(args[0].toLowerCase()))
+		{
+			Zyenyo.masterThreadPool.submit(new Achievement(event, args));
+		}
+	}
+
+	@Override
+	public void onButtonClick(ButtonClickEvent event) {
+		switch (event.getComponentId()) {
+			case "achievementListNext":
+				AchievementList.onNextPage(event);
+				break;
+			case "achievementListPrev":
+				AchievementList.onPrevPage(event);
+				break;
 		}
 	}
 }

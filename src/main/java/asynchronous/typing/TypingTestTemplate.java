@@ -1,5 +1,6 @@
 package asynchronous.typing;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -10,6 +11,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
 import commands.Typing;
+import dataStructures.AchievementDetails;
 import dataStructures.AddTestResult;
 import dataStructures.TypingSubmission;
 import dataStructures.TypingTestLeaderboard;
@@ -36,7 +38,7 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	protected TypingTestLeaderboard submissions = new TypingTestLeaderboard();
 	protected String promptTitle;
 
-	protected final static String TEST_PROMPTS_FILEPATH = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/";
+	protected final static String TEST_PROMPTS_FILEPATH = BotConfig.BOT_DATA_FILEPATH + "cache/TypingPrompts/";
 	protected final static String ZERO_WIDTH_NON_JOINER = "‌";
 	protected final static short NUM_CHARS_IN_WORD = 5;
 	
@@ -44,6 +46,10 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	protected Future<?> scheduledStop;
 	
 	
+	/**
+	 * @param event : jda message event
+	 * @param args : args that have been passed in to this command
+	 */
 	public TypingTestTemplate(MessageReceivedEvent event, String[] args)
 	{
 		this.event = event;
@@ -206,10 +212,16 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 				embed.setTitle("Stopped Typing");
 				embed.setDescription("Hint, you can choose your prompt with \\TypeList");
 			}
+			
+			HashMap<String, List<AchievementDetails>> achievementsUsers = new HashMap<>();
+
 			for (int i = 0; i < submissions.getNumSubmissions(); i++)
 			{
 				TypingSubmission s = submissions.getSubmission(lbOrder.get(i));
 				AddTestResult result = Database.addTestV2(s);
+
+				if (result.achievements().size() > 0) achievementsUsers.put(s.userTag(), result.achievements());
+
 				String dailyStreak = "";
 				if (result.dailyStreak() > 0) {
 					dailyStreak = String.format("Daily Streak: **`%d`**", result.dailyStreak());
@@ -228,6 +240,23 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 			}
 			message.replyEmbeds(embed.build()).queue();
 			Typing.guildTestList.remove(event.getGuild().getIdLong());
+
+			if (achievementsUsers.isEmpty()) return;
+
+			for (String user : achievementsUsers.keySet()) {
+				List<AchievementDetails> achievementList = achievementsUsers.get(user);
+
+				EmbedBuilder achievementEmbed = new EmbedBuilder().setTitle(String.format("Achievements Unlocked for %s", user));
+				for (AchievementDetails achievement : achievementList) {
+					achievementEmbed.addField(achievement.title(), achievement.description(), false);
+					achievementEmbed.setThumbnail("attachment://thumbnail.png");
+				}
+
+				// use the first achievement image only since we can't put more than 1 thumbnail on an embed
+				File file = new File(achievementList.get(0).thumbnail());
+				channel.sendMessageEmbeds(achievementEmbed.build()).addFile(file, "thumbnail.png").queue();
+
+			}
 			
 		}
 	};
