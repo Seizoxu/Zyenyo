@@ -38,7 +38,7 @@ public class CalculatePromptDifficulty
 	private final static Set<Character> BOTH_HANDS_CHARS =	Set.of('6','b','^','B',' ');
 	
 	private final static double COMBO_EXPONENT_CONSTANT = 2;
-	private final static String CHARACTER_FREQUENCY_MAP_FILEPATH = BotConfig.BOT_DATA_FILEPATH + "assets/CharFreqMaps/CharacterFrequencyMap-TRv3.json";
+	private final static String CHARACTER_FREQUENCY_MAP_FILEPATH = BotConfig.BOT_DATA_FILEPATH + "CharFreqMaps/CharacterFrequencyMap-TRv3.json";
 	
 	private static HashMap<Integer, Double> promptRatingMap = new HashMap<>();
 	private static ArrayList<List<Integer>> promptsSortedByDifficulty = new ArrayList<List<Integer>>(4);
@@ -50,8 +50,8 @@ public class CalculatePromptDifficulty
 	 */
 	public static void downloadAndUpdatePrompts()
 	{
-		String newPromptsPath = BotConfig.BOT_DATA_FILEPATH + "/cache/newPrompts/";
-		String oldPromptsPath = BotConfig.BOT_DATA_FILEPATH + "/cache/TypingPrompts/";
+		String newPromptsPath = BotConfig.BOT_DATA_FILEPATH + "newPrompts/";
+		String oldPromptsPath = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/";
 		
 		
 		ArrayList<Document> prompts = Database.getPrompts();
@@ -156,7 +156,7 @@ public class CalculatePromptDifficulty
 			for (int i = 0; i < 4; i++) {promptsSortedByDifficulty.add(new ArrayList<Integer>());} // Initialise 2DArrayList.
 			for (int i = 0; i < BotConfig.NUM_PROMPTS; i++)
 			{
-				reader = new BufferedReader(new FileReader(String.format("%s/cache/TypingPrompts/prompt%d.txt", BotConfig.BOT_DATA_FILEPATH, i)));
+				reader = new BufferedReader(new FileReader(String.format("%sTypingPrompts/prompt%d.txt", BotConfig.BOT_DATA_FILEPATH, i)));
 				prompt = reader.readLine().toCharArray();
 				promptData pd = calculateSinglePrompt(prompt);
 				
@@ -168,7 +168,7 @@ public class CalculatePromptDifficulty
 				else {promptsSortedByDifficulty.get(3).add(i);} // Diabolical.
 			}
 			
-			new File(BotConfig.BOT_DATA_FILEPATH+"/cache/TypingPrompts/").mkdirs();
+			new File(BotConfig.BOT_DATA_FILEPATH+"TypingPrompts/").mkdirs();
 			mapObjectWriter.writeObject(promptRatingMap);
 			System.out.println("[CREATED] Prompt Rating Map File");
 			

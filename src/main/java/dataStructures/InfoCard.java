@@ -28,7 +28,6 @@ public class InfoCard
 //		.addField("Chart", "Shows a chart of a user's typing stats.", false)
 		.addField("Leaderboard", "Shows the typing stats leaderboard of a specified statistic.", false)
 		.addField("Daily", "Shows daily streak information.", false)
-		.addField("Achievements", "Shows a list of all achievements.", false)
 //		.addField("DpiConverter", "Converts fullscreen DPI on one screen to another (not implemented).", false)
 		.setColor(0x8D538D);
 	
@@ -197,14 +196,6 @@ public class InfoCard
 			.addField("Aliases","`None`", false)
 			.addField("Syntax", "`\\daily`", false);
 
-	public static final EmbedBuilder ACHIEVEMENTS =
-			new EmbedBuilder()
-			.setTitle("CMD: Achievements.")
-			.setDescription("Displays a list of all available achievements.")
-			.setColor(0x8D538D)
-			.addField("Aliases","`achievementlist`, `al`", false)
-			.addField("Syntax", "`\\achievements`", false)
-			.addField("Hint", "View a specific achievement in detail with `\\achievement <achievement title>`", false);
 	
 	
 	/*—————————————————————————————————————|
