@@ -17,13 +17,13 @@ public class BotConfig
 	
 	public static int NUM_PROMPTS; // Set in CalculatePromptDifficulty.downloadAndUpdatePrompts.run();
 	public static final String BOT_DATA_FILEPATH = "ZBotData/";
-	public static final String SCRAPE_DATA_FILEPATH = "ZBotData/cache/user/ScrapeData/";
-	public static final String INDEX_COUNTS_FILEPATH = "ZBotData/cache/user/ScrapeData/COUNTS.zbif"; //ZBIF = ZyenyoBotIndexFile.
-	public static final String INDEX_IDS_FILEPATH = "ZBotData/cache/user/ScrapeData/IDs.zbif";
+	public static final String SCRAPE_DATA_FILEPATH = "ZBotData/ScrapeData/";
+	public static final String INDEX_COUNTS_FILEPATH = "ZBotData/ScrapeData/COUNTS.zbif"; //ZBIF = ZyenyoBotIndexFile.
+	public static final String INDEX_IDS_FILEPATH = "ZBotData/ScrapeData/IDs.zbif";
 	public static final List<Long> ADMINISTRATOR_IDS = List.of(642193466876493829l, 365691073156087819l);
 	
-	protected static final File PROMPT_RATING_FILE = new File("ZBotData/cache/TypingPrompts/PromptRatingMap.zbo");
-	protected static final File PROMPT_DIFFICULTY_FILE = new File("ZBotData/cache/TypingPrompts/SortedPromptsList.zbo");
+	protected static final File PROMPT_RATING_FILE = new File("ZBotData/TypingPrompts/PromptRatingMap.zbo");
+	protected static final File PROMPT_DIFFICULTY_FILE = new File("ZBotData/TypingPrompts/SortedPromptsList.zbo");
 	
 	protected static void setConfigVars(String ENVIRONMENT)
 	{

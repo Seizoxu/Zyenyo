@@ -12,7 +12,7 @@ import zyenyo.BotConfig;
 public class TypeList implements Runnable
 {
 	private static final int NUM_PAGES = (BotConfig.NUM_PROMPTS / 10) + 1;
-	private static final String TEST_PROMPTS_FILEPATH = "ZBotData/cache/TypingPrompts/";
+	private static final String TEST_PROMPTS_FILEPATH = "ZBotData/TypingPrompts/";
 	private MessageReceivedEvent event;
 	private String[] args;
 	
