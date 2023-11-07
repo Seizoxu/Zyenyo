@@ -43,6 +43,14 @@
     	<version>1.2.8</version>
     </dependency>
     
+    <!-- https://mvnrepository.com/artifact/org.json/json -->
+	<dependency>
+		<groupId>org.json</groupId>
+		<artifactId>json</artifactId>
+		<version>20231013</version>
+	</dependency>
+
+    
     <!--dependency>
     	<groupId>com.github.Gary50613</groupId>
     	<artifactId>osu4j</artifactId>
@@ -54,7 +62,7 @@
 		<groupId>com.google.apis</groupId>
 		<artifactId>google-api-services-sheets</artifactId>
 		<version>v4-rev614-1.18.0-rc</version>
-	</dependency>-->
+	</dependency-->
 
 	<!-- https://mvnrepository.com/artifact/com.google.api-client/google-api-client-gson -->
 	<dependency>
