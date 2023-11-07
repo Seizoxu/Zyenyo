@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.seizoxu.zyenyo</groupId>
   <artifactId>zyenyo</artifactId>
-  <version>0.3.0-beta</version>
+  <version>0.3.01-beta</version>
   <name>ZyenyoBot</name>
 
   <properties>
@@ -43,18 +43,26 @@
     	<version>1.2.8</version>
     </dependency>
     
-    <dependency>
+    <!-- https://mvnrepository.com/artifact/org.json/json -->
+	<dependency>
+		<groupId>org.json</groupId>
+		<artifactId>json</artifactId>
+		<version>20231013</version>
+	</dependency>
+
+    
+    <!--dependency>
     	<groupId>com.github.Gary50613</groupId>
     	<artifactId>osu4j</artifactId>
     	<version>2.3.3</version>
-    </dependency>
+    <dependency-->
 
 	<!-- https://mvnrepository.com/artifact/com.google.apis/google-api-services-sheets -->
 	<!-- <dependency>
 		<groupId>com.google.apis</groupId>
 		<artifactId>google-api-services-sheets</artifactId>
 		<version>v4-rev614-1.18.0-rc</version>
-	</dependency>-->
+	</dependency-->
 
 	<!-- https://mvnrepository.com/artifact/com.google.api-client/google-api-client-gson -->
 	<dependency>

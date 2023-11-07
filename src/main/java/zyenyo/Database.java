@@ -293,4 +293,16 @@ public class Database
 		return weightedTp;
 	}
 
+	
+	public static AggregateIterable<Document> getTopPlays(String discordId)
+	{
+		AggregateIterable<Document> playsList = testsV2.aggregate(Arrays.asList(
+				Aggregates.match(Filters.eq("discordId", discordId)),
+				Aggregates.match(Filters.exists("tp")),
+				Aggregates.sort(descending("tp")),
+				Aggregates.limit(100)
+				));
+		
+		return playsList;
+	}
 }

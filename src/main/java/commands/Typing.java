@@ -7,6 +7,7 @@ import asynchronous.typing.Daily;
 import asynchronous.typing.Leaderboard;
 import asynchronous.typing.TypeList;
 import asynchronous.typing.TypeStats;
+import asynchronous.typing.TypeTop;
 import asynchronous.typing.TypingTest;
 import asynchronous.typing.TypingTestNumberRow;
 import asynchronous.typing.TypingTestTeam;
@@ -116,6 +117,11 @@ public class Typing extends ListenerAdapter
 		else if (Aliases.DAILY.contains(args[0].toLowerCase()))
 		{
 			Zyenyo.masterThreadPool.submit(new Daily(event, args));
+		}
+		
+		else if (Aliases.TYPETOP.contains(args[0].toLowerCase()))
+		{
+			Zyenyo.masterThreadPool.submit(new TypeTop(event, args));
 		}
 	}
 }
