@@ -21,7 +21,12 @@ public class TypeTop implements Runnable
 	private MessageReceivedEvent event;
 	private String[] args;
 	
-	
+	/**
+	 * Sends a message embed of a specified user's top 100 tests.
+	 * @param event
+	 * @param args
+	 * @since 0.3.01-beta
+	 */
 	public TypeTop(MessageReceivedEvent event, String[] args)
 	{
 		this.event = event;
@@ -51,7 +56,7 @@ public class TypeTop implements Runnable
 			case "-p":
 				playsPage = getPageArg(args, cmd);
 				break;
-				//TODO: More sort options.
+				//TODO: More sort options in the future.
 			}
 		}
 		
@@ -96,6 +101,12 @@ public class TypeTop implements Runnable
 		event.getChannel().sendMessageEmbeds(embed.build()).queue();
 	}
 	
+	/**
+	 * Parses a page number argument for a specified command.
+	 * @param args
+	 * @param cmd
+	 * @return int page number if it exists, or 1 by default.
+	 */
 	private static int getPageArg(String[] args, String cmd)
 	{
 		String pageNumberArg;
