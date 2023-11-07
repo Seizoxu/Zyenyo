@@ -13,20 +13,18 @@ import com.google.common.collect.Iterables;
 import com.mongodb.client.AggregateIterable;
 
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import zyenyo.Database;
 
 public class TypeTop implements Runnable
 {
 	private MessageReceivedEvent event;
-	private JDA jda;
 	private String[] args;
+	
 	
 	public TypeTop(MessageReceivedEvent event, String[] args)
 	{
 		this.event = event;
-		this.jda = event.getJDA();
 		this.args = args;
 	}
 	
@@ -53,6 +51,7 @@ public class TypeTop implements Runnable
 			case "-p":
 				playsPage = getPageArg(args, cmd);
 				break;
+				//TODO: More sort options.
 			}
 		}
 		

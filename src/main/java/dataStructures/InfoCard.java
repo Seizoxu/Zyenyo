@@ -163,6 +163,23 @@ public class InfoCard
 		.addField("Syntax", "`\\typelist [Page Number]`", false)
 		.addField("Hint", "You can choose your own prompt with `\\tt [prompt number]`", false);
 	
+	public static final EmbedBuilder TYPING_TOPS =
+		new EmbedBuilder()
+		.setTitle("CMD: Typing Tops List.")
+		.setDescription("This command displays a user's best tests, sorted by TP by default.")
+		.setColor(0x8D538D)
+		.addField("Aliases","`ttop`", false)
+		.addField("Syntax", "`\\typetop [Options]`", false)
+		.addField("Options",
+//				  "`-tp   :` Sorts by TP.\n"
+//				+ "`-wpm  :` Sorts by WPM.\n"
+//				+ "`-acc  :` Sorts by accuracy.\n"
+//				+ "`-best :` Sorts by global (overall) stats.\n"
+//				+ "`-avg  :` Sorts by average (recent 10 tests) stats.\n"
+//				+ "`-sum  :` Sorts by cumulative TP.\n"
+//				+ "`-tests:` Sorts by number of tests.\n"
+				  "`-p    :` Specifies a page number (Eg: `-p 2`).\n", false);
+		
 	public static final EmbedBuilder CHART =
 			new EmbedBuilder()
 			.setTitle("CMD: Chart.")

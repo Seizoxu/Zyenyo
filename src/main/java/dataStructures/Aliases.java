@@ -55,16 +55,17 @@ public final class Aliases
 			BotConfig.PREFIX + "typelist",
 			BotConfig.PREFIX + "tlist",
 			BotConfig.PREFIX + "tl");
+	public static final Set<String> TYPETOP = Set.of(
+			BotConfig.PREFIX + "typetop",
+			BotConfig.PREFIX + "ttop");
 	public final static Set<String> CHART = Collections.singleton(BotConfig.PREFIX + "chart");
 	public final static Set<String> LEADERBOARD = Set.of(
 			BotConfig.PREFIX + "leaderboard",
 			BotConfig.PREFIX + "lboard",
 			BotConfig.PREFIX + "lb");
 	public static final Set<String> DAILY = Collections.singleton(BotConfig.PREFIX + "daily");
-	public static final Set<String> TYPETOP = Set.of(
-			BotConfig.PREFIX + "typetop",
-			BotConfig.PREFIX + "ttop");
 	
+
 	
 	/*————————————————————————————————————|
 	|————————————————ADMIN————————————————|

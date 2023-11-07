@@ -67,6 +67,9 @@ public class Help extends ListenerAdapter
 				case "typelist": case "tlist": case "tl":
 					embed = InfoCard.TYPING_LIST;
 					break;
+				case "typetop": case "ttop":
+					embed = InfoCard.TYPING_TOPS;
+					break;
 //				case "chart":
 //					embed = InfoCard.CHART;
 //					break;
