@@ -25,6 +25,7 @@ public class InfoCard
 		.addField("TypeQuit", "Stops a typing test, if there is one currently running in the server.", false)
 		.addField("TypeStats", "Shows Typing Statistics.", false)
 		.addField("TypeList", "Shows a list of prompts.", false)
+		.addField("TypeTop", "Displays a user's best tests, sorted by TP by default.", false)
 //		.addField("Chart", "Shows a chart of a user's typing stats.", false)
 		.addField("Leaderboard", "Shows the typing stats leaderboard of a specified statistic.", false)
 		.addField("Daily", "Shows daily streak information.", false)
