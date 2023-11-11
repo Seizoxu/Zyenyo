@@ -1,6 +1,7 @@
 package zyenyo;
 
 import static com.mongodb.client.model.Sorts.descending;
+import static com.mongodb.client.model.Sorts.ascending;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -293,14 +294,21 @@ public class Database
 		return weightedTp;
 	}
 
-	
-	public static AggregateIterable<Document> getTopPlays(String discordId)
+	/**
+	 * Filters through the testsV2 collection, and initially orders tests by TP,
+	 * the top 100 of which are sorted by a specified parameter.
+	 * @param discordId
+	 * @param sort
+	 * @param isDescending
+	 * @return AggregateIterable<Document>
+	 */
+	public static AggregateIterable<Document> getTopPlays(String discordId, String sort, Boolean isDescending)
 	{
 		AggregateIterable<Document> playsList = testsV2.aggregate(Arrays.asList(
 				Aggregates.match(Filters.eq("discordId", discordId)),
 				Aggregates.match(Filters.exists("tp")),
-				Aggregates.sort(descending("tp")),
-				Aggregates.limit(100)
+				Aggregates.limit(100), // Limit before sort, since we want to sort the top 100, not everything.
+				(isDescending) ? Aggregates.sort(descending(sort)) : Aggregates.sort(ascending(sort))
 				));
 		
 		return playsList;
