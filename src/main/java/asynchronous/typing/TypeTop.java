@@ -111,7 +111,7 @@ public class TypeTop implements Runnable
 		embed.setFooter(
 				String.format("Showing test %d to %d on page %d.",
 						(playsPage-1) * 5 + index - 4,
-						(playsPage-1) * 5 + index + 1,
+						(playsPage-1) * 5 + index,
 						playsPage
 						));
 		
