@@ -172,14 +172,12 @@ public class InfoCard
 		.addField("Aliases","`ttop`", false)
 		.addField("Syntax", "`\\typetop [Options]`", false)
 		.addField("Options",
-//				  "`-tp   :` Sorts by TP.\n"
-//				+ "`-wpm  :` Sorts by WPM.\n"
-//				+ "`-acc  :` Sorts by accuracy.\n"
-//				+ "`-best :` Sorts by global (overall) stats.\n"
-//				+ "`-avg  :` Sorts by average (recent 10 tests) stats.\n"
-//				+ "`-sum  :` Sorts by cumulative TP.\n"
-//				+ "`-tests:` Sorts by number of tests.\n"
-				  "`-p    :` Specifies a page number (Eg: `-p 2`).\n", false);
+				  "`-tp   :` Sorts by TP.\n"
+				+ "`-wpm  :` Sorts by WPM.\n"
+				+ "`-acc  :` Sorts by accuracy.\n"
+				+ "`-date :` Sorts by date.\n"
+				+ "`-rev  :` Reverses the sort order to ascending.\n"
+				+ "`-p    :` Specifies a page number (Eg: `-p 2`).\n", false);
 		
 	public static final EmbedBuilder CHART =
 			new EmbedBuilder()

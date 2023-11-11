@@ -36,10 +36,13 @@ public class TypeTop implements Runnable
 	@Override
 	public void run()
 	{
-		// One page = 5 plays.
-		int playsPage = 1;
 		String userId = event.getAuthor().getId();
 		String messageAuthorName = event.getAuthor().getName();
+
+		// One page = 5 plays.
+		int playsPage = 1;
+		String sortBy = "tp";
+		boolean isDescending = true;
 		
 		for (String cmd : args)
 		{
@@ -56,11 +59,25 @@ public class TypeTop implements Runnable
 			case "-p":
 				playsPage = getPageArg(args, cmd);
 				break;
-				//TODO: More sort options in the future.
+			case "-tp":
+				sortBy = "tp";
+				break;
+			case "-wpm":
+				sortBy = "wpm";
+				break;
+			case "-accuracy": case "-acc":
+				sortBy = "accuracy";
+				break;
+			case "-date":
+				sortBy = "date";
+				break;
+			case "-reverse": case "-rev":
+				isDescending = false;
+				break;
 			}
 		}
 		
-		AggregateIterable<Document> plays = Database.getTopPlays(userId);
+		AggregateIterable<Document> plays = Database.getTopPlays(userId, sortBy, isDescending);
 
 		EmbedBuilder embed = new EmbedBuilder()
 				.setTitle("TypeTop for " + messageAuthorName);
@@ -94,7 +111,7 @@ public class TypeTop implements Runnable
 		embed.setFooter(
 				String.format("Showing test %d to %d on page %d.",
 						(playsPage-1) * 5 + index - 4,
-						(playsPage-1) * 5 + index + 1,
+						(playsPage-1) * 5 + index,
 						playsPage
 						));
 		
