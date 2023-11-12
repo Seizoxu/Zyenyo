@@ -106,7 +106,7 @@ public class LeaderboardConfig {
 	}
 
 	public String getLeaderboardTitle() {
-		return String.format("Global %s %s Leaderboards %s %s", StringUtils.capitalize(lbScope.toString().toLowerCase()), StringUtils.capitalize(String.join(" ", StringUtils.splitByCharacterTypeCamelCase(this.lbStatistic))), this.old ? "(old)" : "", this.promptNumber > -1 ? "on " + PromptHeadings.get(promptNumber) : "");
+		return String.format("Global %s %s Leaderboards %s%s", StringUtils.capitalize(lbScope.toString().toLowerCase()), StringUtils.capitalize(String.join(" ", StringUtils.splitByCharacterTypeCamelCase(this.lbStatistic))), this.old ? "(old)" : "", this.promptNumber > -1 ? "on " + PromptHeadings.get(promptNumber) : "");
 	}
 
 }
