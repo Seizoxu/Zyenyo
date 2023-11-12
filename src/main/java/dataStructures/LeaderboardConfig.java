@@ -3,11 +3,13 @@ package dataStructures;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.BsonField;
+import com.mongodb.client.model.Filters;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.bson.conversions.Bson;
 
 /*
  * creates a LeaderboardConfig object that can be passed to getLeaderboards in Database.java, which ensures that an invalid leaderboard configuration can never be passed in. for example, the leaderboard of BEST ACCURACY makes sense, but leaderboard of SUM ACCURACY does not.
@@ -19,11 +21,21 @@ public class LeaderboardConfig {
 	private String collection;
 	Boolean old;
 	private ArrayList<BsonField> accumulators = new ArrayList<BsonField>();
+	private Bson filter = Filters.empty();
+	private int promptNumber;
 
-	public LeaderboardConfig(LeaderboardStatisticType lbStatistic, LeaderboardScope lbScope, Boolean old) {
+	public LeaderboardConfig(LeaderboardStatisticType lbStatistic, LeaderboardScope lbScope, Boolean old, int promptNumber) {
 		this.lbScope = lbScope;
 		this.old = old;
 		this.collection = old ? "tests" : "testsv2";
+		this.promptNumber = promptNumber;
+
+		if (promptNumber > -1) {
+			if (lbStatistic.equals(LeaderboardStatisticType.TP) && lbScope.equals(LeaderboardScope.SUM)) {
+				lbScope = LeaderboardScope.BEST;
+			}
+			this.filter = Filters.eq("prompt", PromptHeadings.get(promptNumber));
+		}
 
 		switch (lbStatistic) {
 			case TP: 
@@ -74,6 +86,7 @@ public class LeaderboardConfig {
 				} break;
 				
 		}
+
 	}
 
 	public String getStatistic() {
@@ -88,8 +101,12 @@ public class LeaderboardConfig {
 		return this.accumulators;
 	}
 
+	public Bson getFiltrationStrategy() {
+		return this.filter;
+	}
+
 	public String getLeaderboardTitle() {
-		return String.format("Global %s %s Leaderboards %s", StringUtils.capitalize(lbScope.toString().toLowerCase()), StringUtils.capitalize(String.join(" ", StringUtils.splitByCharacterTypeCamelCase(this.lbStatistic))), this.old ? "(old)" : "");
+		return String.format("Global %s %s Leaderboards %s%s", StringUtils.capitalize(lbScope.toString().toLowerCase()), StringUtils.capitalize(String.join(" ", StringUtils.splitByCharacterTypeCamelCase(this.lbStatistic))), this.old ? "(old)" : "", this.promptNumber > -1 ? "on " + PromptHeadings.get(promptNumber) : "");
 	}
 
 }

@@ -270,6 +270,7 @@ public class Database
 		MongoCollection<Document> collection = client.getDatabase(DB_NAME).getCollection(lbConfig.getCollection());
 
 		return collection.aggregate(Arrays.asList(
+			Aggregates.match(lbConfig.getFiltrationStrategy()),
 			Aggregates.group("$discordId", 
 				lbConfig.getAccumulationStrategies()
 					),
