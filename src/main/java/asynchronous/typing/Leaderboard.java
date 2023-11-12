@@ -37,6 +37,7 @@ public class Leaderboard implements Runnable
 		LeaderboardStatisticType lbStat = LeaderboardStatisticType.TP;
 		LeaderboardScope lbScope = LeaderboardScope.SUM;
 		int lbPage = 1;
+		int prompt = -1;
 		Boolean old = false;
 		
 		for (String cmd : args) {
@@ -51,12 +52,13 @@ public class Leaderboard implements Runnable
 				case "-sum": lbScope = LeaderboardScope.SUM; break;
 				case "-p": lbPage = getValueArg(args, "-p"); break;
 				case "-page": lbPage = getValueArg(args, "-page"); break;
+				case "-prompt": prompt = getValueArg(args, "-prompt"); break;
 				case "-tests": lbStat = LeaderboardStatisticType.TESTS; break;
 				case "-old": old = true; break;
 			}
 		}
 		
-		LeaderboardConfig lbConfig = new LeaderboardConfig(lbStat, lbScope, old);
+		LeaderboardConfig lbConfig = new LeaderboardConfig(lbStat, lbScope, old, prompt);
 
 		AggregateIterable<Document> lbList = Database.getLeaderboards(lbConfig);
 
