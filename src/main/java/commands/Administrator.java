@@ -1,7 +1,12 @@
 package commands;
 
-import asynchronous.typing.AddTest;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import asynchronous.typing.AddPrompt;
+import asynchronous.typing.AddTest;
 import asynchronous.typing.ClearProfile;
 import asynchronous.typing.FindCheaters;
 import asynchronous.typing.RefreshUsers;
@@ -13,8 +18,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import zyenyo.BotConfig;
 import zyenyo.CalculatePromptDifficulty;
-import zyenyo.Zyenyo;
 import zyenyo.Database;
+import zyenyo.Zyenyo;
 
 public class Administrator extends ListenerAdapter
 {
@@ -98,7 +103,26 @@ public class Administrator extends ListenerAdapter
 				}
 			});
 		}
-	
+
+		else if (Aliases.RESTART.contains(args[0].toLowerCase()))
+		{
+			channel.sendMessageFormat("A restart has been scheduled.").queue();
+			
+			File restartFlagFile = new File("zbflag-restart");
+			
+			try
+			{
+				restartFlagFile.createNewFile();
+				
+				channel.sendMessageFormat("Shutting down...").queue();
+				event.getJDA().shutdown();
+			}
+			catch (IOException e)
+			{
+				
+			}
+		}
+		
 		else if (Aliases.SHUTDOWN.contains(args[0].toLowerCase()))
 		{
 			channel.sendMessageFormat("Shutting down...").queue();

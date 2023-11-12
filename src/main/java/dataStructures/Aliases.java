@@ -71,6 +71,7 @@ public final class Aliases
 	|————————————————ADMIN————————————————|
 	|————————————————————————————————————*/
 	public final static Set<String> SHUTDOWN = Collections.singleton(BotConfig.PREFIX + "shutdown");
+	public final static Set<String> RESTART = Collections.singleton(BotConfig.PREFIX + "restart");
 	public final static Set<String> ADDTEST = Collections.singleton(BotConfig.PREFIX + "addtest");
 	public final static Set<String> CLEARPROFILE = Collections.singleton(BotConfig.PREFIX + "clearprofile");
 	public final static Set<String> FINDCHEATERS = Collections.singleton(BotConfig.PREFIX + "findcheaters");
