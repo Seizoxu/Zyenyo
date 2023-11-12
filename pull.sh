@@ -2,25 +2,36 @@
 
 cd $BOT_DIR
 
-#git pull origin stable
+get_logstamp() {
+    date +%Y%m%d-%H%M%S
+}
 
-rm target/*.jar
-mvn package
-pkill -f "java -cp $jarfile zyenyo.Zyenyo $BOT_TOKEN $MONGO_URI $ZYENYO_ENVIRONMENT"
+# Pull from stable, package, and run, outputting into a distinct log file.
+deploy() {
+    logfile=logs/$(get_logstamp).log
+    mkdir -p logs/
 
-jarfile=$(find target/ -name zyenyo-*.*.*.jar)
+    git pull origin stable >> "$logfile" 2>&1
 
-echo "[TERM] Starting Zyenyo..."
-java -cp $jarfile zyenyo.Zyenyo $BOT_TOKEN $MONGO_URI $ZYENYO_ENVIRONMENT
+    rm target/*.jar
+    mvn package >> "$logfile" 2>&1
+    pkill -f "java -cp $jarfile zyenyo.Zyenyo $BOT_TOKEN $MONGO_URI $ZYENYO_ENVIRONMENT"
 
+    jarfile=$(find target/ -name zyenyo-*.*.*.jar)
+
+    echo "[TERM] Starting Zyenyo..." >> "$logfile" 2>&1
+    java -cp $jarfile zyenyo.Zyenyo $BOT_TOKEN $MONGO_URI $ZYENYO_ENVIRONMENT >> "$logfile" 2>&1
+}
+
+# Run once first.
+deploy
+
+# After shutdown of above, restarts if restart flag is present.
 while true; do
     if [ -e "zbflag-restart" ]; then
-        echo "[TERM] Restarting Zyenyo..."
         rm "zbflag-restart"
-        pkill -f "java -cp $jarfile zyenyo.Zyenyo $BOT_TOKEN $MONGO_URI $ZYENYO_ENVIRONMENT"
-        java -cp $jarfile zyenyo.Zyenyo $BOT_TOKEN $MONGO_URI $ZYENYO_ENVIRONMENT
+        deploy
     else
-        echo "[TERM] Shutting Down..."
         break
     fi
 done
