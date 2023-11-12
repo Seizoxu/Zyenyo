@@ -6,6 +6,7 @@ test/
 .vim/
 ZBotData/
 bin/
+logs/
 
 # Files
 *.zbif
