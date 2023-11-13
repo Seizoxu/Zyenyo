@@ -285,13 +285,16 @@ public class Database
 				Aggregates.match(Filters.eq("discordId", String.valueOf(id))),
 				Aggregates.match(Filters.exists("tp")),
 				Aggregates.sort(descending("tp")),
+				Aggregates.group("$prompt", Accumulators.first("document", "$$ROOT")),
+				Aggregates.replaceRoot("$document"),
+				Aggregates.sort(descending("tp")),
 				Aggregates.limit(100)
 				));
 
 		double weightedTp = 0;
 		int index = 0;
 		for (Document test : tpList) {weightedTp += (test.getDouble("tp") * Math.pow(0.95, index++));}
-
+		
 		return weightedTp;
 	}
 
@@ -308,10 +311,36 @@ public class Database
 		AggregateIterable<Document> playsList = testsV2.aggregate(Arrays.asList(
 				Aggregates.match(Filters.eq("discordId", discordId)),
 				Aggregates.match(Filters.exists("tp")),
+				Aggregates.sort(descending("tp")),
+				Aggregates.group("$prompt", Accumulators.first("document", "$$ROOT")),
+				Aggregates.replaceRoot("$document"),
+				Aggregates.sort(descending("tp")),
 				Aggregates.limit(100), // Limit before sort, since we want to sort the top 100, not everything.
 				(isDescending) ? Aggregates.sort(descending(sort)) : Aggregates.sort(ascending(sort))
 				));
 		
 		return playsList;
+	}
+	
+	
+	public static void recalculateTp()
+	{
+		for (Document user : usersV2.find())
+		{
+			// Technically unsafe, but whatever.
+			long id = Long.parseLong(user.getString("discordId"));
+			ArrayList<Bson> userUpdates = new ArrayList<Bson>();
+			
+			double weightedTp = getWeightedTp(id);
+			userUpdates.add(Updates.set("totalTp", weightedTp));
+			
+			usersV2.updateOne(
+					Filters.eq("discordId", String.valueOf(id)),
+					Updates.combine(
+							userUpdates
+							),
+					upsertTrue
+			);
+		}
 	}
 }
