@@ -103,7 +103,26 @@ public class Administrator extends ListenerAdapter
 				}
 			});
 		}
+		
+		else if (Aliases.RECALCULATE_TYPING_POINTS.contains(args[0].toLowerCase()))
+		{
+			Zyenyo.masterThreadPool.submit(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					long startTime = System.currentTimeMillis();
+					Database.recalculateTp();
+					
+					channel.sendMessageFormat(
+							"Successfully recalculated TP.%nTime taken: %dms",
+							System.currentTimeMillis() - startTime).queue();
 
+				}
+			});
+		
+		}
+		
 		else if (Aliases.RESTART.contains(args[0].toLowerCase()))
 		{
 			channel.sendMessageFormat("A restart has been scheduled.").queue();
