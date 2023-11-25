@@ -58,6 +58,9 @@ public final class Aliases
 	public static final Set<String> TYPETOP = Set.of(
 			BotConfig.PREFIX + "typetop",
 			BotConfig.PREFIX + "ttop");
+	public static final Set<String> COMPARE = Set.of(
+			BotConfig.PREFIX + "compare",
+			BotConfig.PREFIX + "c");
 	public final static Set<String> CHART = Collections.singleton(BotConfig.PREFIX + "chart");
 	public final static Set<String> LEADERBOARD = Set.of(
 			BotConfig.PREFIX + "leaderboard",

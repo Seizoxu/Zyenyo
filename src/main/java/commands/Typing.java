@@ -3,6 +3,7 @@ package commands;
 import java.util.HashMap;
 
 import asynchronous.typing.Chart;
+import asynchronous.typing.CompareTest;
 import asynchronous.typing.Daily;
 import asynchronous.typing.Leaderboard;
 import asynchronous.typing.TypeList;
@@ -122,6 +123,11 @@ public class Typing extends ListenerAdapter
 		else if (Aliases.TYPETOP.contains(args[0].toLowerCase()))
 		{
 			Zyenyo.masterThreadPool.submit(new TypeTop(event, args));
+		}
+
+		else if (Aliases.COMPARE.contains(args[0].toLowerCase()))
+		{
+			Zyenyo.masterThreadPool.submit(new CompareTest(event, args));
 		}
 	}
 }
