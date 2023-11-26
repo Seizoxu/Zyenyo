@@ -10,7 +10,6 @@ public class CompareTest implements Runnable
 {
 
 	private MessageReceivedEvent event;
-	private String[] args;
 	
 	/**
 	 * Sends a message embed of a specified user's top 100 tests.
@@ -21,7 +20,6 @@ public class CompareTest implements Runnable
 	public CompareTest(MessageReceivedEvent event, String[] args)
 	{
 		this.event = event;
-		this.args = args;
 	}
 	
 	@Override
@@ -37,7 +35,7 @@ public class CompareTest implements Runnable
 			"Best TP: **`%.2f`**%n"
 				+ "Best WPM: **`%.2f`**%n"
 				+ "Best ACC: **`%.2f`**%%%n"
-				+ "Average WPM: **`%.2f`**%n",
+				+ "Average TP: **`%.2f`**%n",
 				stats.getDouble("maxTp"), stats.getDouble("maxWpm"), stats.getDouble("maxAcc"), stats.getDouble("avgTp")));
 
 		event.getChannel().sendMessageEmbeds(embed.build()).queue();
