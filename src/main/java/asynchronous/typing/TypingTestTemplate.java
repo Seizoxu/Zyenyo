@@ -101,7 +101,8 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 						calc.typingPoints(),
 						timeTakenMillis,
 						userTypingSubmission,
-						promptTitle	
+						promptTitle	,
+						answerChannel.getId()
 						)
 				);
 	}

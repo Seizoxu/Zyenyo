@@ -109,6 +109,7 @@ public class Database
 				.append("prompt", submission.promptTitle())
 				.append("submittedText", submission.userTypingSubmission())
 				.append("date", LocalDateTime.now())
+				.append("channelId", submission.channelId())
 				);
 
 		double newWeightedTp = getWeightedTp(submission.userID());
@@ -320,6 +321,28 @@ public class Database
 				));
 		
 		return playsList;
+	}
+
+	public static Document channelCompare(String channelID, String discordId) {
+		Document test = testsV2.find(Filters.eq("channelId", channelID))
+				.sort(descending("date"))
+				.first();
+
+		String promptToCompare = test.getString("prompt");
+		
+		Document results = testsV2.aggregate(Arrays.asList(
+			Aggregates.match(Filters.eq("discordId", discordId)),
+			Aggregates.match(Filters.eq("channelId", channelID)),
+			Aggregates.match(Filters.eq("prompt", promptToCompare)),
+			Aggregates.group("$prompt", 
+				Accumulators.max("maxTp", "$tp"),
+				Accumulators.max("maxWpm", "$wpm"),
+				Accumulators.max("maxAcc", "$accuracy"),
+				Accumulators.avg("avgTp", "$tp")
+			)
+		)).first();
+
+		return results;
 	}
 	
 	
