@@ -24,6 +24,7 @@ deploy() {
 
     echo "[TERM] Starting Zyenyo..." >> "$logfile" 2>&1
     java -cp $jarfile zyenyo.Zyenyo $BOT_TOKEN $MONGO_URI $ZYENYO_ENVIRONMENT >> "$logfile" 2>&1
+    sleep 5
 }
 
 # Run once first.
