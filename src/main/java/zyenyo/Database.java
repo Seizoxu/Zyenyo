@@ -332,7 +332,6 @@ public class Database
 		
 		Document results = testsV2.aggregate(Arrays.asList(
 			Aggregates.match(Filters.eq("discordId", discordId)),
-			Aggregates.match(Filters.eq("channelId", channelID)),
 			Aggregates.match(Filters.eq("prompt", promptToCompare)),
 			Aggregates.group("$prompt", 
 				Accumulators.max("maxTp", "$tp"),
