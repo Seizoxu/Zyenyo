@@ -1,0 +1,26 @@
+services:
+  backend:
+    container_name: zyenyo-backend
+    build:
+      context: zyenyo-backend
+      target: production
+    restart: always
+    env_file: .env
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./zyenyo-frontend
+    restart: always
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+
+  discord:
+    build:
+      context: ./zyenyo-discord
+      target: runner
+    restart: always
+    env_file: .env
