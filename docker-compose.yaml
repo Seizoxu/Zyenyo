@@ -1,0 +1,29 @@
+services:
+  backend:
+    container_name: zyenyo-backend
+    build:
+      context: zyenyo-backend
+      target: development
+    env_file: .env
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./zyenyo-frontend
+      target: development
+    command: npm run dev
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./zyenyo-frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+
+  discord:
+    build:
+      context: ./zyenyo-discord
+      target: runner
+    env_file: .env
