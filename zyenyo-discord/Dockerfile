@@ -17,14 +17,13 @@ RUN mkdir -p $HOME
 WORKDIR $HOME
 ADD pom.xml $HOME
 RUN mvn verify --fail-never
-ADD . $HOME
+COPY . .
 RUN mvn package
 
 FROM eclipse-temurin:17-jdk-jammy as runner
-COPY --from=build /app/target/* /app/target/
-COPY --from=build /app/ZBotData/* /app/ZBotData/
-
-
+WORKDIR /app
+COPY --from=build /app/target target
+COPY ./ZBotData ZBotData
 
 CMD java -cp /app/target/zyenyo*.jar zyenyo.Zyenyo $BOT_TOKEN $MONGO_URI $ZYENYO_ENVIRONMENT 
 
