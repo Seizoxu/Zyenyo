@@ -35,7 +35,7 @@ async fn get_user(context: web::Data<Context>, discordId: web::Path<String>) -> 
     match collection.find_one(doc! { "discordId": &discord_id }, None).await {
         Ok(Some(user)) => HttpResponse::Ok().json(user),
         Ok(None) => {
-            HttpResponse::NotFound().body(format!("No user found with discordId {discord_id}"))
+            HttpResponse::NotFound().body(format!("No user found with discord ID {discord_id}"))
         }
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
@@ -44,7 +44,6 @@ async fn get_user(context: web::Data<Context>, discordId: web::Path<String>) -> 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     env::set_var("RUST_LOG", "debug");
-
     let uri = env::var("MONGO_URI").expect("database URI not provided");
     let client = Client::with_uri_str(uri).await.expect("failed to connect to database");
     let environment = env::var("ZYENYO_ENVIRONMENT").expect("ENVIRONMENT not provided");
@@ -54,13 +53,12 @@ async fn main() -> std::io::Result<()> {
         environment,
     };
 
-
-
     HttpServer::new(move || {
-        let cors = Cors::default()
-            .allowed_origin("http://localhost:80")
-            .allowed_origin("http://localhost:8080")
-            .allowed_methods(vec!["GET", "POST"]);
+        let cors = match context.environment.as_str() {
+            "development" => Cors::permissive(),
+            "production" => Cors::default().allowed_origin("http://localhost:80").allowed_methods(vec!["GET", "POST"]),
+            _ => panic!()
+        };
 
         App::new()
             .wrap(cors)
