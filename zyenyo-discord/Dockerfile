@@ -1,30 +1,16 @@
-# syntax=docker/dockerfile:1
-
-# FROM eclipse-temurin:17-jdk-jammy
-
-# WORKDIR /app
-
-# COPY .project pom.xml ./
-# COPY src ./src
-
-# ARG jarfile=/app/target/*.jar
-
-# CMD java -cp $jarfile zyenyo.Zyenyo $BOT_TOKEN $MONGO_URI $ZYENYO_ENVIRONMENT 
-
 FROM maven as build
 ENV HOME=/app
 RUN mkdir -p $HOME
 WORKDIR $HOME
 ADD pom.xml $HOME
 RUN mvn verify --fail-never
-ADD . $HOME
+COPY . .
 RUN mvn package
 
 FROM eclipse-temurin:17-jdk-jammy as runner
-COPY --from=build /app/target/* /app/target/
-COPY --from=build /app/ZBotData/* /app/ZBotData/
-
-
+WORKDIR /app
+COPY --from=build /app/target target
+COPY ./ZBotData ZBotData
 
 CMD java -cp /app/target/zyenyo*.jar zyenyo.Zyenyo $BOT_TOKEN $MONGO_URI $ZYENYO_ENVIRONMENT 
 
