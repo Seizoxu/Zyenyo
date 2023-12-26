@@ -20,7 +20,7 @@ services:
       - /app/node_modules
       - /app/.next
     ports:
-      - "3000:3000"
+      - "8080:8080"
 
   discord:
     build:

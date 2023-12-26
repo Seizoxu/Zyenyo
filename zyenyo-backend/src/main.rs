@@ -41,11 +41,6 @@ async fn get_user(context: web::Data<Context>, discordId: web::Path<String>) -> 
     }
 }
 
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
-}
-
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     env::set_var("RUST_LOG", "debug");
@@ -63,7 +58,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         let cors = Cors::default()
-            .allowed_origin("http://localhost:3000")
+            .allowed_origin("http://localhost:8080")
             .allowed_methods(vec!["GET", "POST"]);
 
         App::new()
@@ -72,7 +67,6 @@ async fn main() -> std::io::Result<()> {
             .service(hello)
             .service(echo)
             .service(get_user)
-            .route("/hey", web::get().to(manual_hello))
     })
     .bind("0.0.0.0:8000")?
     .run()

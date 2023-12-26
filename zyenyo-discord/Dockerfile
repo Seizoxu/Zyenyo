@@ -1,16 +1,3 @@
-# syntax=docker/dockerfile:1
-
-# FROM eclipse-temurin:17-jdk-jammy
-
-# WORKDIR /app
-
-# COPY .project pom.xml ./
-# COPY src ./src
-
-# ARG jarfile=/app/target/*.jar
-
-# CMD java -cp $jarfile zyenyo.Zyenyo $BOT_TOKEN $MONGO_URI $ZYENYO_ENVIRONMENT 
-
 FROM maven as build
 ENV HOME=/app
 RUN mkdir -p $HOME
