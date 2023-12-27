@@ -56,7 +56,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         let cors = match context.environment.as_str() {
             "development" => Cors::permissive(),
-            "production" => Cors::default().allowed_origin("http://localhost:80").allowed_methods(vec!["GET", "POST"]),
+            "production" => Cors::default().allowed_origin("https://zyenyobot.com").allowed_methods(vec!["GET", "POST"]),
             _ => panic!()
         };
 
