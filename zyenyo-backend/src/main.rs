@@ -16,7 +16,7 @@ pub struct Context {
     environment: String,
 }
 
-#[get("/")]
+#[get("/api")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().json(json!({"ping": "hello world!"}))
 }
