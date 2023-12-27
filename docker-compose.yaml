@@ -1,12 +1,21 @@
 services:
+  nginx:
+    build:
+      context: ./nginx-docker
+    ports:
+      - "8080:8080"
+    environment:
+      - NEXTJS_CONTAINER_IP=frontend
+      - ACTIX_CONTAINER_IP=backend
+      - CONF_FILE=dev-nginx.conf
+    command: [ 'sh', '/etc/nginx/convert-nginx.sh'] 
+
   backend:
     container_name: zyenyo-backend
     build:
       context: zyenyo-backend
       target: development
     env_file: .env
-    ports:
-      - "8000:8000"
 
   frontend:
     build:
@@ -19,8 +28,6 @@ services:
       - ./zyenyo-frontend:/app
       - /app/node_modules
       - /app/.next
-    ports:
-      - "8080:8080"
 
   discord:
     build:

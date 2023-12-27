@@ -1,4 +1,27 @@
 services:
+  nginx:
+    build:
+      context: ./nginx-docker
+    ports:
+      - "80:8080"
+    environment:
+      - NEXTJS_CONTAINER_IP=frontend
+      - ACTIX_CONTAINER_IP=backend
+      - CONF_FILE=prod-nginx.conf
+    command: [ 'sh', '/etc/nginx/convert-nginx.sh'] 
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
   backend:
     container_name: zyenyo-backend
     build:

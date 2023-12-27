@@ -12,7 +12,7 @@ const TestComponent = () => {
 
     useEffect(() => {
         async function query() {
-            const res = await axios.get("http://localhost:8000")
+            const res = await axios.get("/api")
 
             const response = res.data as Response
             setTest(response.ping)
