@@ -3,7 +3,8 @@ services:
     build:
       context: ./nginx-docker
     ports:
-      - "80:8080"
+      - "80:80"
+      - "443:443"
     environment:
       - NEXTJS_CONTAINER_IP=frontend
       - ACTIX_CONTAINER_IP=backend
@@ -12,8 +13,8 @@ services:
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
-    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
-
+    networks:
+      - app-network
 
   certbot:
     image: certbot/certbot
@@ -23,23 +24,24 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
   backend:
-    container_name: zyenyo-backend
+    container_name: backend
     build:
       context: zyenyo-backend
       target: production
     restart: always
     env_file: .env
-    ports:
-      - "8000:8000"
+    networks:
+      - app-network
 
   frontend:
+    container_name: frontend
     build:
       context: ./zyenyo-frontend
     restart: always
     environment:
       - NODE_ENV=production
-    ports:
-      - "80:8080"
+    networks:
+      - app-network
 
   discord:
     build:
@@ -47,3 +49,7 @@ services:
       target: runner
     restart: always
     env_file: .env
+
+networks:
+  app-network:
+    driver: bridge
