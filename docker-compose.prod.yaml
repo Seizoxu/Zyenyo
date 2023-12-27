@@ -13,7 +13,7 @@ services:
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
-    netowrks:
+    networks:
       - app-network
 
   certbot:
@@ -30,7 +30,7 @@ services:
       target: production
     restart: always
     env_file: .env
-    netowrks:
+    networks:
       - app-network
 
   frontend:
