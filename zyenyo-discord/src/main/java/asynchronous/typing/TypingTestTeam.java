@@ -14,6 +14,7 @@ import zyenyo.BotConfig;
 import zyenyo.Database;
 
 import commands.Typing;
+import dataStructures.PromptHeadings;
 import dataStructures.TypingSubmission;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -59,8 +60,9 @@ public class TypingTestTeam extends TypingTestTemplate
 					+ ZERO_WIDTH_NON_JOINER
 					+ prompt.substring(prompt.length()/2, prompt.length());
 			
+			promptTitle = PromptHeadings.get(promptNumber);
 			EmbedBuilder embed = new EmbedBuilder()
-					.setTitle("Typing Prompt:")
+					.setTitle(String.format("[#%d | %.2fTR] %s", promptNumber, promptRating, promptTitle))
 					.setDescription(fakePrompt)
 					.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
 			

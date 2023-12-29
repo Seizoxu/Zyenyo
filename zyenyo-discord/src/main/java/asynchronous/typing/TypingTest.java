@@ -62,7 +62,7 @@ public class TypingTest extends TypingTestTemplate
 
 			promptTitle = PromptHeadings.get(promptNumber);						
 			EmbedBuilder embed = new EmbedBuilder()
-					.setTitle(String.format("%s", promptTitle))
+					.setTitle(String.format("[#%d | %.2fTR] %s", promptNumber, promptRating, promptTitle))
 					.setDescription(fakePrompt)
 					.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
 			
