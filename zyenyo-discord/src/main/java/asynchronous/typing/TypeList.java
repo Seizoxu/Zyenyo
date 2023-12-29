@@ -16,6 +16,9 @@ public class TypeList implements Runnable
 	private MessageReceivedEvent event;
 	private String[] args;
 	
+	private int pageNumber = 1;
+	private String searchString = "";
+	
 	public TypeList(MessageReceivedEvent event, String[] args)
 	{
 		this.event = event;
@@ -26,9 +29,10 @@ public class TypeList implements Runnable
 	@Override
 	public void run()
 	{
-		event.getChannel().sendTyping();
+		event.getChannel().sendTyping().queue();
 		
-		int pageNumber = parsePageNumber(args, 1);
+		parseArguments();
+		
 		int promptOffset = 10 * (pageNumber-1);
 		EmbedBuilder embed = new EmbedBuilder()
 				.setTitle("Prompts List")
@@ -52,18 +56,36 @@ public class TypeList implements Runnable
 	}
 	
 	
-	private int parsePageNumber(String[] args, int argumentIndex)
+	/**
+	 * Parses command arguments from args[].
+	 */
+	private void parseArguments()
 	{
-		try
+		for (int i = 0; i < args.length; i++)
 		{
-			int pageNumberInt = Integer.parseInt(args[argumentIndex]);
-
-			if (pageNumberInt > NUM_PAGES) {return 1;}
-			return pageNumberInt;
-		}
-		catch(NumberFormatException | ArrayIndexOutOfBoundsException e)
-		{
-			return 1;
+			String cmd = args[i];
+			
+			switch(cmd)
+			{
+			case "-page": case "-p":
+				try
+				{
+					int pageNumberInt = Integer.parseInt(args[i+1]);
+					if (pageNumberInt > NUM_PAGES) {continue;}
+					if (pageNumberInt <= 0) {continue;}
+					pageNumber = pageNumberInt;
+				}
+				catch(NumberFormatException | ArrayIndexOutOfBoundsException e) {e.printStackTrace();}
+				break;
+			case "-search": case "-s":
+				try
+				{
+					if (!searchString.isBlank()) {continue;}
+					searchString = args[i+1];
+				}
+				catch(ArrayIndexOutOfBoundsException e) {e.printStackTrace();}
+				break;
+			}
 		}
 	}
 }
