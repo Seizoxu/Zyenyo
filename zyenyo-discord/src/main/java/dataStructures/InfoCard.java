@@ -161,8 +161,11 @@ public class InfoCard
 		.setDescription("This command displays a list of all available prompts.")
 		.setColor(0x8D538D)
 		.addField("Aliases","`tlist`, `tl`", false)
-		.addField("Syntax", "`\\typelist [Page Number]`", false)
-		.addField("Hint", "You can choose your own prompt with `\\tt [prompt number]`", false);
+		.addField("Syntax", "`\\typelist [Options]`", false)
+		.addField("Options",
+				  "`-search | -s:` Specifies a search phrase (Eg: `-s the chandelier`).\n"
+				+ "`-page   | -p:` Specifies a page number (Eg: `-p 2`).\n", false)
+	.addField("Hint", "You can choose your own prompt with `\\tt [prompt number]`", false);
 	
 	public static final EmbedBuilder TYPING_TOPS =
 		new EmbedBuilder()
