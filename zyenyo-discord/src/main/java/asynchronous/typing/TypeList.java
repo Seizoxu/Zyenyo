@@ -136,8 +136,9 @@ public class TypeList implements Runnable
 				StringSimilarityPair s = relevantResults.poll();
 				searchResults.put(
 						String.format(
-								"[%d] %s",
+								"`[#%d | %.2fTR]` %s",
 								s.promptId,
+								BotConfig.promptRatingMap.get(i + promptOffset),
 								PromptHeadings.get(s.promptId)),
 						BotConfig.promptMap.get(s.promptId).substring(0, 150) + "..."
 						);
@@ -150,8 +151,9 @@ public class TypeList implements Runnable
 			{
 				searchResults.put(
 						String.format(
-								"[%d] %s",
+								"`[#%d | %.2fTR]` %s",
 								i + promptOffset,
+								BotConfig.promptRatingMap.get(i + promptOffset),
 								PromptHeadings.get(i + promptOffset)),
 						BotConfig.promptMap.get(i + promptOffset).substring(0, 150) + "..."
 						);
