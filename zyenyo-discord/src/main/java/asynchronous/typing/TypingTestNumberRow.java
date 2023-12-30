@@ -42,22 +42,21 @@ public class TypingTestNumberRow extends TypingTestTemplate
 			}
 		}
 
-
-		numChars = prompt.length();
-		long endTime = (System.currentTimeMillis() / 1000) + (60*numChars / (WPM_MINIMUM * NUM_CHARS_IN_WORD));
-
 		fakePrompt = prompt.substring(0, prompt.length()/2)
 				+ ZERO_WIDTH_NON_JOINER
 				+ prompt.substring(prompt.length()/2, prompt.length());
+		numChars = prompt.length();
+		long endTime = (System.currentTimeMillis() / 1000) + (60*numChars / (WPM_MINIMUM * NUM_CHARS_IN_WORD));
 
 		EmbedBuilder embed = new EmbedBuilder()
-		.setTitle("Typing Prompt:")
-		.setDescription(fakePrompt)
-		.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
+				.setTitle("Typing Prompt:")
+				.setDescription(fakePrompt)
+				.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
+
 		channel.sendMessageEmbeds(embed.build()).complete();
-		startTime = System.currentTimeMillis();
 
 		// Makes sure the typing test finishes on time.
+		startTime = System.currentTimeMillis();
 		long delay = endTime*1000 - startTime;
 		scheduledStop = schedulePool.schedule(concludeTest, delay, TimeUnit.MILLISECONDS);
 	}

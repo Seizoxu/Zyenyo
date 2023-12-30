@@ -1,23 +1,19 @@
 package asynchronous.typing;
 
-import java.util.Arrays;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import zyenyo.BotConfig;
-import zyenyo.Database;
 
 import commands.Typing;
 import dataStructures.PromptHeadings;
 import dataStructures.TypingSubmission;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import zyenyo.BotConfig;
+import zyenyo.Database;
 
 public class TypingTestTeam extends TypingTestTemplate
 {
@@ -45,41 +41,27 @@ public class TypingTestTeam extends TypingTestTemplate
 	protected void constructAndSendTest() // Essentially a duplicate of 
 	{
 		int promptNumber = (int) (BotConfig.NUM_PROMPTS*Math.random() + 1);
-		
+
+		prompt = BotConfig.promptMap.get(promptNumber);
 		promptRating = BotConfig.promptRatingMap.get(promptNumber);
+		promptTitle = PromptHeadings.get(promptNumber);
+		fakePrompt = prompt.substring(0, prompt.length()/2)
+				+ ZERO_WIDTH_NON_JOINER
+				+ prompt.substring(prompt.length()/2, prompt.length());
+		numChars = prompt.length();
+		long endTime = (System.currentTimeMillis() / 1000) + (60*numChars / (WPM_MINIMUM * NUM_CHARS_IN_WORD));
+		
+		EmbedBuilder embed = new EmbedBuilder()
+				.setTitle(String.format("[#%d | %.2fTR] %s", promptNumber, promptRating, promptTitle))
+				.setDescription(fakePrompt)
+				.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
+		
+		channel.sendMessageEmbeds(embed.build()).complete();
 
-		try (BufferedReader reader = new BufferedReader(new FileReader(
-								String.format("%sprompt%d.txt", TEST_PROMPTS_FILEPATH, promptNumber)));)
-		{
-			prompt = reader.readLine();
-			numChars = prompt.length();
-
-			// Sets ending time and sends typing test.
-			long endTime = (System.currentTimeMillis() / 1000) + (60*numChars / (WPM_MINIMUM * NUM_CHARS_IN_WORD));
-			fakePrompt = prompt.substring(0, prompt.length()/2)
-					+ ZERO_WIDTH_NON_JOINER
-					+ prompt.substring(prompt.length()/2, prompt.length());
-			
-			promptTitle = PromptHeadings.get(promptNumber);
-			EmbedBuilder embed = new EmbedBuilder()
-					.setTitle(String.format("[#%d | %.2fTR] %s", promptNumber, promptRating, promptTitle))
-					.setDescription(fakePrompt)
-					.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
-			
-			channel.sendMessageEmbeds(embed.build()).complete();
-			startTime = System.currentTimeMillis();
-
-			// Makes sure the typing test finishes on time.
-			long delay = endTime*1000 - startTime;
-			scheduledStop = schedulePool.schedule(concludeTest, delay, TimeUnit.MILLISECONDS);
-		}
-		catch (IOException e)
-		{
-			channel.sendMessageEmbeds(new EmbedBuilder()
-					.addField("Error", "Internal error — contact developer.", false)
-					.build())
-			.queue();
-		}
+		// Makes sure the typing test finishes on time.
+		startTime = System.currentTimeMillis();
+		long delay = endTime*1000 - startTime;
+		scheduledStop = schedulePool.schedule(concludeTest, delay, TimeUnit.MILLISECONDS);
 	}
 	
 	
@@ -92,7 +74,7 @@ public class TypingTestTeam extends TypingTestTemplate
 		}
 		catch (NullPointerException e)
 		{
-			System.out.println("[ERROR: TYPINGTEST] Could not quit test. Aborting...");
+			System.out.println("[ERROR: TypingTestTeam] Could not quit test. Aborting...");
 		}
 		finally
 		{

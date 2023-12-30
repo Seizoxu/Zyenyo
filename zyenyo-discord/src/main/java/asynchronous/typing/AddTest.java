@@ -4,6 +4,7 @@ import dataStructures.InfoCard;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
+@Deprecated
 public class AddTest implements Runnable
 {
 	private MessageReceivedEvent event;

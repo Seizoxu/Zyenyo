@@ -1,15 +1,14 @@
 package dataStructures;
 
-import com.mongodb.client.model.Accumulators;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.BsonField;
-import com.mongodb.client.model.Filters;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.conversions.Bson;
+
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.BsonField;
+import com.mongodb.client.model.Filters;
 
 /*
  * creates a LeaderboardConfig object that can be passed to getLeaderboards in Database.java, which ensures that an invalid leaderboard configuration can never be passed in. for example, the leaderboard of BEST ACCURACY makes sense, but leaderboard of SUM ACCURACY does not.

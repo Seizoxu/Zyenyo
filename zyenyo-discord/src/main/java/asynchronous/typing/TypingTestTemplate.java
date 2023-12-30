@@ -18,7 +18,6 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import zyenyo.BotConfig;
 import zyenyo.Database;
 
 public abstract class TypingTestTemplate extends ListenerAdapter implements Runnable
@@ -36,7 +35,6 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	protected TypingTestLeaderboard submissions = new TypingTestLeaderboard();
 	protected String promptTitle;
 
-	protected final static String TEST_PROMPTS_FILEPATH = BotConfig.BOT_DATA_FILEPATH + "TypingPrompts/";
 	protected final static String ZERO_WIDTH_NON_JOINER = "‌";
 	protected final static short NUM_CHARS_IN_WORD = 5;
 	

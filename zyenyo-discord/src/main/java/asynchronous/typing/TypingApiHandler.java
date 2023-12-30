@@ -6,6 +6,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+@Deprecated
 public class TypingApiHandler
 {
 	public static String requestData(String requestStr) throws IOException, InterruptedException
