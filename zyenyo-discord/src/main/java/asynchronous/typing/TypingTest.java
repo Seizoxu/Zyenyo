@@ -1,8 +1,5 @@
 package asynchronous.typing;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -34,9 +31,6 @@ public class TypingTest extends TypingTestTemplate
 		if (args.length >=2)
 		{
 			promptSelect = parsePromptSelect(args[1]);
-		
-			// Second argument will be EITHER promptSelect or difficulty.
-//			String difficulty = parseDifficultySelect(args[1]);
 		}
 		
 		constructAndSendTest(promptSelect, "none");
@@ -46,42 +40,29 @@ public class TypingTest extends TypingTestTemplate
 	protected void constructAndSendTest(int promptNumber, String difficulty)
 	{
 		promptNumber = parseDifficulty(promptNumber, difficulty);
+
+		prompt = BotConfig.promptMap.get(promptNumber);
 		promptRating = BotConfig.promptRatingMap.get(promptNumber);
+		promptTitle = PromptHeadings.get(promptNumber);						
+		fakePrompt = prompt.substring(0, prompt.length()/2)
+				+ ZERO_WIDTH_NON_JOINER
+				+ prompt.substring(prompt.length()/2, prompt.length());
+		numChars = prompt.length();
+		long endTime = (System.currentTimeMillis() / 1000) + (60*numChars / (WPM_MINIMUM * NUM_CHARS_IN_WORD));
 
-		try (BufferedReader reader = new BufferedReader(new FileReader(
-								String.format("%sprompt%d.txt", TEST_PROMPTS_FILEPATH, promptNumber)));)
-		{
-			prompt = reader.readLine();
-			numChars = prompt.length();
+		EmbedBuilder embed = new EmbedBuilder()
+				.setTitle(String.format("[#%d | %.2fTR] %s", promptNumber, promptRating, promptTitle))
+				.setDescription(fakePrompt)
+				.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
+		
+		/* .complete() is used here instead of .queue(), since we need to
+		 * wait for the message to be sent. */
+		channel.sendMessageEmbeds(embed.build()).complete();
 
-			// Sets ending time and sends typing test.
-			long endTime = (System.currentTimeMillis() / 1000) + (60*numChars / (WPM_MINIMUM * NUM_CHARS_IN_WORD));
-			fakePrompt = prompt.substring(0, prompt.length()/2)
-					+ ZERO_WIDTH_NON_JOINER
-					+ prompt.substring(prompt.length()/2, prompt.length());
-
-			promptTitle = PromptHeadings.get(promptNumber);						
-			EmbedBuilder embed = new EmbedBuilder()
-					.setTitle(String.format("[#%d | %.2fTR] %s", promptNumber, promptRating, promptTitle))
-					.setDescription(fakePrompt)
-					.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
-			
-			/* .complete() is used here instead of .queue(), since we need to
-			 * wait for the message to be sent. */
-			channel.sendMessageEmbeds(embed.build()).complete();
-			startTime = System.currentTimeMillis();
-
-			// Makes sure the typing test finishes on time.
-			long delay = endTime*1000 - startTime;
-			scheduledStop = schedulePool.schedule(concludeTest, delay, TimeUnit.MILLISECONDS);
-		}
-		catch (IOException e)
-		{
-			channel.sendMessageEmbeds(new EmbedBuilder()
-					.addField("Error", "Internal error — contact developer.", false)
-					.build())
-			.queue();
-		}
+		// Makes sure the typing test finishes on time.
+		startTime = System.currentTimeMillis();
+		long delay = endTime*1000 - startTime;
+		scheduledStop = schedulePool.schedule(concludeTest, delay, TimeUnit.MILLISECONDS);
 	}
 	
 	
@@ -102,14 +83,6 @@ public class TypingTest extends TypingTestTemplate
 			return -1;
 		}
 	}
-	
-	
-//	private String parseDifficultySelect(String difficulty)
-//	{
-//		if (!DIFFICULTIES.contains(difficulty)) {return "none";}
-//		
-//		return difficulty.toLowerCase();
-//	}
 	
 	
 	private int parseDifficulty(int promptNumber, String difficulty)
