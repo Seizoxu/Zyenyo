@@ -7,20 +7,20 @@ package dataStructures;
  */
 public class LongestCommonSubstring
 {
-	public static String find(String str1, String str2)
+	public static String find(String needle, String haystack)
 	{
-		int m = str1.length();
-		int n = str2.length();
+		int needleLength = needle.length();
+		int haystackLength = haystack.length();
 
-		int[][] dp = new int[m+1][n+1];
+		int[][] dp = new int[needleLength+1][haystackLength+1];
 		int maxLength = 0;
 		int endIndex = 0;
 
-		for (int i = 1; i <= m; i++)
+		for (int i = 1; i <= needleLength; i++)
 		{
-			for (int j = 1; j <= n; j++)
+			for (int j = 1; j <= haystackLength; j++)
 			{
-				if (str1.charAt(i-1) == str2.charAt(j-1))
+				if (needle.charAt(i-1) == haystack.charAt(j-1))
 				{
 					dp[i][j] = dp[i-1][j-1] + 1;
 					if (dp[i][j] > maxLength)
@@ -36,6 +36,6 @@ public class LongestCommonSubstring
 			}
 		}
 
-		return str1.substring(endIndex - maxLength + 1, endIndex + 1);
+		return needle.substring(endIndex - maxLength + 1, endIndex + 1);
 	}
 }
