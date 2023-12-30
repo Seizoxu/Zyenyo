@@ -1,20 +1,31 @@
 package asynchronous.typing;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
 
+import dataStructures.LongestCommonSubstring;
 import dataStructures.PromptHeadings;
+import dataStructures.StringSimilarityPair;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import zyenyo.BotConfig;
 
+/**
+ * Constructs and returns a list of prompts.
+ */
 public class TypeList implements Runnable
 {
 	private static final int NUM_PAGES = (BotConfig.NUM_PROMPTS / 10) + 1;
-	private static final String TEST_PROMPTS_FILEPATH = "ZBotData/TypingPrompts/";
 	private MessageReceivedEvent event;
 	private String[] args;
+	
+	private int pageNumber = 1;
+	private int numResults = 10;
+	private String searchString = "";
+	private EmbedBuilder embed = new EmbedBuilder();
 	
 	public TypeList(MessageReceivedEvent event, String[] args)
 	{
@@ -26,44 +37,129 @@ public class TypeList implements Runnable
 	@Override
 	public void run()
 	{
-		event.getChannel().sendTyping();
+		event.getChannel().sendTyping().queue();
+		parseArguments();
 		
-		int pageNumber = parsePageNumber(args, 1);
-		int promptOffset = 10 * (pageNumber-1);
-		EmbedBuilder embed = new EmbedBuilder()
-				.setTitle("Prompts List")
-				.setFooter(String.format("Page %d of %d", pageNumber, NUM_PAGES));
+		// Search.
+		int promptOffset = numResults * (pageNumber-1);
+		Map<String, String> searchResults = searchPrompts(promptOffset);
+		embed.setFooter(String.format("Page %d of %d", pageNumber, NUM_PAGES));
 		
-		for (int i = 0; i < 10; i++)
+		// Add results to embed.
+		for (Map.Entry<String, String> entry : searchResults.entrySet())
 		{
-			try (BufferedReader reader = new BufferedReader(new FileReader(
-					String.format("%sprompt%d.txt", TEST_PROMPTS_FILEPATH, i + promptOffset)));)
-			{
-				embed.addField(
-						String.format("[%d] %s", i + promptOffset, PromptHeadings.get(i + promptOffset)),
-						reader.readLine().substring(0, 150) + "...",
-						false
-						);
-			}
-			catch (IndexOutOfBoundsException | IOException e) {}
+			embed.addField(
+					entry.getKey(),
+					entry.getValue(),
+					false
+					);
 		}
 		
 		event.getChannel().sendMessageEmbeds(embed.build()).queue();
 	}
 	
 	
-	private int parsePageNumber(String[] args, int argumentIndex)
+	/**
+	 * Parses command arguments from args[].
+	 */
+	private void parseArguments()
 	{
-		try
+		List<String> commandAliases = List.of("-page", "-p", "-search", "-s");
+		
+		for (int i = 0; i < args.length; i++)
 		{
-			int pageNumberInt = Integer.parseInt(args[argumentIndex]);
+			String cmd = args[i];
+			
+			switch(cmd)
+			{
+			case "-page": case "-p":
+				try
+				{
+					if (args.length-1 == i) {continue;}
 
-			if (pageNumberInt > NUM_PAGES) {return 1;}
-			return pageNumberInt;
+					int pageNumberInt = Integer.parseInt(args[i+1]);
+					if (pageNumberInt > NUM_PAGES) {continue;}
+					if (pageNumberInt <= 0) {continue;}
+
+					pageNumber = pageNumberInt;
+				}
+				catch(NumberFormatException e) {e.printStackTrace();}
+				break;
+			case "-search": case "-s":
+				if (!searchString.isBlank()) {continue;}
+				if (args.length-1 == i) {continue;}
+				
+				for (int j = i+1; j < args.length; j++)
+				{
+					if (commandAliases.contains(args[j])) {break;}
+					searchString += args[j] + " ";
+				}
+				searchString = searchString.strip();
+				break;
+			}
 		}
-		catch(NumberFormatException | ArrayIndexOutOfBoundsException e)
+	}
+	
+	
+	/**
+	 * Searches through the prompts for the search string.
+	 * @param promptOffset
+	 * @return
+	 */
+	private Map<String, String> searchPrompts(int promptOffset)
+	{
+		Map<String, String> searchResults = new LinkedHashMap<>(numResults);
+		
+		if (!searchString.isBlank()) // if searching for something...
 		{
-			return 1;
+			embed.setTitle(String.format("Returning %d most relevant results for \"%s\"",
+					numResults,
+					searchString));
+			
+			PriorityQueue<StringSimilarityPair> relevantResults = new PriorityQueue<>(
+					Comparator.comparingDouble(p -> -p.similarityScore));
+			
+			for (Map.Entry<Integer, String> entry : BotConfig.promptMap.entrySet())
+			{
+				String promptTitleAndBody = PromptHeadings.get(entry.getKey()) + " " + BotConfig.promptMap.get(entry.getKey());
+				double similarityScore = (double)(LongestCommonSubstring.find(searchString, promptTitleAndBody).length())
+						/ (double)(promptTitleAndBody.length());
+
+				relevantResults.offer(new StringSimilarityPair(entry.getKey(), similarityScore));
+			}
+			
+			// Skip pages.
+			for (int i = 0; i < promptOffset; i++) {relevantResults.poll();}
+			for (int i = 0; i < numResults; i++)
+			{
+				
+				StringSimilarityPair s = relevantResults.poll();
+				searchResults.put(
+						String.format(
+								"`[#%d | %.2fTR]` %s",
+								s.promptId,
+								BotConfig.promptRatingMap.get(i + promptOffset),
+								PromptHeadings.get(s.promptId)),
+						BotConfig.promptMap.get(s.promptId).substring(0, 150) + "..."
+						);
+			}
 		}
+		else
+		{
+			embed.setTitle("Prompts List");
+			for (int i = 0; i < numResults; i++)
+			{
+				searchResults.put(
+						String.format(
+								"`[#%d | %.2fTR]` %s",
+								i + promptOffset,
+								BotConfig.promptRatingMap.get(i + promptOffset),
+								PromptHeadings.get(i + promptOffset)),
+						BotConfig.promptMap.get(i + promptOffset).substring(0, 150) + "..."
+						);
+			}
+		}
+		
+		return searchResults;
 	}
 }
