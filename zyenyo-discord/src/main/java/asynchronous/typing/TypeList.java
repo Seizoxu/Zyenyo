@@ -13,6 +13,9 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import zyenyo.BotConfig;
 
+/**
+ * Constructs and returns a list of prompts.
+ */
 public class TypeList implements Runnable
 {
 	private static final int NUM_PAGES = (BotConfig.NUM_PROMPTS / 10) + 1;
@@ -98,16 +101,21 @@ public class TypeList implements Runnable
 	}
 	
 	
+	/**
+	 * Searches through the prompts for the search string.
+	 * @param promptOffset
+	 * @return
+	 */
 	private Map<String, String> searchPrompts(int promptOffset)
 	{
 		Map<String, String> searchResults = new LinkedHashMap<>(numResults);
 		
-		if (!searchString.isBlank())
+		if (!searchString.isBlank()) // if searching for something...
 		{
 			embed.setTitle(String.format("Returning %d most relevant results for \"%s\"",
 					numResults,
 					searchString));
-			//search and fill map; account for page number.
+			
 			PriorityQueue<StringSimilarityPair> relevantResults = new PriorityQueue<>(
 					Comparator.comparingDouble(p -> -p.similarityScore));
 			
@@ -120,7 +128,7 @@ public class TypeList implements Runnable
 				relevantResults.offer(new StringSimilarityPair(entry.getKey(), similarityScore));
 			}
 			
-			//account for page num later
+			// Skip pages.
 			for (int i = 0; i < promptOffset; i++) {relevantResults.poll();}
 			for (int i = 0; i < numResults; i++)
 			{
@@ -145,7 +153,8 @@ public class TypeList implements Runnable
 								"[%d] %s",
 								i + promptOffset,
 								PromptHeadings.get(i + promptOffset)),
-						BotConfig.promptMap.get(i + promptOffset).substring(0, 150));
+						BotConfig.promptMap.get(i + promptOffset).substring(0, 150) + "..."
+						);
 			}
 		}
 		
