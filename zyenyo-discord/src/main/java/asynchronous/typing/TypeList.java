@@ -8,6 +8,7 @@ import java.util.PriorityQueue;
 
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
+import dataStructures.LongestCommonSubstring;
 import dataStructures.PromptHeadings;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -37,11 +38,10 @@ public class TypeList implements Runnable
 		event.getChannel().sendTyping().queue();
 		parseArguments();
 		
-		long startTime = System.currentTimeMillis();
+		// Search.
 		int promptOffset = numResults * (pageNumber-1);
 		Map<String, String> searchResults = searchPrompts(promptOffset);
 		embed.setFooter(String.format("Page %d of %d", pageNumber, NUM_PAGES));
-		System.out.println("Search time: " + (System.currentTimeMillis() - startTime) + "ms");
 		
 		// Add results to embed.
 		for (Map.Entry<String, String> entry : searchResults.entrySet())
@@ -115,16 +115,17 @@ public class TypeList implements Runnable
 			for (Map.Entry<Integer, String> entry : BotConfig.promptMap.entrySet())
 			{
 				String promptTitleAndBody = PromptHeadings.get(entry.getKey()) + " " + BotConfig.promptMap.get(entry.getKey());
-				int editDistance = new LevenshteinDistance().apply(searchString, promptTitleAndBody);
-				double similarityScore = 100 * (double)(promptTitleAndBody.length() - editDistance) / (double)(promptTitleAndBody.length());
-				
+				double similarityScore = (double)(LongestCommonSubstring.find(searchString, promptTitleAndBody).length())
+						/ (double)(promptTitleAndBody.length());
+
 				relevantResults.offer(new StringSimilarityPair(entry.getKey(), similarityScore));
-//				if (relevantResults.size() > promptOffset+numResults) {relevantResults.poll();}
 			}
 			
 			//account for page num later
+			for (int i = 0; i < promptOffset; i++) {relevantResults.poll();}
 			for (int i = 0; i < numResults; i++)
 			{
+				
 				StringSimilarityPair s = relevantResults.poll();
 				searchResults.put(
 						String.format(
