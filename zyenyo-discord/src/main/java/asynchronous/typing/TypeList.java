@@ -6,10 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-import org.apache.commons.text.similarity.LevenshteinDistance;
-
 import dataStructures.LongestCommonSubstring;
 import dataStructures.PromptHeadings;
+import dataStructures.StringSimilarityPair;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import zyenyo.BotConfig;
@@ -151,19 +150,5 @@ public class TypeList implements Runnable
 		}
 		
 		return searchResults;
-	}
-}
-
-
-
-class StringSimilarityPair
-{
-	int promptId;
-	double similarityScore;
-	
-	public StringSimilarityPair(int promptId, double similarityScore)
-	{
-		this.promptId = promptId;
-		this.similarityScore = similarityScore;
 	}
 }
