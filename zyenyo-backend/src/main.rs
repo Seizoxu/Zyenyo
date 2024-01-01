@@ -1,44 +1,17 @@
 use std::env;
 
 mod models;
+mod routes;
 
-
-use models::User;
-
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, http};
+use actix_web::{web, App, HttpServer};
 use actix_cors::Cors;
-use mongodb::{Client, Collection, bson::doc};
-use serde_json::json;
+use mongodb::{Client, Database};
+use routes::api_config;
 
 #[derive(Clone)]
 pub struct Context {
-    db: Client,
+    db: Database,
     environment: String,
-}
-
-#[get("/api")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().json(json!({"ping": "hello world!"}))
-}
-
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    HttpResponse::Ok().body(req_body)
-}
-
-#[get("/get_user/{discordId}")]
-async fn get_user(context: web::Data<Context>, discordId: web::Path<String>) -> HttpResponse {
-    let discord_id = discordId.into_inner();
-    let collection: Collection<User> = context.db.database("ZyenyoStaging").collection("usersv2");
-    println!("{discord_id}");
-
-    match collection.find_one(doc! { "discordId": &discord_id }, None).await {
-        Ok(Some(user)) => HttpResponse::Ok().json(user),
-        Ok(None) => {
-            HttpResponse::NotFound().body(format!("No user found with discord ID {discord_id}"))
-        }
-        Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
-    }
 }
 
 #[actix_web::main]
@@ -48,24 +21,29 @@ async fn main() -> std::io::Result<()> {
     let client = Client::with_uri_str(uri).await.expect("failed to connect to database");
     let environment = env::var("ZYENYO_ENVIRONMENT").expect("ENVIRONMENT not provided");
     
-    let context = Context {
-        db: client,
-        environment,
-    };
-
     HttpServer::new(move || {
-        let cors = match context.environment.as_str() {
-            "development" => Cors::permissive(),
-            "production" => Cors::default().allowed_origin("https://zyenyobot.com").allowed_methods(vec!["GET", "POST"]),
+        let mut cors = Cors::permissive();
+        let context = match environment.as_str() {
+            "development" => {
+                Context {
+                    db: client.database("ZyenyoStaging"),
+                    environment: environment.to_owned()
+                }
+            },
+            "production" => {
+                cors = Cors::default().allowed_origin("https://zyenyobot.com").allowed_methods(vec!["GET", "POST"]);
+                Context {
+                    db: client.database("MyDatabase"),
+                    environment: environment.to_owned()
+                }
+            },
             _ => panic!()
         };
 
         App::new()
             .wrap(cors)
             .app_data(web::Data::new(context.clone()))
-            .service(hello)
-            .service(echo)
-            .service(get_user)
+            .service(web::scope("/api").configure(api_config))
     })
     .bind("0.0.0.0:8000")?
     .run()
