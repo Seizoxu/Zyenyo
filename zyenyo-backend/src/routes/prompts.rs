@@ -9,11 +9,11 @@ use futures::stream::TryStreamExt;
 const PAGE_DEFAULT: u32 = 1;
 const PAGE_SIZE_DEFAULT: u32 = 20;
 const SORT_BY_DEFAULT: &str = "title";
-const SORT_ORDER_DEFAULT: u32 = 1;
+const SORT_ORDER_DEFAULT: i32 = 1;
 fn page_default() -> u32 { PAGE_DEFAULT }
 fn page_size_default() -> u32 { PAGE_SIZE_DEFAULT }
 fn sort_by_default() -> String { SORT_BY_DEFAULT.to_owned() }
-fn sort_order_default() -> u32 { SORT_ORDER_DEFAULT }
+fn sort_order_default() -> i32 { SORT_ORDER_DEFAULT }
 
 #[derive(Deserialize)]
 struct PromptsConfig {
@@ -24,7 +24,7 @@ struct PromptsConfig {
     #[serde(default = "sort_by_default")]
     sort_by: String,
     #[serde(default = "sort_order_default")]
-    sort_order: u32,
+    sort_order: i32,
 
 }
 
