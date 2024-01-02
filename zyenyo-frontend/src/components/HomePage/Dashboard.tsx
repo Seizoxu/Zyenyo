@@ -1,8 +1,6 @@
 "use client"
 
-import { StarIcon } from "@heroicons/react/24/outline";
-import { TrophyIcon } from "@heroicons/react/24/outline";
-import { CommandLineIcon } from "@heroicons/react/24/outline";
+import { StarIcon, TrophyIcon, CommandLineIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
 
 <CommandLineIcon className="h-6 w-6 text-gray-500" />
 
@@ -16,27 +14,41 @@ const Dashboard = () => {
 
     return (
         <>
-            <div className='flex flex-row gap-0 text-6xl md:text-9xl'>
+            <div className='flex flex-row gap-0 text-6xl md:text-9xl mb-12'>
                 <div className='text-white underline underline-offset-8'>Zyenyo</div><div className='text-[#F51A1F]'>Bot</div>
             </div>
-            <div className="flex flex-col mt-auto mb-auto gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 mt-auto mb-auto gap-3">
 
-                <a className="relative hover:bg-zinc-800 ease-in p-6 gap-3 min-w-[250px] text-center border-2 border-white rounded-3xl text-lg font-bold" href="https://discord.com/api/oauth2/authorize?client_id=696614233944752130&permissions=137439283200&scope=bot" target="_blank">
-
-                    <StarIcon className="absolute left-5 top-auto bottom-auto h-8 -translate-y-[2px] w-8 text-[#F51A1F]" />
-                    Get Zyenyo
+                <a className="flex flex-col justify-evenly hover:bg-zinc-800 ease-in p-6 gap-3 max-w-[350px] h-[180px] text-left border-2 border-white rounded-3xl " href="https://discord.com/api/oauth2/authorize?client_id=696614233944752130&permissions=137439283200&scope=bot" target="_blank">
+                    <StarIcon className="h-8 w-8 text-[#F51A1F]" />
+                    <div>
+                        <p className="text-lg mb-1 font-bold">Get Zyenyo</p>
+                        <p className="text-sm text-gray-50">Add Zyenyo to your server.</p>
+                    </div>
                 </a>
 
-                <Link className="relative hover:bg-zinc-800 ease-in p-6 gap-3  min-w-[250px] text-center border-2 border-white rounded-3xl text-lg font-bold" href="/">
-
-                    <CommandLineIcon className="absolute left-5 top-auto bottom-auto -translate-y-[2px]  h-8 w-8 text-[#F51A1F]" />
-                    Commands
+                <Link className="flex flex-col justify-evenly hover:bg-zinc-800 ease-in p-6 gap-3 max-w-[350px] h-[180px] text-left border-2 border-white rounded-3xl " href="/" >
+                    <CommandLineIcon className="h-8 w-8 text-[#F51A1F]" />
+                    <div>
+                        <p className="text-lg mb-1 font-bold">Commands</p>
+                        <p className="text-sm text-gray-50">Documentation for every command Zyenyo has to offer. Coming soon!</p>
+                    </div>
                 </Link>
 
-                <Link className="relative hover:bg-zinc-800 ease-in p-6 gap-3  min-w-[250px] text-center border-2 border-white rounded-3xl text-lg font-bold" href="/">
+                <Link className="flex flex-col justify-evenly hover:bg-zinc-800 ease-in p-6 gap-3 max-w-[350px] h-[180px] text-left border-2 border-white rounded-3xl " href="/" >
+                    <TrophyIcon className=" h-8 w-8 text-[#F51A1F]" />
+                    <div>
+                        <p className="text-lg mb-1 font-bold">Leaderboards</p>
+                        <p className="text-sm text-gray-50">Player rankings on various typing statistics. Coming soon!</p>
+                    </div>
+                </Link>
 
-                    <TrophyIcon className="absolute left-5 top-auto bottom-auto -translate-y-[2px]  h-8 w-8 text-[#F51A1F]" />
-                    Leaderboards
+                <Link className="flex flex-col justify-evenly hover:bg-zinc-800 ease-in p-6 gap-3 max-w-[350px] h-[180px] text-left border-2 border-white rounded-3xl " href="/prompts" >
+                    <ChatBubbleLeftEllipsisIcon className=" h-8 w-8 text-[#F51A1F]" />
+                    <div>
+                        <p className="text-lg mb-1 font-bold">Prompts</p>
+                        <p className="text-sm text-gray-50">Browse through the entire catalog of prompts that you can type with Zyenyo.</p>
+                    </div>
                 </Link>
 
             </div>

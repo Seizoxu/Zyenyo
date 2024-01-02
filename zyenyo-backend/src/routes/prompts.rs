@@ -30,8 +30,8 @@ struct PromptsConfig {
 
 
 #[get("/prompts")]
-async fn prompts(context: web::Data<Context>, info: web::Query<PromptsConfig>) -> impl Responder {
-    let info = info.into_inner();
+async fn prompts(context: web::Data<Context>, controls: web::Query<PromptsConfig>) -> impl Responder {
+    let info = controls.into_inner();
 
     match prompt_query(context, info).await {
         Ok(prompts_vec) => HttpResponse::Ok().json(prompts_vec),
@@ -39,13 +39,13 @@ async fn prompts(context: web::Data<Context>, info: web::Query<PromptsConfig>) -
     }
 }
 
-async fn prompt_query(context: web::Data<Context>, info: PromptsConfig) -> Result<Vec<Prompt>, Box<dyn Error>> {
+async fn prompt_query(context: web::Data<Context>, controls: PromptsConfig) -> Result<Vec<Prompt>, Box<dyn Error>> {
     let collection: Collection<Prompt> = context.db.collection("prompts");
     
     let pipeline = vec![
-        doc! {"$sort": doc! {&info.sort_by: &info.sort_order}},
-        doc! {"$skip": (&info.page-1)*&info.page_size},
-        doc! {"$limit": &info.page_size}
+        doc! {"$sort": doc! {&controls.sort_by: &controls.sort_order}},
+        doc! {"$skip": (&controls.page-1)*&controls.page_size},
+        doc! {"$limit": &controls.page_size}
     ];
 
     let results = collection.aggregate(pipeline, None).await?;
