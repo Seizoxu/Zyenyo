@@ -12,7 +12,7 @@ const PromptCard = (props: PromptCardProps) => {
     let { prompt } = props
 
     return (
-        <button className="relative flex p-10 flex-col border-[3px] border-[#F51A1F] rounded-3xl hover:bg-zinc-800" onClick={() => setCollapsed((prev) => !prev)}>
+        <button className="relative m-2 flex p-10 flex-col border-[3px] border-[#F51A1F] rounded-3xl hover:bg-zinc-800" onClick={() => setCollapsed((prev) => !prev)}>
             <div className="flex mb-3 justify-between">
                 <p className="text-lg font-bold">{prompt.title}</p>
                 <p className="text-md font-bold">TR: {prompt.rating.toFixed(2)}</p>
