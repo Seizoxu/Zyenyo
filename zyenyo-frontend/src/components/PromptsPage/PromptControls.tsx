@@ -102,7 +102,7 @@ const PromptControls = () => {
 
             <div className='flex flex-col h-[70vh] gap-5 mt-12 overflow-y-scroll'>
 
-                {prompts?.map((prompt) => <PromptCard prompt={prompt}/>)}
+                {prompts?.map((prompt, idx) => <PromptCard prompt={prompt} key={idx}/>)}
 
             </div>
         </div>
