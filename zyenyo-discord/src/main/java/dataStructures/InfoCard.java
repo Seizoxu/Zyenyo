@@ -163,9 +163,13 @@ public class InfoCard
 		.addField("Aliases","`tlist`, `tl`", false)
 		.addField("Syntax", "`\\typelist [Options]`", false)
 		.addField("Options",
-				  "`-search | -s:` Specifies a search phrase (Eg: `-s the chandelier`).\n"
-				+ "`-page   | -p:` Specifies a page number (Eg: `-p 2`).\n", false)
-	.addField("Hint", "You can choose your own prompt with `\\tt [prompt number]`", false);
+				  "`-search     | -s :` Specifies a search phrase (Eg: `-s the chandelier`).\n"
+				+ "`-page       | -p :` Specifies a page number (Eg: `-p 2`).\n"
+				+ "`-typerating | -tr:` Specifies a TR Range to filter the results. You may use `>`, `<`, `-` "
+				+ "for ranges in the following ways: `-tr >1.23`     `-tr 0.95-1.3`     `-tr 1.2`\n"
+				+ "`-length     | -l :` Specifies a character length range to filter the results. You may use `>`, `<`, `-` "
+				+ "for ranges in the following ways: `-l >600`     `-l 350-400`     `-l 450`\n", false)
+		.addField("Hint", "You can choose your own prompt with `\\tt [prompt number]`", false);
 	
 	public static final EmbedBuilder TYPING_TOPS =
 		new EmbedBuilder()

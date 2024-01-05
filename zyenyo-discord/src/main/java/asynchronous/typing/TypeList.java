@@ -119,7 +119,7 @@ public class TypeList implements Runnable
 						lengthString += args[j];
 					}
 					
-					DoubleRange dr = parseRange(lengthString);
+					DoubleRange dr = parseRange(lengthString, true);
 					lengthRange = new IntegerRange((int)dr.lowerBound(), (int)dr.upperBound());
 				}
 				catch(NumberFormatException e) {e.printStackTrace();}
@@ -136,7 +136,7 @@ public class TypeList implements Runnable
 						lengthString += args[j];
 					}
 					
-					trRange = parseRange(lengthString);
+					trRange = parseRange(lengthString, false);
 				}
 				catch(NumberFormatException e) {e.printStackTrace();}
 				break;
@@ -157,10 +157,11 @@ public class TypeList implements Runnable
 	}
 	
 	
-	private DoubleRange parseRange(String rangeString)
+	private DoubleRange parseRange(String rangeString, boolean isLength)
 	{
 		if (rangeString.isBlank()) {return null;}
 		
+		double addValue =  (isLength) ? 50d : 0.1d;
 		Pattern pattern = Pattern.compile("([<>]?)([0-9]+(?:\\.?[0-9]+)?)\\-?([0-9]+(?:\\.?[0-9]+)?)?");
 		Matcher matcher = pattern.matcher(rangeString);
 		
@@ -185,8 +186,8 @@ public class TypeList implements Runnable
 			// upperBound would have changed for signs, so we can ask again here, in cases of single values.
 			if (upperBound == -1d)
 			{
-				upperBound = lowerBound + 50d;
-				lowerBound = lowerBound - 50d;
+				upperBound = lowerBound + addValue;
+				lowerBound = lowerBound - addValue;
 			}
 			return new DoubleRange(lowerBound, upperBound);
 		}
