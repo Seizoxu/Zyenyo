@@ -120,7 +120,6 @@ public class TypeList implements Runnable
 			PriorityQueue<StringSimilarityPair> relevantResults = new PriorityQueue<>(
 					Comparator.comparingDouble(p -> -p.similarityScore));
 			
-//			for (Map.Entry<Integer, String> entry : BotConfig.promptMap.entrySet())
 			for (Prompt prompt : BotConfig.newPromptList)
 			{
 				String promptTitleAndBody = prompt.title() + " " + prompt.body();
@@ -142,10 +141,8 @@ public class TypeList implements Runnable
 								"`[#%d | %.2fTR]` %s",
 								s.promptId,
 								prompt.typeRating(),
-//								BotConfig.promptRatingMap.get(i + promptOffset),
 								PromptHeadings.get(s.promptId)),
 						prompt.body().substring(0, 150) + "..."
-//						BotConfig.promptMap.get(s.promptId).substring(0, 150) + "..."
 						);
 			}
 		}
@@ -161,10 +158,8 @@ public class TypeList implements Runnable
 								"`[#%d | %.2fTR]` %s",
 								i + promptOffset,
 								prompt.typeRating(),
-//								BotConfig.promptRatingMap.get(i + promptOffset),
 								PromptHeadings.get(i + promptOffset)),
 						prompt.body().substring(0, 150) + "..."
-//						BotConfig.promptMap.get(i + promptOffset).substring(0, 150) + "..."
 						);
 			}
 		}

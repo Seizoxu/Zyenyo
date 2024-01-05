@@ -17,8 +17,6 @@ import dataStructures.PromptHeadings;
 public class BotConfig
 {
 	public static char PREFIX;
-//	public static HashMap<Integer, String> promptMap = new HashMap<>(200);
-//	public static HashMap<Integer, Double> promptRatingMap = new HashMap<>();
 	public static List<Prompt> newPromptList = new ArrayList<>(200);
 	public static ArrayList<List<Integer>> promptDifficultyList = new ArrayList<>(4);
 	public static HashMap<String, Double> characterRatingMap = new HashMap<>(200); // Should only require 116.
