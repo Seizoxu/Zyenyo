@@ -2,6 +2,7 @@ package asynchronous.typing;
 
 import java.util.concurrent.TimeUnit;
 
+import dataStructures.Prompt;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
@@ -31,21 +32,23 @@ public class TypingTestNumberRow extends TypingTestTemplate
 		
 		int wordLength = (int)(Math.random() * 6 + 1);
 
+		String promptText = "";
 		for (int charIdx = 0; charIdx < PROMPT_LENGTH; charIdx++)
 		{
-			this.prompt += String.valueOf((int)(Math.random() * 9));
+			promptText += String.valueOf((int)(Math.random() * 9));
 			
 			if (charIdx % wordLength == 0)
 			{
-				this.prompt += " ";
+				promptText += " ";
 				wordLength = (int)(Math.random() * 6 + 1);
 			}
 		}
+		prompt = new Prompt(-1, "", promptText, promptText.length(), 0);
 
-		fakePrompt = prompt.substring(0, prompt.length()/2)
+		fakePrompt = prompt.body().substring(0, prompt.length()/2)
 				+ ZERO_WIDTH_NON_JOINER
-				+ prompt.substring(prompt.length()/2, prompt.length());
-		numChars = prompt.length();
+				+ prompt.body().substring(prompt.length()/2, prompt.length());
+		int numChars = prompt.length();
 		long endTime = (System.currentTimeMillis() / 1000) + (60*numChars / (WPM_MINIMUM * NUM_CHARS_IN_WORD));
 
 		EmbedBuilder embed = new EmbedBuilder()

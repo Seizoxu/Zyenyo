@@ -11,6 +11,7 @@ import org.apache.commons.text.similarity.LevenshteinDistance;
 
 import commands.Typing;
 import dataStructures.AddTestResult;
+import dataStructures.Prompt;
 import dataStructures.TypingSubmission;
 import dataStructures.TypingTestLeaderboard;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -26,14 +27,11 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	protected MessageChannel channel;
 	protected Message message;
 	protected String[] args;
-	protected String prompt;
-	protected double promptRating;
+	protected Prompt prompt;
 	protected String fakePrompt;
-	protected int numChars;
 	protected long startTime = -1;
 	protected TypingTestTemplate thisInstance = this;
 	protected TypingTestLeaderboard submissions = new TypingTestLeaderboard();
-	protected String promptTitle;
 
 	protected final static String ZERO_WIDTH_NON_JOINER = "‌";
 	protected final static short NUM_CHARS_IN_WORD = 5;
@@ -75,7 +73,7 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 		else if (event.getAuthor().isBot()) {return;}
 		
 		// Calculation.
-		TpCalculation calc = calculateTypingPoints(prompt, userTypingSubmission, timeTakenMillis, promptRating);
+		TpCalculation calc = calculateTypingPoints(prompt.body(), userTypingSubmission, timeTakenMillis, prompt.typeRating());
 		
 		// Filter scores.
 		if (calc.accuracy() < 75.0) {return;}
@@ -99,7 +97,7 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 						calc.typingPoints(),
 						timeTakenMillis,
 						userTypingSubmission,
-						promptTitle	,
+						prompt.title(),
 						answerChannel.getId()
 						)
 				);
@@ -121,14 +119,14 @@ public abstract class TypingTestTemplate extends ListenerAdapter implements Runn
 	 */
 	protected TpCalculation calculateTypingPoints(String originalPrompt, String userPrompt, long timeTakenMillis, double typeRating)
 	{
-		double wordsPerMinute = (numChars / (double)timeTakenMillis) * 12000;
+		double wordsPerMinute = (prompt.length() / (double)timeTakenMillis) * 12000;
 		
-		int editDistance = new LevenshteinDistance().apply(prompt, userPrompt);
+		int editDistance = new LevenshteinDistance().apply(prompt.body(), userPrompt);
 		double accuracy = 100* (double)(originalPrompt.length() - editDistance) / (double)originalPrompt.length();
 
 		double wpmMultiplier = 0.2 * Math.pow(wordsPerMinute, 1.5);
 		double accuracyMultiplier = Math.pow(0.95, 100-accuracy);
-		double typingPoints = (wpmMultiplier * promptRating) * accuracyMultiplier;
+		double typingPoints = (wpmMultiplier * prompt.typeRating()) * accuracyMultiplier;
 		
 		return new TpCalculation(typingPoints, wordsPerMinute, accuracy);
 	}

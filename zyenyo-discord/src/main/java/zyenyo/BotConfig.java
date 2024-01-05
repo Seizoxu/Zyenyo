@@ -9,12 +9,17 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import dataStructures.Prompt;
+import dataStructures.PromptHeadings;
 
 public class BotConfig
 {
 	public static char PREFIX;
-	public static HashMap<Integer, String> promptMap = new HashMap<>(200);
-	public static HashMap<Integer, Double> promptRatingMap = new HashMap<>();
+//	public static HashMap<Integer, String> promptMap = new HashMap<>(200);
+//	public static HashMap<Integer, Double> promptRatingMap = new HashMap<>();
+	public static List<Prompt> newPromptList = new ArrayList<>(200);
 	public static ArrayList<List<Integer>> promptDifficultyList = new ArrayList<>(4);
 	public static HashMap<String, Double> characterRatingMap = new HashMap<>(200); // Should only require 116.
 	
@@ -43,17 +48,18 @@ public class BotConfig
 		try (	ObjectInputStream ratingMapOIS = new ObjectInputStream(new FileInputStream(PROMPT_RATING_FILE));
 				ObjectInputStream difficultyListOIS = new ObjectInputStream(new FileInputStream(PROMPT_DIFFICULTY_FILE));)
 		{
+			Map<Integer, Double> promptRatingMap = (HashMap<Integer, Double>)ratingMapOIS.readObject();
+			System.out.println("[LOADED] Prompt Rating Map File");
+			
 			for (int i = 0; i < NUM_PROMPTS; i++)
 			{
 				try (BufferedReader reader = new BufferedReader(new FileReader(
 						String.format("%sprompt%d.txt", TYPING_PROMPTS_FILEPATH, i)));)
 				{
-					promptMap.put(i, reader.readLine());
+					String body = reader.readLine();
+					newPromptList.add(new Prompt(i, PromptHeadings.get(i), body, body.length(), promptRatingMap.get(i)));
 				}
 			}
-			
-			promptRatingMap = (HashMap<Integer, Double>)ratingMapOIS.readObject();
-			System.out.println("[LOADED] Prompt Rating Map File");
 			
 			promptDifficultyList = (ArrayList<List<Integer>>)difficultyListOIS.readObject();
 			System.out.println("[LOADED] Prompt Difficulty Categorisation File");
