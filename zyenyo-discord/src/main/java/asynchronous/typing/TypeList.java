@@ -22,10 +22,13 @@ public class TypeList implements Runnable
 	private MessageReceivedEvent event;
 	private String[] args;
 	
-	private int pageNumber = 1;
 	private int numResults = 10;
-	private String searchString = "";
 	private EmbedBuilder embed = new EmbedBuilder();
+	
+	private String argSearchString = "";
+	private int argPageNumber = 1;
+	private int argTargetLength = -1;
+	private double argTargetTr = -1;
 	
 	public TypeList(MessageReceivedEvent event, String[] args)
 	{
@@ -41,9 +44,9 @@ public class TypeList implements Runnable
 		parseArguments();
 		
 		// Search.
-		int promptOffset = numResults * (pageNumber-1);
+		int promptOffset = numResults * (argPageNumber-1);
 		Map<String, String> searchResults = searchPrompts(promptOffset);
-		embed.setFooter(String.format("Page %d of %d", pageNumber, NUM_PAGES));
+		embed.setFooter(String.format("Page %d of %d", argPageNumber, NUM_PAGES));
 		
 		// Add results to embed.
 		for (Map.Entry<String, String> entry : searchResults.entrySet())
@@ -64,7 +67,11 @@ public class TypeList implements Runnable
 	 */
 	private void parseArguments()
 	{
-		List<String> commandAliases = List.of("-page", "-p", "-search", "-s");
+		List<String> commandAliases = List.of(
+				"-page", "-p",
+				"-search", "-s",
+				"-typerating", "-tr",
+				"-length", "-l");
 		
 		for (int i = 0; i < args.length; i++)
 		{
@@ -78,23 +85,46 @@ public class TypeList implements Runnable
 					if (args.length-1 == i) {continue;}
 
 					int pageNumberInt = Integer.parseInt(args[i+1]);
-					if (pageNumberInt > NUM_PAGES) {continue;}
-					if (pageNumberInt <= 0) {continue;}
+					if (pageNumberInt > NUM_PAGES || pageNumberInt <= 0) {continue;}
 
-					pageNumber = pageNumberInt;
+					argPageNumber = pageNumberInt;
+				}
+				catch(NumberFormatException e) {e.printStackTrace();}
+				break;
+			case "-length": case "-l":
+				try
+				{
+					if (args.length-1 == i) {continue;}
+					
+					int length = Integer.parseInt(args[i+1]);
+					if (length <= 0 || length > 5000) {continue;}
+					
+					argTargetLength = length;
+				}
+				catch(NumberFormatException e) {e.printStackTrace();}
+				break;
+			case "-typerating": case "-tr":
+				try
+				{
+					if (args.length-1 == i) {continue;}
+					
+					double typeRating = Double.parseDouble(args[i+1]);
+					if (typeRating <= 0 || typeRating > 3) {continue;}
+					
+					argTargetTr = typeRating;
 				}
 				catch(NumberFormatException e) {e.printStackTrace();}
 				break;
 			case "-search": case "-s":
-				if (!searchString.isBlank()) {continue;}
+				if (!argSearchString.isBlank()) {continue;}
 				if (args.length-1 == i) {continue;}
 				
 				for (int j = i+1; j < args.length; j++)
 				{
 					if (commandAliases.contains(args[j])) {break;}
-					searchString += args[j] + " ";
+					argSearchString += args[j] + " ";
 				}
-				searchString = searchString.strip();
+				argSearchString = argSearchString.strip();
 				break;
 			}
 		}
@@ -109,56 +139,59 @@ public class TypeList implements Runnable
 	private Map<String, String> searchPrompts(int promptOffset)
 	{
 		Map<String, String> searchResults = new LinkedHashMap<>(numResults);
+		PriorityQueue<StringSimilarityPair> relevantResults = new PriorityQueue<>(
+				Comparator.comparingDouble(p -> -p.similarityScore));
+		embed.setTitle("Prompts List");
 		
-		if (!searchString.isBlank()) // if searching for something...
+		if (!argSearchString.isBlank()) // if searching for something...
 		{
 			embed.setTitle(String.format("Returning %d most relevant results for \"%s\"",
 					numResults,
-					searchString));
+					argSearchString));
 			
-			PriorityQueue<StringSimilarityPair> relevantResults = new PriorityQueue<>(
-					Comparator.comparingDouble(p -> -p.similarityScore));
 			
 			for (Map.Entry<Integer, String> entry : BotConfig.promptMap.entrySet())
 			{
 				String promptTitleAndBody = PromptHeadings.get(entry.getKey()) + " " + BotConfig.promptMap.get(entry.getKey());
-				double similarityScore = (double)(LongestCommonSubstring.find(searchString, promptTitleAndBody).length())
+				double similarityScore = (double)(LongestCommonSubstring.find(argSearchString, promptTitleAndBody).length())
 						/ (double)(promptTitleAndBody.length());
 
 				relevantResults.offer(new StringSimilarityPair(entry.getKey(), similarityScore));
 			}
 			
 			// Skip pages.
-			for (int i = 0; i < promptOffset; i++) {relevantResults.poll();}
-			for (int i = 0; i < numResults; i++)
-			{
-				
-				StringSimilarityPair s = relevantResults.poll();
-				searchResults.put(
-						String.format(
-								"`[#%d | %.2fTR]` %s",
-								s.promptId,
-								BotConfig.promptRatingMap.get(i + promptOffset),
-								PromptHeadings.get(s.promptId)),
-						BotConfig.promptMap.get(s.promptId).substring(0, 150) + "..."
-						);
-			}
+//			for (int i = 0; i < promptOffset; i++) {relevantResults.poll();}
+//			for (int i = 0; i < numResults; i++)
+//			{
+//				
+//				StringSimilarityPair s = relevantResults.poll();
+//				searchResults.put(
+//						String.format(
+//								"`[#%d | %.2fTR]` %s",
+//								s.promptId,
+//								BotConfig.promptRatingMap.get(i + promptOffset),
+//								PromptHeadings.get(s.promptId)),
+//						BotConfig.promptMap.get(s.promptId).substring(0, 150) + "..."
+//						);
+//			}
 		}
 		else
 		{
-			embed.setTitle("Prompts List");
-			for (int i = 0; i < numResults; i++)
-			{
-				searchResults.put(
-						String.format(
-								"`[#%d | %.2fTR]` %s",
-								i + promptOffset,
-								BotConfig.promptRatingMap.get(i + promptOffset),
-								PromptHeadings.get(i + promptOffset)),
-						BotConfig.promptMap.get(i + promptOffset).substring(0, 150) + "..."
-						);
-			}
+//			for (int i = 0; i < numResults; i++)
+//			{
+//				searchResults.put(
+//						String.format(
+//								"`[#%d | %.2fTR]` %s",
+//								i + promptOffset,
+//								BotConfig.promptRatingMap.get(i + promptOffset),
+//								PromptHeadings.get(i + promptOffset)),
+//						BotConfig.promptMap.get(i + promptOffset).substring(0, 150) + "..."
+//						);
+//			}
 		}
+		
+		
+		
 		
 		return searchResults;
 	}
