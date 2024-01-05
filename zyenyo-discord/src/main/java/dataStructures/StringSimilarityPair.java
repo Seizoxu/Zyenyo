@@ -2,12 +2,12 @@ package dataStructures;
 
 public class StringSimilarityPair
 {
-	public int promptId;
+	public int id;
 	public double similarityScore;
 	
-	public StringSimilarityPair(int promptId, double similarityScore)
+	public StringSimilarityPair(int id, double similarityScore)
 	{
-		this.promptId = promptId;
+		this.id = id;
 		this.similarityScore = similarityScore;
 	}
 }

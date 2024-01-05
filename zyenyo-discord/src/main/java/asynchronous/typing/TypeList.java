@@ -1,14 +1,12 @@
 package asynchronous.typing;
 
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 
 import dataStructures.LongestCommonSubstring;
 import dataStructures.Prompt;
-import dataStructures.PromptHeadings;
 import dataStructures.StringSimilarityPair;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -23,13 +21,16 @@ public class TypeList implements Runnable
 	private MessageReceivedEvent event;
 	private String[] args;
 	
-	private int numResults = 10;
+	private static final int NUM_RESULTS = 10;
 	private EmbedBuilder embed = new EmbedBuilder();
+	private String embedTitle = "";
 	
 	private String argSearchString = "";
 	private int argPageNumber = 1;
 	private int argTargetLength = -1;
 	private double argTargetTr = -1;
+	private int totalPages = NUM_PAGES;
+	private List<Prompt> filteredResults = new ArrayList<>(BotConfig.promptList);
 	
 	public TypeList(MessageReceivedEvent event, String[] args)
 	{
@@ -42,22 +43,32 @@ public class TypeList implements Runnable
 	public void run()
 	{
 		event.getChannel().sendTyping().queue();
+		
 		parseArguments();
+		filterPrompts();
 		
-		// Search.
-		int promptOffset = numResults * (argPageNumber-1);
-		Map<String, String> searchResults = searchPrompts(promptOffset);
-		embed.setFooter(String.format("Page %d of %d", argPageNumber, NUM_PAGES));
+		if (filteredResults.size() == 0)
+		{
+			event.getChannel().sendMessage("Nothing found.").queue();
+			return;
+		}
 		
-		// Add results to embed.
-		for (Map.Entry<String, String> entry : searchResults.entrySet())
+		for (Prompt prompt : filteredResults)
 		{
 			embed.addField(
-					entry.getKey(),
-					entry.getValue(),
-					false
-					);
+					String.format(
+							"`[#%d | %.2fTR]` %s",
+							prompt.number(),
+							prompt.typeRating(),
+							prompt.title()),
+					prompt.body().substring(0, 150) + "...",
+					false);
 		}
+		
+		embed.setFooter(String.format("Page %d of %d", argPageNumber, totalPages));
+		embed.setTitle((embedTitle.isEmpty())
+				? "Prompts List"
+				: embedTitle);
 		
 		event.getChannel().sendMessageEmbeds(embed.build()).queue();
 	}
@@ -135,67 +146,73 @@ public class TypeList implements Runnable
 	/**
 	 * Searches through the prompts for the search string.
 	 * @param promptOffset
-	 * @return
+	 * @return An n=10 List of filtered/sorted prompts.
 	 */
-	private Map<String, String> searchPrompts(int promptOffset)
+	private void filterPrompts()
 	{
-		Map<String, String> searchResults = new LinkedHashMap<>(numResults);
+		trFilter();
+		lengthFilter();
+		searchFilter();
+		pageFilter();
+	}
+	
+	
+	private void searchFilter()
+	{
+		if (argSearchString.isBlank()) {return;}
+		
+		embedTitle += String.format("Returning %d most relevant results for \"%s\"%n", NUM_RESULTS, argSearchString);
+		
 		PriorityQueue<StringSimilarityPair> relevantResults = new PriorityQueue<>(
 				Comparator.comparingDouble(p -> -p.similarityScore));
-		embed.setTitle("Prompts List");
-		
-		if (!argSearchString.isBlank()) // if searching for something...
+		for (Prompt prompt : filteredResults)
 		{
-			embed.setTitle(String.format("Returning %d most relevant results for \"%s\"",
-					numResults,
-					argSearchString));
-			
-			
-			for (Prompt prompt : BotConfig.newPromptList)
-			{
-				String promptTitleAndBody = prompt.title() + " " + prompt.body();
-				double similarityScore = (double)(LongestCommonSubstring.find(argSearchString, promptTitleAndBody).length())
-						/ (double)(promptTitleAndBody.length());
+			String promptTitleAndBody = prompt.title() + " " + prompt.body();
+			double similarityScore = (double)(LongestCommonSubstring.find(argSearchString, promptTitleAndBody).length())
+					/ (double)(promptTitleAndBody.length());
 
-				relevantResults.offer(new StringSimilarityPair(prompt.number(), similarityScore));
-			}
-			
-			// Skip pages.
-			for (int i = 0; i < promptOffset; i++) {relevantResults.poll();}
-			for (int i = 0; i < numResults; i++)
-			{
-				Prompt prompt = BotConfig.newPromptList.get(i + promptOffset);
-
-				StringSimilarityPair s = relevantResults.poll();
-				searchResults.put(
-						String.format(
-								"`[#%d | %.2fTR]` %s",
-								s.promptId,
-								prompt.typeRating(),
-								PromptHeadings.get(s.promptId)),
-						prompt.body().substring(0, 150) + "..."
-						);
-			}
-		}
-		else
-		{
-			embed.setTitle("Prompts List");
-			for (int i = 0; i < numResults; i++)
-			{
-				Prompt prompt = BotConfig.newPromptList.get(i + promptOffset);
-				
-				searchResults.put(
-						String.format(
-								"`[#%d | %.2fTR]` %s",
-								i + promptOffset,
-								prompt.typeRating(),
-								PromptHeadings.get(i + promptOffset)),
-						prompt.body().substring(0, 150) + "..."
-						);
-			}
+			relevantResults.offer(new StringSimilarityPair(prompt.number(), similarityScore));
 		}
 		
+		filteredResults = new ArrayList<Prompt>(relevantResults.size());
+		StringSimilarityPair s;
+		while((s = relevantResults.poll()) != null)
+		{
+			Prompt prompt = BotConfig.promptList.get(s.id);
+			filteredResults.add(prompt);
+		}
+	}
+	
+	
+	private void trFilter()
+	{
+		if (argTargetTr == -1) {return;}
 		
-		return searchResults;
+		double lowerTrBound = argTargetTr - 0.1;
+		double upperTrBound = argTargetTr + 0.1;
+		
+		filteredResults.removeIf(x -> (x.typeRating() < lowerTrBound || x.typeRating() > upperTrBound));
+	}
+	
+	
+	private void lengthFilter()
+	{
+		if (argTargetLength == -1) {return;}
+		
+		int lowerLengthBound = argTargetLength - 100;
+		int upperLengthBound = argTargetLength + 100;
+		
+		filteredResults.removeIf(x -> (x.length() < lowerLengthBound || x.length() > upperLengthBound));
+	}
+	
+	
+	private void pageFilter()
+	{
+		totalPages = filteredResults.size()/NUM_RESULTS + 1;
+		argPageNumber = (totalPages < argPageNumber) ? 1 : argPageNumber;
+		int startPointer = NUM_RESULTS * (argPageNumber-1);
+		int endPointer = Math.min(startPointer + 10, filteredResults.size());
+		
+		filteredResults = filteredResults.subList(startPointer, endPointer);
 	}
 }
