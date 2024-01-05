@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 import dataStructures.LongestCommonSubstring;
+import dataStructures.Prompt;
 import dataStructures.PromptHeadings;
 import dataStructures.StringSimilarityPair;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -150,47 +151,49 @@ public class TypeList implements Runnable
 					argSearchString));
 			
 			
-			for (Map.Entry<Integer, String> entry : BotConfig.promptMap.entrySet())
+			for (Prompt prompt : BotConfig.newPromptList)
 			{
-				String promptTitleAndBody = PromptHeadings.get(entry.getKey()) + " " + BotConfig.promptMap.get(entry.getKey());
+				String promptTitleAndBody = prompt.title() + " " + prompt.body();
 				double similarityScore = (double)(LongestCommonSubstring.find(argSearchString, promptTitleAndBody).length())
 						/ (double)(promptTitleAndBody.length());
 
-				relevantResults.offer(new StringSimilarityPair(entry.getKey(), similarityScore));
+				relevantResults.offer(new StringSimilarityPair(prompt.number(), similarityScore));
 			}
 			
 			// Skip pages.
-//			for (int i = 0; i < promptOffset; i++) {relevantResults.poll();}
-//			for (int i = 0; i < numResults; i++)
-//			{
-//				
-//				StringSimilarityPair s = relevantResults.poll();
-//				searchResults.put(
-//						String.format(
-//								"`[#%d | %.2fTR]` %s",
-//								s.promptId,
-//								BotConfig.promptRatingMap.get(i + promptOffset),
-//								PromptHeadings.get(s.promptId)),
-//						BotConfig.promptMap.get(s.promptId).substring(0, 150) + "..."
-//						);
-//			}
+			for (int i = 0; i < promptOffset; i++) {relevantResults.poll();}
+			for (int i = 0; i < numResults; i++)
+			{
+				Prompt prompt = BotConfig.newPromptList.get(i + promptOffset);
+
+				StringSimilarityPair s = relevantResults.poll();
+				searchResults.put(
+						String.format(
+								"`[#%d | %.2fTR]` %s",
+								s.promptId,
+								prompt.typeRating(),
+								PromptHeadings.get(s.promptId)),
+						prompt.body().substring(0, 150) + "..."
+						);
+			}
 		}
 		else
 		{
-//			for (int i = 0; i < numResults; i++)
-//			{
-//				searchResults.put(
-//						String.format(
-//								"`[#%d | %.2fTR]` %s",
-//								i + promptOffset,
-//								BotConfig.promptRatingMap.get(i + promptOffset),
-//								PromptHeadings.get(i + promptOffset)),
-//						BotConfig.promptMap.get(i + promptOffset).substring(0, 150) + "..."
-//						);
-//			}
+			embed.setTitle("Prompts List");
+			for (int i = 0; i < numResults; i++)
+			{
+				Prompt prompt = BotConfig.newPromptList.get(i + promptOffset);
+				
+				searchResults.put(
+						String.format(
+								"`[#%d | %.2fTR]` %s",
+								i + promptOffset,
+								prompt.typeRating(),
+								PromptHeadings.get(i + promptOffset)),
+						prompt.body().substring(0, 150) + "..."
+						);
+			}
 		}
-		
-		
 		
 		
 		return searchResults;

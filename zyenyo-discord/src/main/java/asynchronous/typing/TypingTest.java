@@ -3,7 +3,6 @@ package asynchronous.typing;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
-import dataStructures.PromptHeadings;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import zyenyo.BotConfig;
@@ -40,18 +39,15 @@ public class TypingTest extends TypingTestTemplate
 	protected void constructAndSendTest(int promptNumber, String difficulty)
 	{
 		promptNumber = parseDifficulty(promptNumber, difficulty);
-
-		prompt = BotConfig.promptMap.get(promptNumber);
-		promptRating = BotConfig.promptRatingMap.get(promptNumber);
-		promptTitle = PromptHeadings.get(promptNumber);						
-		fakePrompt = prompt.substring(0, prompt.length()/2)
+		prompt = BotConfig.newPromptList.get(promptNumber);
+		
+		fakePrompt = prompt.body().substring(0, prompt.length()/2)
 				+ ZERO_WIDTH_NON_JOINER
-				+ prompt.substring(prompt.length()/2, prompt.length());
-		numChars = prompt.length();
-		long endTime = (System.currentTimeMillis() / 1000) + (60*numChars / (WPM_MINIMUM * NUM_CHARS_IN_WORD));
+				+ prompt.body().substring(prompt.length()/2, prompt.length());
+		long endTime = (System.currentTimeMillis() / 1000) + (60*prompt.length() / (WPM_MINIMUM * NUM_CHARS_IN_WORD));
 
 		EmbedBuilder embed = new EmbedBuilder()
-				.setTitle(String.format("[#%d | %.2fTR] %s", promptNumber, promptRating, promptTitle))
+				.setTitle(String.format("[#%d | %.2fTR] %s", prompt.number(), prompt.typeRating(), prompt.title()))
 				.setDescription(fakePrompt)
 				.addField("Time", String.format("Test end time: <t:%d:R>.", endTime), false);
 		
