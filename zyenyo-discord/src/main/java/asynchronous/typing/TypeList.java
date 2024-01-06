@@ -1,14 +1,17 @@
 package asynchronous.typing;
 
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.PriorityQueue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import dataStructures.DoubleRange;
+import dataStructures.IntegerRange;
 import dataStructures.LongestCommonSubstring;
 import dataStructures.Prompt;
-import dataStructures.PromptHeadings;
 import dataStructures.StringSimilarityPair;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -20,13 +23,19 @@ import zyenyo.BotConfig;
 public class TypeList implements Runnable
 {
 	private static final int NUM_PAGES = (BotConfig.NUM_PROMPTS / 10) + 1;
+	private static final int NUM_RESULTS = 10;
 	private MessageReceivedEvent event;
 	private String[] args;
 	
-	private int pageNumber = 1;
-	private int numResults = 10;
-	private String searchString = "";
 	private EmbedBuilder embed = new EmbedBuilder();
+	private String embedDescription = "";
+	
+	private String argSearchString = "";
+	private int argPageNumber = 1;
+	private int totalPages = NUM_PAGES;
+	private IntegerRange lengthRange = null;
+	private DoubleRange trRange = null;
+	private List<Prompt> filteredResults = new ArrayList<>(BotConfig.promptList);
 	
 	public TypeList(MessageReceivedEvent event, String[] args)
 	{
@@ -39,22 +48,31 @@ public class TypeList implements Runnable
 	public void run()
 	{
 		event.getChannel().sendTyping().queue();
+		
 		parseArguments();
+		filterPrompts();
 		
-		// Search.
-		int promptOffset = numResults * (pageNumber-1);
-		Map<String, String> searchResults = searchPrompts(promptOffset);
-		embed.setFooter(String.format("Page %d of %d", pageNumber, NUM_PAGES));
+		if (filteredResults.size() == 0)
+		{
+			event.getChannel().sendMessage("Nothing found.").queue();
+			return;
+		}
 		
-		// Add results to embed.
-		for (Map.Entry<String, String> entry : searchResults.entrySet())
+		for (Prompt prompt : filteredResults)
 		{
 			embed.addField(
-					entry.getKey(),
-					entry.getValue(),
-					false
-					);
+					String.format(
+							"`[#%d | %.2fTR]` %s",
+							prompt.number(),
+							prompt.typeRating(),
+							prompt.title()),
+					prompt.body().substring(0, 150) + "...",
+					false);
 		}
+		
+		embed.setFooter(String.format("Page %d of %d", argPageNumber, totalPages));
+		embed.setTitle("Prompts List");
+		embed.setDescription(embedDescription);
 		
 		event.getChannel().sendMessageEmbeds(embed.build()).queue();
 	}
@@ -65,7 +83,11 @@ public class TypeList implements Runnable
 	 */
 	private void parseArguments()
 	{
-		List<String> commandAliases = List.of("-page", "-p", "-search", "-s");
+		List<String> commandAliases = List.of(
+				"-page", "-p",
+				"-search", "-s",
+				"-typerating", "-tr",
+				"-length", "-l");
 		
 		for (int i = 0; i < args.length; i++)
 		{
@@ -79,91 +101,176 @@ public class TypeList implements Runnable
 					if (args.length-1 == i) {continue;}
 
 					int pageNumberInt = Integer.parseInt(args[i+1]);
-					if (pageNumberInt > NUM_PAGES) {continue;}
-					if (pageNumberInt <= 0) {continue;}
+					if (pageNumberInt > NUM_PAGES || pageNumberInt <= 0) {continue;}
 
-					pageNumber = pageNumberInt;
+					argPageNumber = pageNumberInt;
+				}
+				catch(NumberFormatException e) {e.printStackTrace();}
+				break;
+			case "-length": case "-l":
+				try
+				{
+					if (args.length-1 == i) {continue;}
+					
+					String lengthString = "";
+					for (int j = i+1; j < args.length; j++)
+					{
+						if (commandAliases.contains(args[j])) {break;}
+						lengthString += args[j];
+					}
+					
+					DoubleRange dr = parseRange(lengthString, true);
+					lengthRange = new IntegerRange((int)dr.lowerBound(), (int)dr.upperBound());
+				}
+				catch(NumberFormatException e) {e.printStackTrace();}
+				break;
+			case "-typerating": case "-tr":
+				try
+				{
+					if (args.length-1 == i) {continue;}
+					
+					String lengthString = "";
+					for (int j = i+1; j < args.length; j++)
+					{
+						if (commandAliases.contains(args[j])) {break;}
+						lengthString += args[j];
+					}
+					
+					trRange = parseRange(lengthString, false);
 				}
 				catch(NumberFormatException e) {e.printStackTrace();}
 				break;
 			case "-search": case "-s":
-				if (!searchString.isBlank()) {continue;}
+				if (!argSearchString.isBlank()) {continue;}
 				if (args.length-1 == i) {continue;}
 				
 				for (int j = i+1; j < args.length; j++)
 				{
 					if (commandAliases.contains(args[j])) {break;}
-					searchString += args[j] + " ";
+					argSearchString += args[j] + " ";
 				}
-				searchString = searchString.strip();
+				
+				argSearchString = argSearchString.strip();
 				break;
 			}
 		}
 	}
 	
 	
+	private DoubleRange parseRange(String rangeString, boolean isLength)
+	{
+		if (rangeString.isBlank()) {return null;}
+		
+		double addValue =  (isLength) ? 50d : 0.1d;
+		Pattern pattern = Pattern.compile("([<>]?)([0-9]+(?:\\.?[0-9]+)?)\\-?([0-9]+(?:\\.?[0-9]+)?)?");
+		Matcher matcher = pattern.matcher(rangeString);
+		
+		if (matcher.matches())
+		{
+			String sign = matcher.group(1);
+			double lowerBound = Optional.ofNullable(matcher.group(2)).map(Double::parseDouble).orElse(-1d);
+			double upperBound = Optional.ofNullable(matcher.group(3)).map(Double::parseDouble).orElse(-1d);
+			
+			if (lowerBound == -1d) {return null;}
+			
+			if (sign.equals(">"))
+			{
+				upperBound = Double.POSITIVE_INFINITY;
+			}
+			else if (sign.equals("<"))
+			{
+				upperBound = lowerBound;
+				lowerBound = 0;
+			}
+			
+			// upperBound would have changed for signs, so we can ask again here, in cases of single values.
+			if (upperBound == -1d)
+			{
+				upperBound = lowerBound + addValue;
+				lowerBound = lowerBound - addValue;
+			}
+			return new DoubleRange(lowerBound, upperBound);
+		}
+		
+		return null;
+	}
+	
+	
 	/**
 	 * Searches through the prompts for the search string.
 	 * @param promptOffset
-	 * @return
+	 * @return An n=10 List of filtered/sorted prompts.
 	 */
-	private Map<String, String> searchPrompts(int promptOffset)
+	private void filterPrompts()
 	{
-		Map<String, String> searchResults = new LinkedHashMap<>(numResults);
+		// Page Filter has to be final.
+		trFilter();
+		lengthFilter();
+		searchFilter();
+		pageFilter();
+	}
+	
+	
+	private void searchFilter()
+	{
+		if (argSearchString.isBlank()) {return;}
 		
-		if (!searchString.isBlank()) // if searching for something...
+		embedDescription += String.format("`Search String:` %s%n", argSearchString);
+		
+		PriorityQueue<StringSimilarityPair> relevantResults = new PriorityQueue<>(
+				Comparator.comparingDouble(p -> -p.similarityScore));
+		for (Prompt prompt : filteredResults)
 		{
-			embed.setTitle(String.format("Returning %d most relevant results for \"%s\"",
-					numResults,
-					searchString));
-			
-			PriorityQueue<StringSimilarityPair> relevantResults = new PriorityQueue<>(
-					Comparator.comparingDouble(p -> -p.similarityScore));
-			
-			for (Prompt prompt : BotConfig.newPromptList)
-			{
-				String promptTitleAndBody = prompt.title() + " " + prompt.body();
-				double similarityScore = (double)(LongestCommonSubstring.find(searchString, promptTitleAndBody).length())
-						/ (double)(promptTitleAndBody.length());
+			String promptTitleAndBody = prompt.title() + " " + prompt.body();
+			double similarityScore = (double)(LongestCommonSubstring.find(argSearchString, promptTitleAndBody).length())
+					/ (double)(promptTitleAndBody.length());
 
-				relevantResults.offer(new StringSimilarityPair(prompt.number(), similarityScore));
-			}
-			
-			// Skip pages.
-			for (int i = 0; i < promptOffset; i++) {relevantResults.poll();}
-			for (int i = 0; i < numResults; i++)
-			{
-				Prompt prompt = BotConfig.newPromptList.get(i + promptOffset);
-
-				StringSimilarityPair s = relevantResults.poll();
-				searchResults.put(
-						String.format(
-								"`[#%d | %.2fTR]` %s",
-								s.promptId,
-								prompt.typeRating(),
-								PromptHeadings.get(s.promptId)),
-						prompt.body().substring(0, 150) + "..."
-						);
-			}
-		}
-		else
-		{
-			embed.setTitle("Prompts List");
-			for (int i = 0; i < numResults; i++)
-			{
-				Prompt prompt = BotConfig.newPromptList.get(i + promptOffset);
-				
-				searchResults.put(
-						String.format(
-								"`[#%d | %.2fTR]` %s",
-								i + promptOffset,
-								prompt.typeRating(),
-								PromptHeadings.get(i + promptOffset)),
-						prompt.body().substring(0, 150) + "..."
-						);
-			}
+			relevantResults.offer(new StringSimilarityPair(prompt.number(), similarityScore));
 		}
 		
-		return searchResults;
+		filteredResults = new ArrayList<Prompt>(relevantResults.size());
+		StringSimilarityPair s;
+		while((s = relevantResults.poll()) != null)
+		{
+			Prompt prompt = BotConfig.promptList.get(s.id);
+			filteredResults.add(prompt);
+		}
+	}
+	
+	
+	private void trFilter()
+	{
+		if (trRange == null) {return;}
+		
+		embedDescription += String.format("`TR Range:` %.2f-%s%n",
+				trRange.lowerBound(),
+				(trRange.upperBound() == Double.POSITIVE_INFINITY) ? "infinity" : String.format("%.2f",trRange.upperBound()));
+		
+		filteredResults.removeIf(x -> (x.typeRating() < trRange.lowerBound() || x.typeRating() > trRange.upperBound()));
+	}
+	
+	
+	private void lengthFilter()
+	{
+		if (lengthRange == null) {return;}
+		
+		embedDescription += String.format("`Length Range:` %d-%s%n",
+				lengthRange.lowerBound(),
+				(lengthRange.upperBound() == Integer.MAX_VALUE) ? "infinity" : lengthRange.upperBound());
+		
+		filteredResults.removeIf(x -> (x.length() < lengthRange.lowerBound() || x.length() > lengthRange.upperBound()));
+	}
+	
+	
+	private void pageFilter()
+	{
+		totalPages = filteredResults.size()/NUM_RESULTS + 1;
+		argPageNumber = (totalPages < argPageNumber) ? 1 : argPageNumber;
+		int startPointer = NUM_RESULTS * (argPageNumber-1);
+		int endPointer = Math.min(startPointer + 10, filteredResults.size());
+		
+		embedDescription += String.format("`Page:` %d%n", argPageNumber);
+		
+		filteredResults = filteredResults.subList(startPointer, endPointer);
 	}
 }

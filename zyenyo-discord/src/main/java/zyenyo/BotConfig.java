@@ -17,7 +17,7 @@ import dataStructures.PromptHeadings;
 public class BotConfig
 {
 	public static char PREFIX;
-	public static List<Prompt> newPromptList = new ArrayList<>(200);
+	public static List<Prompt> promptList = new ArrayList<>(200);
 	public static ArrayList<List<Integer>> promptDifficultyList = new ArrayList<>(4);
 	public static HashMap<String, Double> characterRatingMap = new HashMap<>(200); // Should only require 116.
 	
@@ -55,7 +55,7 @@ public class BotConfig
 						String.format("%sprompt%d.txt", TYPING_PROMPTS_FILEPATH, i)));)
 				{
 					String body = reader.readLine();
-					newPromptList.add(new Prompt(i, PromptHeadings.get(i), body, body.length(), promptRatingMap.get(i)));
+					promptList.add(new Prompt(i, PromptHeadings.get(i), body, body.length(), promptRatingMap.get(i)));
 				}
 			}
 			

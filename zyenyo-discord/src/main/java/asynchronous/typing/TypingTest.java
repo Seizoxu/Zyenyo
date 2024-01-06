@@ -39,7 +39,7 @@ public class TypingTest extends TypingTestTemplate
 	protected void constructAndSendTest(int promptNumber, String difficulty)
 	{
 		promptNumber = parseDifficulty(promptNumber, difficulty);
-		prompt = BotConfig.newPromptList.get(promptNumber);
+		prompt = BotConfig.promptList.get(promptNumber);
 		
 		fakePrompt = prompt.body().substring(0, prompt.length()/2)
 				+ ZERO_WIDTH_NON_JOINER

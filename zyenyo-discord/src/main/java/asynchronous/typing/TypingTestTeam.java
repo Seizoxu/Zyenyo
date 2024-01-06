@@ -40,7 +40,7 @@ public class TypingTestTeam extends TypingTestTemplate
 	protected void constructAndSendTest() // Essentially a duplicate of 
 	{
 		int promptNumber = (int) (BotConfig.NUM_PROMPTS*Math.random() + 1);
-		prompt = BotConfig.newPromptList.get(promptNumber);
+		prompt = BotConfig.promptList.get(promptNumber);
 		
 		fakePrompt = prompt.body().substring(0, prompt.length()/2)
 				+ ZERO_WIDTH_NON_JOINER
