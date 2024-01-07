@@ -5,6 +5,7 @@ import java.util.HashMap;
 import asynchronous.typing.Chart;
 import asynchronous.typing.CompareTest;
 import asynchronous.typing.Daily;
+import asynchronous.typing.Difference;
 import asynchronous.typing.Leaderboard;
 import asynchronous.typing.TypeList;
 import asynchronous.typing.TypeStats;
@@ -128,6 +129,11 @@ public class Typing extends ListenerAdapter
 		else if (Aliases.COMPARE.contains(args[0].toLowerCase()))
 		{
 			Zyenyo.masterThreadPool.submit(new CompareTest(event, args));
+		}
+		
+		else if (Aliases.DIFFERENCE.contains(args[0].toLowerCase()))
+		{
+			Zyenyo.masterThreadPool.submit(new Difference(event, args));
 		}
 	}
 }

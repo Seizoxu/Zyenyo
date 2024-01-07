@@ -71,6 +71,13 @@
 		<version>1.35.1</version>
 	</dependency>
 
+	
+	<dependency>
+        <groupId>com.github.mike706574</groupId>
+        <artifactId>java-diff-match-patch</artifactId>
+        <version>e9ca05c</version> <!-- fork and use a personal release later -->
+    </dependency>
+
 	<dependency>
 		<groupId>com.googlecode.json-simple</groupId>  
 		<artifactId>json-simple</artifactId>  
