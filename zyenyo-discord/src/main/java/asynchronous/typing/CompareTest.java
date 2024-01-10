@@ -1,5 +1,7 @@
 package asynchronous.typing;
 
+import java.time.Instant;
+
 import org.bson.Document;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -25,20 +27,25 @@ public class CompareTest implements Runnable
 	@Override
 	public void run()
 	{
-		String messageAuthorName = event.getAuthor().getName();
-		String channelID = event.getChannel().getId();
+		try {
+			String messageAuthorName = event.getAuthor().getName();
+			String channelID = event.getChannel().getId();
 
-		Document stats = Database.channelCompare(channelID, event.getAuthor().getId());
+			Document stats = Database.channelCompare(channelID, event.getAuthor().getId());
 
-		EmbedBuilder embed = new EmbedBuilder().setTitle(String.format("Top stats for %s on %s", messageAuthorName, stats.getString("_id")));
-		embed.appendDescription(String.format(
-			"Best TP: **`%.2f`**%n"
-				+ "Best WPM: **`%.2f`**%n"
-				+ "Best ACC: **`%.2f`**%%%n"
-				+ "Average TP: **`%.2f`**%n",
-				stats.getDouble("maxTp"), stats.getDouble("maxWpm"), stats.getDouble("maxAcc"), stats.getDouble("avgTp")));
+			EmbedBuilder embed = new EmbedBuilder().setTitle(String.format("Best score for %s on %s", messageAuthorName, stats.getString("prompt")));
+			embed.appendDescription(String.format(
+				"TP: **`%.2f`**%n"
+				+ "WPM: **`%.2f`**%n"
+				+ "ACC: **`%.2f`**%%%n"
+				+ "Set: <t:%d:R>",
+				stats.getDouble("tp"), stats.getDouble("wpm"), stats.getDouble("accuracy"), Instant.parse(stats.getString("date")).toEpochMilli()));
 
-		event.getChannel().sendMessageEmbeds(embed.build()).queue();
+			event.getChannel().sendMessageEmbeds(embed.build()).queue();
+		
+		} catch (Exception e) {
+			System.err.println(e);
+		}
 	}
 		
 }
