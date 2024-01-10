@@ -108,7 +108,7 @@ public class Database
 				.append("timeTaken", submission.timeTakenMillis())
 				.append("prompt", submission.promptTitle())
 				.append("submittedText", submission.userTypingSubmission())
-				.append("date", LocalDateTime.now())
+				.append("date", Instant.now())
 				.append("channelId", submission.channelId())
 				);
 
@@ -378,4 +378,6 @@ public class Database
 			);
 		}
 	}
+
+	public static void migrate() throws Exception {}
 }

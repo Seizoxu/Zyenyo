@@ -121,6 +121,29 @@ public class Administrator extends ListenerAdapter
 		
 		}
 		
+		else if (Aliases.MIGRATE.contains(args[0].toLowerCase()))
+		{
+
+			Zyenyo.masterThreadPool.submit(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						channel.sendMessageFormat("Performing Migration...").queue();
+						long startTime = System.currentTimeMillis();
+						try {
+							Database.migrate();
+							channel.sendMessageFormat(
+								"Migration Successful.%nTime taken: %dms",
+								System.currentTimeMillis() - startTime).queue();
+						} catch (Exception e) {
+							System.err.println(e);
+						}
+
+					}
+			});
+		}
+		
 		else if (Aliases.RESTART.contains(args[0].toLowerCase()))
 		{
 			channel.sendMessageFormat("A restart has been scheduled.").queue();

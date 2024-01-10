@@ -76,6 +76,7 @@ public final class Aliases
 	/*————————————————————————————————————|
 	|————————————————ADMIN————————————————|
 	|————————————————————————————————————*/
+	public final static Set<String> MIGRATE = Collections.singleton(BotConfig.PREFIX + "migrate");
 	public final static Set<String> SHUTDOWN = Collections.singleton(BotConfig.PREFIX + "shutdown");
 	public final static Set<String> RESTART = Collections.singleton(BotConfig.PREFIX + "restart");
 	public final static Set<String> ADDTEST = Collections.singleton(BotConfig.PREFIX + "addtest");
