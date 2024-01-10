@@ -61,7 +61,7 @@ public final class Aliases
 	public static final Set<String> COMPARE = Set.of(
 			BotConfig.PREFIX + "compare",
 			BotConfig.PREFIX + "c");
-	public static final Set<String> DIFFERENCE = Set.of(
+	public static final Set<String> TYPEDIFF = Set.of(
 			BotConfig.PREFIX + "difference",
 			BotConfig.PREFIX + "diff");
 	public final static Set<String> CHART = Collections.singleton(BotConfig.PREFIX + "chart");

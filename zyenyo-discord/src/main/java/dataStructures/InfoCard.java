@@ -14,22 +14,23 @@ public class InfoCard
 		.setDescription("To obtain more information about a command, type `\\help [command]`.\n"
 				+ "Keep in mind that brackets `[]` are used for optional parameters, and "
 				+ "arrow brackets `<>` are used for required parameters.")
-		.addField("Help", "Shows this message.", false)
-		.addField("Info", "Shows general bot information.", false)
-		.addField("Ping", "Returns the bot and gateway latency.", false)
-		.addField("MesticsScrape", "Scrapes a specified number of messages and stores the statistics on a local file.", false)
-		.addField("MesticsRead", "Reads a specified scrape file, given an MS-Recall ID.", false)
-		.addField("TypeTest", "Starts a typing test.", false)
-		.addField("TeamVs", "Starts a team typing test.", false)
-		.addField("Numrow", "Starts a numrow typing test.", false)
-		.addField("TypeQuit", "Stops a typing test, if there is one currently running in the server.", false)
-		.addField("TypeStats", "Shows Typing Statistics.", false)
-		.addField("TypeList", "Shows a list of prompts.", false)
-		.addField("TypeTop", "Displays a user's best tests, sorted by TP by default.", false)
-//		.addField("Chart", "Shows a chart of a user's typing stats.", false)
-		.addField("Leaderboard", "Shows the typing stats leaderboard of a specified statistic.", false)
-		.addField("Daily", "Shows daily streak information.", false)
-//		.addField("DpiConverter", "Converts fullscreen DPI on one screen to another (not implemented).", false)
+		.addField("Help", "Shows this message.", true)
+		.addField("Info", "Shows general bot information.", true)
+		.addField("Ping", "Returns the bot and gateway latency.", true)
+		.addField("MesticsScrape", "Scrapes a specified number of messages.", true)
+		.addField("MesticsRead", "Reads a specified scrape file, given an MS-Recall ID.", true)
+		.addField("TypeTest", "Starts a typing test.", true)
+		.addField("TeamVs", "Starts a team typing test.", true)
+		.addField("Numrow", "Starts a numrow typing test.", true)
+		.addField("TypeQuit", "Stops a typing test, if it's currently running.", true)
+		.addField("TypeDiff", "Shows a user's typing test mistakes.", true)
+		.addField("TypeStats", "Shows Typing Statistics.", true)
+		.addField("TypeList", "Shows a list of prompts.", true)
+		.addField("TypeTop", "Displays a user's best tests.", true)
+//		.addField("Chart", "Shows a chart of a user's typing stats.", true)
+		.addField("Leaderboard", "Shows the typing stats leaderboard.", true)
+		.addField("Daily", "Shows daily streak information.", true)
+//		.addField("DpiConverter", "Converts fullscreen DPI on one screen to another (not implemented).", true)
 		.setColor(0x8D538D);
 	
 	
@@ -146,6 +147,16 @@ public class InfoCard
 		.addField("Aliases","`typestop`, `tquit`, `tq`", false)
 		.addField("Syntax", "`\\typequit`", false);
 	
+	public static final EmbedBuilder TYPING_DIFF = 
+		new EmbedBuilder()
+		.setTitle("CMD: Typing Test Diffchecker")
+		.setDescription("This command outputs a Diff of your latest submitted test, which shows "
+				+ "any errors the user has made. This makes it easier to find errors, in cases"
+				+ "where it is not immediately visible.")
+		.setColor(0x8D538D)
+		.addField("Aliases","`diff`, `td`", false)
+		.addField("Syntax", "`\\typediff`", false);
+
 	public static final EmbedBuilder TYPING_STATS =
 		new EmbedBuilder()
 		.setTitle("CMD: Typing Statistics.")

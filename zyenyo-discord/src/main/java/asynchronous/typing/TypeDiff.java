@@ -1,6 +1,8 @@
 package asynchronous.typing;
 
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 
@@ -12,16 +14,18 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import zyenyo.BotConfig;
 import zyenyo.Database;
 
-public class Difference implements Runnable
+public class TypeDiff implements Runnable
 {
 	private MessageReceivedEvent event;
 	private String[] args;
 	
+	private String discordId = "";
+	private String username = "";
 	private Prompt recentPrompt;
 	private String originalText;
 	private String modifiedText;
 	
-	public Difference(MessageReceivedEvent event, String[] args)
+	public TypeDiff(MessageReceivedEvent event, String[] args)
 	{
 		this.event = event;
 		this.args = args;
@@ -30,11 +34,13 @@ public class Difference implements Runnable
 	@Override
 	public void run()
 	{
-		String discordId = event.getAuthor().getId();
+		parseArguments();
+		
 		Document recentPlay = Database.getRecentPlays(discordId, 1).first();
 		String promptTitle = recentPlay.getString("prompt");
 		double accuracy = recentPlay.getDouble("accuracy");
 		modifiedText = recentPlay.getString("submittedText");
+
 		
 		if (accuracy == 100d)
 		{
@@ -77,9 +83,30 @@ public class Difference implements Runnable
 	    EmbedBuilder embed = new EmbedBuilder()
 	    		.setTitle(String.format("DIFF: [#%d | %.2fTR] %s",
 	    				recentPrompt.number(), recentPrompt.typeRating(), recentPrompt.title()))
-	    		.setDescription(str.trim())
+	    		.setDescription(String.format("User: %s%n%n%s", username, str.trim()))
 	    		.setFooter(String.format("DIFF calculated in %dms.", timeTaken));
 	    
 	    event.getChannel().sendMessageEmbeds(embed.build()).queue();
+	}
+	
+	
+	private void parseArguments()
+	{
+		for (String cmd : args)
+		{
+			Matcher matcher = Pattern.compile("<@\\d+>").matcher(cmd);
+			if (matcher.find())
+			{
+				discordId = event.getMessage().getMentionedMembers().get(0).getId();
+				username = event.getMessage().getMentionedMembers().get(0).getUser().getName();
+			}
+		}
+		
+		// Could just return from above, but planning to add more options.
+		if (discordId.isBlank())
+		{
+			discordId = event.getAuthor().getId();
+			username = event.getAuthor().getName();
+		}
 	}
 }
