@@ -322,6 +322,19 @@ public class Database
 		
 		return playsList;
 	}
+	
+	public static AggregateIterable<Document> getRecentPlays(String discordId, int numRecents)
+	{
+		if (numRecents < 1 || numRecents > 100) {numRecents = 1;}
+		
+		AggregateIterable<Document> recentsList = testsV2.aggregate(Arrays.asList(
+				Aggregates.match(Filters.eq("discordId", discordId)),
+				Aggregates.sort(descending("date")),
+				Aggregates.limit(numRecents)
+				));
+		
+		return recentsList;
+	}
 
 	public static Document channelCompare(String channelID, String discordId) {
 		Document test = testsV2.find(Filters.eq("channelId", channelID))

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.seizoxu.zyenyo</groupId>
   <artifactId>zyenyo</artifactId>
-  <version>0.3.07-beta</version>
+  <version>0.3.08-beta</version>
   <name>ZyenyoBot</name>
 
   <properties>
@@ -70,6 +70,13 @@
 		<artifactId>google-api-client-gson</artifactId>
 		<version>1.35.1</version>
 	</dependency>
+
+	
+	<dependency>
+        <groupId>com.github.mike706574</groupId>
+        <artifactId>java-diff-match-patch</artifactId>
+        <version>e9ca05c</version> <!-- fork and use a personal release later -->
+    </dependency>
 
 	<dependency>
 		<groupId>com.googlecode.json-simple</groupId>  
