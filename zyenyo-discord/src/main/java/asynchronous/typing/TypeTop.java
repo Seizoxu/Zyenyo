@@ -97,9 +97,7 @@ public class TypeTop implements Runnable
 							play.get("tp"),
 							play.get("wpm"),
 							play.get("accuracy"),
-							Instant.parse(
-									play.get("date").toString()
-							).toEpochMilli()),
+							play.getDate("date").toInstant().toEpochMilli() / 1000),
 					false
 					);
 			

@@ -39,7 +39,7 @@ public class CompareTest implements Runnable
 				+ "WPM: **`%.2f`**%n"
 				+ "ACC: **`%.2f`**%%%n"
 				+ "Set: <t:%d:R>",
-				stats.getDouble("tp"), stats.getDouble("wpm"), stats.getDouble("accuracy"), Instant.parse(stats.getString("date")).toEpochMilli()));
+				stats.getDouble("tp"), stats.getDouble("wpm"), stats.getDouble("accuracy"), stats.getDate("date").toInstant().toEpochMilli() / 1000));
 
 			event.getChannel().sendMessageEmbeds(embed.build()).queue();
 		
