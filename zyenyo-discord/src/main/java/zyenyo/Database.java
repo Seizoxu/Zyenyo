@@ -346,12 +346,8 @@ public class Database
 		Document results = testsV2.aggregate(Arrays.asList(
 			Aggregates.match(Filters.eq("discordId", discordId)),
 			Aggregates.match(Filters.eq("prompt", promptToCompare)),
-			Aggregates.group("$prompt", 
-				Accumulators.max("maxTp", "$tp"),
-				Accumulators.max("maxWpm", "$wpm"),
-				Accumulators.max("maxAcc", "$accuracy"),
-				Accumulators.avg("avgTp", "$tp")
-			)
+			Aggregates.sort(descending("tp")),
+			Aggregates.limit(1)
 		)).first();
 
 		return results;

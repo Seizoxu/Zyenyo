@@ -1,5 +1,6 @@
 package asynchronous.typing;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -96,12 +97,7 @@ public class TypeTop implements Runnable
 							play.get("tp"),
 							play.get("wpm"),
 							play.get("accuracy"),
-							ZonedDateTime.parse(
-									play.get("date").toString(),
-									DateTimeFormatter.ofPattern("E MMM d HH:mm:ss z uuuu", Locale.ENGLISH))
-							.toInstant()
-							.toEpochMilli()/1000
-							),
+							play.getDate("date").toInstant().toEpochMilli() / 1000),
 					false
 					);
 			
