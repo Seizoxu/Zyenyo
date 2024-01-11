@@ -61,6 +61,9 @@ public final class Aliases
 	public static final Set<String> COMPARE = Set.of(
 			BotConfig.PREFIX + "compare",
 			BotConfig.PREFIX + "c");
+	public static final Set<String> TYPEDIFF = Set.of(
+			BotConfig.PREFIX + "difference",
+			BotConfig.PREFIX + "diff");
 	public final static Set<String> CHART = Collections.singleton(BotConfig.PREFIX + "chart");
 	public final static Set<String> LEADERBOARD = Set.of(
 			BotConfig.PREFIX + "leaderboard",
@@ -73,6 +76,7 @@ public final class Aliases
 	/*————————————————————————————————————|
 	|————————————————ADMIN————————————————|
 	|————————————————————————————————————*/
+	public final static Set<String> MIGRATE = Collections.singleton(BotConfig.PREFIX + "migrate");
 	public final static Set<String> SHUTDOWN = Collections.singleton(BotConfig.PREFIX + "shutdown");
 	public final static Set<String> RESTART = Collections.singleton(BotConfig.PREFIX + "restart");
 	public final static Set<String> ADDTEST = Collections.singleton(BotConfig.PREFIX + "addtest");

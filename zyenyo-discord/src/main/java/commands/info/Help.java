@@ -61,6 +61,9 @@ public class Help extends ListenerAdapter
 				case "typestop": case "typequit": case "tquit": case "tq":
 					embed = InfoCard.TYPING_QUIT;
 					break;
+				case "typediff": case "diff": case "td":
+					embed = InfoCard.TYPING_DIFF;
+					break;
 				case "typestats": case "tstats": case "ts":
 					embed = InfoCard.TYPING_STATS;
 					break;
