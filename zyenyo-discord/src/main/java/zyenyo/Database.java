@@ -336,10 +336,14 @@ public class Database
 		return recentsList;
 	}
 
-	public static Document channelCompare(String channelID, String discordId) {
+	public static Document channelCompare(String channelID, String discordId) throws Exception {
 		Document test = testsV2.find(Filters.eq("channelId", channelID))
 				.sort(descending("date"))
 				.first();
+
+		if (test == null) {
+			throw new Exception("A typing test has not been conducted in this channel.");
+		}
 
 		String promptToCompare = test.getString("prompt");
 		
@@ -349,6 +353,10 @@ public class Database
 			Aggregates.sort(descending("tp")),
 			Aggregates.limit(1)
 		)).first();
+
+		if (results == null) {
+			throw new Exception("No recent plays found.");
+		}
 
 		return results;
 	}
