@@ -34,7 +34,6 @@ public class CompareTest implements Runnable
 		try {
 			if (args.length == 2) {
 				idStr = args[1].subSequence(2, args[1].length()-1).toString();
-				System.out.println(idStr);
 			} else {
 				idStr = event.getAuthor().getId();
 			}
