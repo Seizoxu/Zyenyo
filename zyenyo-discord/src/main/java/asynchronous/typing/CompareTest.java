@@ -12,6 +12,8 @@ public class CompareTest implements Runnable
 {
 
 	private MessageReceivedEvent event;
+	private String[] args;
+	private String idStr;
 	
 	/**
 	 * Sends a message embed of a specified user's top 100 tests.
@@ -22,18 +24,27 @@ public class CompareTest implements Runnable
 	public CompareTest(MessageReceivedEvent event, String[] args)
 	{
 		this.event = event;
+		this.args = args;
 	}
 	
 	@Override
 	public void run()
 	{
+
 		try {
+			if (args.length == 2) {
+				idStr = args[1].subSequence(2, args[1].length()-1).toString();
+				System.out.println(idStr);
+			} else {
+				idStr = event.getAuthor().getId();
+			}
+
 			String messageAuthorName = event.getAuthor().getName();
 			String channelID = event.getChannel().getId();
 
-			Document stats = Database.channelCompare(channelID, event.getAuthor().getId());
+			Document stats = Database.channelCompare(channelID, idStr);
 
-			EmbedBuilder embed = new EmbedBuilder().setTitle(String.format("Best score for %s on %s", messageAuthorName, stats.getString("prompt")));
+			EmbedBuilder embed = new EmbedBuilder().setTitle(String.format("Best score for %s on %s", event.getJDA().retrieveUserById(idStr).submit().get().getAsTag(), stats.getString("prompt")));
 			embed.appendDescription(String.format(
 				"TP: **`%.2f`**%n"
 				+ "WPM: **`%.2f`**%n"
@@ -44,7 +55,8 @@ public class CompareTest implements Runnable
 			event.getChannel().sendMessageEmbeds(embed.build()).queue();
 		
 		} catch (Exception e) {
-			System.err.println(e);
+			e.printStackTrace();
+			event.getChannel().sendMessage(String.format("**Error: %s**", e.getMessage())).queue();
 		}
 	}
 		
