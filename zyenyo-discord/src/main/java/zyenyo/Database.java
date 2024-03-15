@@ -30,6 +30,7 @@ import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.event.CommandFailedEvent;
 import com.mongodb.event.CommandListener;
+import com.mongodb.client.result.UpdateResult;
 
 import dataStructures.AddTestResult;
 import dataStructures.LeaderboardConfig;
@@ -272,6 +273,8 @@ public class Database
 
 		return collection.aggregate(Arrays.asList(
 			Aggregates.match(lbConfig.getFiltrationStrategy()),
+			Aggregates.lookup("usersv2", "discordId", "discordId", "userData"),
+			Aggregates.match(Filters.not(Filters.exists("userData.blacklisted"))),
 			Aggregates.group("$discordId", 
 				lbConfig.getAccumulationStrategies()
 					),
@@ -381,6 +384,16 @@ public class Database
 					upsertTrue
 			);
 		}
+	}
+
+	public static long blacklistAdd(String discordId) {
+			UpdateResult result = usersV2.updateOne(
+					Filters.eq("discordId", discordId),
+					Updates.set("blacklisted", true),
+					upsertTrue
+			);
+
+			return result.getMatchedCount();
 	}
 
 	public static void migrate() throws Exception {}

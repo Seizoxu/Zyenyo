@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import asynchronous.typing.AddPrompt;
+import asynchronous.typing.BlackList;
 import asynchronous.typing.AddTest;
 import asynchronous.typing.ClearProfile;
 import asynchronous.typing.FindCheaters;
@@ -66,6 +67,11 @@ public class Administrator extends ListenerAdapter
 		{
 			
 			Zyenyo.masterThreadPool.submit(new AddPrompt(event));
+		}
+		else if (Aliases.BLACKLIST.contains(args[0].toLowerCase()))
+		{
+			
+			Zyenyo.masterThreadPool.submit(new BlackList(event, args));
 		}
 
 		else if (Aliases.REFRESHUSERS.contains(args[0].toLowerCase()))
