@@ -10,14 +10,13 @@ import Link from "next/link";
 
 import {useEffect, useState} from "react"
 import BotStats from "./BotStats";
+import Header from "../Navigation/Header";
 
 const Dashboard = () => {
 
     return (
         <>
-            <div className='flex flex-row gap-0 text-6xl md:text-9xl mb-12'>
-                <div className='text-white underline underline-offset-8'>Zyenyo</div><div className='text-[#F51A1F]'>Bot</div>
-            </div>
+            <Header />
             <BotStats className="my-5 hidden md:block" />
             <div className="grid grid-cols-1 md:grid-cols-2 mt-auto mb-auto gap-3">
 

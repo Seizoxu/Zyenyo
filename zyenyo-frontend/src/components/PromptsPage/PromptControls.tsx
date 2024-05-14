@@ -41,7 +41,7 @@ const PromptControls = () => {
 
     return (
         <div className='max-w-[300px] md:max-w-[500px]'>
-            <input className='flex border-2 border-white rounded-xl w-full bg-zinc-900 h-14 my-3 px-3' placeholder='Search Prompts' onChange={(e) => debounced(e.target.value)}/>
+            <input className='flex border-2 border-white rounded-xl w-full bg-zinc-800 h-14 my-3 px-3' placeholder='Search Prompts' onChange={(e) => debounced(e.target.value)}/>
 
 
             <div className='flex gap-5'>
@@ -50,9 +50,9 @@ const PromptControls = () => {
                     <p className='text-sm font-bold ml-2 text-gray-400'>Sort By</p>
                     <Select
                         classNames={{
-                            control: () => "bg-zinc-900 border-2 border-amber-400 rounded-xl p-2",
-                            menu: () => "bg-zinc-900 border-2 border-amber-400 rounded-xl p-3",
-                            option: (state) => state.isFocused ? 'bg-zinc-800' : 'bg-zinc-900'
+                            control: () => "bg-zinc-800 border-2 border-amber-400 rounded-xl p-2",
+                            menu: () => "bg-zinc-800 border-2 border-amber-400 rounded-xl p-3",
+                            option: (state) => state.isFocused ? 'bg-zinc-800' : 'bg-zinc-800'
                         }}
                         unstyled
                         isSearchable={false}
@@ -70,9 +70,9 @@ const PromptControls = () => {
                     <p className='text-sm font-bold ml-1 text-gray-400'>Order</p>
                     <Select
                         classNames={{
-                            control: () => "bg-zinc-900 border-2 border-amber-400 rounded-xl p-2",
-                            menu: () => "bg-zinc-900 border-2 border-amber-400 rounded-xl p-3",
-                            option: (state) => state.isFocused ? 'bg-zinc-800' : 'bg-zinc-900'
+                            control: () => "bg-zinc-800 border-2 border-amber-400 rounded-xl p-2",
+                            menu: () => "bg-zinc-800 border-2 border-amber-400 rounded-xl p-3",
+                            option: (state) => state.isFocused ? 'bg-zinc-800' : 'bg-zinc-800'
                         }}
                         unstyled
                         isSearchable={false}
@@ -88,7 +88,7 @@ const PromptControls = () => {
 
                 <div className='flex flex-col gap-1'>
                     <p className='text-sm font-bold ml-1 text-gray-400'>Page</p>
-                    <div className='flex flex-row justify-between items-center bg-zinc-900 border-2 border-amber-400 rounded-xl p-2 w-[100px]'>
+                    <div className='flex flex-row justify-between items-center bg-zinc-800 border-2 border-amber-400 rounded-xl p-2 w-[100px]'>
                         <button onClick={() => setPromptControls((prev) => ({...prev, page: Math.max(prev.page - 1, 1) }))}>
                             <MinusCircleIcon className="h-6 w-6 text-amber-400" />
                         </button>
