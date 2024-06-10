@@ -7,6 +7,7 @@ pub struct Prompt {
     pub title: String,
     pub text: String,
     pub rating: f64,
+    pub slug: String,
 }
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
