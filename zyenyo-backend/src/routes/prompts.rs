@@ -51,13 +51,13 @@ async fn prompts(
 ) -> impl Responder {
     let info = controls.into_inner();
 
-    match prompt_query(context, info).await {
+    match prompts_query(context, info).await {
         Ok(prompts_vec) => HttpResponse::Ok().json(prompts_vec),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
 }
 
-async fn prompt_query(
+async fn prompts_query(
     context: web::Data<Context>,
     controls: PromptsConfig,
 ) -> Result<Vec<Prompt>, Box<dyn Error>> {
@@ -83,4 +83,28 @@ async fn prompt_query(
         .iter()
         .filter_map(|doc| bson::from_document::<Prompt>(doc.to_owned()).ok())
         .collect())
+}
+
+
+#[get("/prompt/{slug}")]
+async fn prompt(context: web::Data<Context>, path: web::Path<String>) -> impl Responder {
+    let slug = path.into_inner();
+
+    dbg!(&slug);
+
+    match prompts_by_slug_query(context, slug).await {
+        Ok(Some(prompt)) => HttpResponse::Ok().json(prompt),
+        Ok(None) => HttpResponse::NotFound().body("No prompt found"),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
+}
+
+async fn prompts_by_slug_query(context: web::Data<Context>, slug: String) -> Result<Option<Prompt>, Box<dyn Error>> {
+    let collection: Collection<Prompt> = context.db.collection("prompts");
+
+    Ok(collection.find_one(doc! {"slug": slug}, None).await?)
+
+
+    
+
 }

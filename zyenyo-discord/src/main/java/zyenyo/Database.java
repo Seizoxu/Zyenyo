@@ -396,5 +396,21 @@ public class Database
 			return result.getMatchedCount();
 	}
 
-	public static void migrate() throws Exception {}
+	public static void migrate() throws Exception {
+		System.out.println("hi");
+		for (Document prompt : prompts.find()) {
+			String title = prompt.getString("title");
+
+			String slug = title.replaceAll("[^\\w\\s]","");
+			slug = slug.replaceAll(" ", "-");
+
+			System.out.println(slug);
+
+			prompts.updateOne(
+					Filters.eq("title", title),
+					Updates.set("slug", slug),
+					upsertTrue
+			);
+		}
+	}
 }

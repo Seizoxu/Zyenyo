@@ -13,6 +13,7 @@ export type Prompt = {
     title: String,
     text: String,
     rating: number,
+    slug: String
 }
 
 const sortOptions = [
@@ -40,11 +41,11 @@ const PromptControls = () => {
     }, [promptControls])
 
     return (
-        <div className='max-w-[300px] md:max-w-[500px]'>
+        <div className='min-w-[300px] md:min-w-[500px]'>
             <input className='flex border-2 border-white rounded-xl w-full bg-zinc-800 h-14 my-3 px-3' placeholder='Search Prompts' onChange={(e) => debounced(e.target.value)}/>
 
 
-            <div className='flex gap-5'>
+            <div className='flex justify-evenly'>
 
                 <div className='flex flex-col gap-1'>
                     <p className='text-sm font-bold ml-2 text-gray-400'>Sort By</p>
@@ -52,7 +53,7 @@ const PromptControls = () => {
                         classNames={{
                             control: () => "bg-zinc-800 border-2 border-amber-400 rounded-xl p-2",
                             menu: () => "bg-zinc-800 border-2 border-amber-400 rounded-xl p-3",
-                            option: (state) => state.isFocused ? 'bg-zinc-800' : 'bg-zinc-800'
+                            option: (state) => state.isFocused ? 'bg-zinc-700' : 'bg-zinc-800'
                         }}
                         unstyled
                         isSearchable={false}
@@ -72,7 +73,7 @@ const PromptControls = () => {
                         classNames={{
                             control: () => "bg-zinc-800 border-2 border-amber-400 rounded-xl p-2",
                             menu: () => "bg-zinc-800 border-2 border-amber-400 rounded-xl p-3",
-                            option: (state) => state.isFocused ? 'bg-zinc-800' : 'bg-zinc-800'
+                            option: (state) => state.isFocused ? 'bg-zinc-700' : 'bg-zinc-800'
                         }}
                         unstyled
                         isSearchable={false}
@@ -100,10 +101,8 @@ const PromptControls = () => {
                 </div>
             </div>
 
-            <div className='flex flex-col h-[70vh] gap-5 mt-12 overflow-y-scroll'>
-
+            <div className='flex flex-col h-full gap-5 mt-12'>
                 {prompts?.map((prompt, idx) => <PromptCard prompt={prompt} key={idx}/>)}
-
             </div>
         </div>
     )
