@@ -6,14 +6,22 @@ import java.io.File;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import java.util.LinkedHashMap;
+
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.EmbedBuilder;
 
 import org.jfree.chart.JFreeChart; 
 import org.jfree.chart.ChartFactory; 
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.ChartUtilities; 
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.chart.axis.CategoryLabelPositions;
+
+import java.awt.BasicStroke;
+
+import zyenyo.Database;
 
 
 public class Chart implements Runnable
@@ -27,22 +35,29 @@ public class Chart implements Runnable
 		try
 		{
 
-			DefaultCategoryDataset line_chart_dataset = new DefaultCategoryDataset();
-			line_chart_dataset.addValue( 15 , "schools" , "1970" );
-			line_chart_dataset.addValue( 30 , "schools" , "1980" );
-			line_chart_dataset.addValue( 60 , "schools" , "1990" );
-			line_chart_dataset.addValue( 120 , "schools" , "2000" );
-			line_chart_dataset.addValue( 240 , "schools" , "2010" ); 
-			line_chart_dataset.addValue( 300 , "schools" , "2014" );
+			String id = event.getAuthor().getId();
+			LinkedHashMap<String, Integer> monthlyPlaycount = Database.playcount(id);
+
+			DefaultCategoryDataset lineChartDataset = new DefaultCategoryDataset();
+			monthlyPlaycount.forEach((monthStr, count) -> lineChartDataset.addValue(count, "playcount", monthStr));
 
 			JFreeChart lineChartObject = ChartFactory.createLineChart(
-					"Schools Vs Years","Year",
-					"Schools Count",
-					line_chart_dataset,PlotOrientation.VERTICAL,
+					"Playcount","",
+					"",
+					lineChartDataset,PlotOrientation.VERTICAL,
 					true,true,false);
+			lineChartObject.removeLegend();
+
+			CategoryPlot plot = (CategoryPlot) lineChartObject.getPlot();
+
+			plot.getDomainAxis().setCategoryLabelPositions(
+					CategoryLabelPositions.UP_45);
+			plot.setDomainGridlinesVisible(true);
+			plot.setRangeGridlinesVisible(false);
+			plot.getRenderer().setSeriesStroke(0, new BasicStroke(2.0f));
 
 			int width = 640;    /* Width of the image */
-			int height = 480;   /* Height of the image */ 
+			int height = 380;   /* Height of the image */ 
 			File lineChart = new File( "LineChart.png" ); 
 			ChartUtilities.saveChartAsPNG(lineChart ,lineChartObject, width ,height);
 

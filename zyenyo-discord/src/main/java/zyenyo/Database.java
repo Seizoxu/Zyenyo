@@ -4,11 +4,17 @@ import static com.mongodb.client.model.Sorts.descending;
 import static com.mongodb.client.model.Sorts.ascending;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -362,6 +368,30 @@ public class Database
 		}
 
 		return results;
+	}
+
+	public static LinkedHashMap<String, Integer> playcount(String discordId) {
+
+		AggregateIterable<Document> submittedTests = testsV2.aggregate(Arrays.asList(
+					Aggregates.match(Filters.eq("discordId", discordId)),
+					Aggregates.sort(ascending("date"))
+					));
+		
+		// needed an insert-ordered map
+		LinkedHashMap<String, Integer> monthlyPlaycount = new LinkedHashMap<String, Integer>();
+
+		for (Document test : submittedTests) {
+			ZonedDateTime date = test.getDate("date").toInstant().atZone(ZoneId.of("UTC"));
+			String dateStr = date.getMonth().toString() + " " + String.valueOf(date.getYear());
+			Integer current = monthlyPlaycount.get(dateStr);
+			if (current == null) {
+				monthlyPlaycount.put(dateStr, 1);
+			} else {
+				monthlyPlaycount.put(dateStr, current + 1);
+			}
+		}
+
+		return monthlyPlaycount;
 	}
 	
 	
