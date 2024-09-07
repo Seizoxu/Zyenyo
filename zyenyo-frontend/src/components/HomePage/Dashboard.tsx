@@ -20,7 +20,7 @@ const Dashboard = () => {
             <BotStats className="my-5 hidden md:block" />
             <div className="grid grid-cols-1 md:grid-cols-2 mt-auto mb-auto gap-3">
 
-                <Link className="flex flex-col justify-evenly hover:bg-zinc-800 ease-in p-6 gap-3 max-w-[350px] h-[180px] text-left border-2 border-white rounded-3xl " href="https://discord.com/api/oauth2/authorize?client_id=696614233944752130&permissions=137439283200&scope=bot" target="_blank">
+                <Link className="flex flex-col justify-evenly hover:bg-zinc-700 ease-in p-6 gap-3 max-w-[350px] h-[180px] text-left border-2 border-white rounded-3xl " href="https://discord.com/api/oauth2/authorize?client_id=696614233944752130&permissions=137439283200&scope=bot" target="_blank">
                     <StarIcon className="h-8 w-8 text-[#F51A1F]" />
                     <div>
                         <p className="text-lg mb-1 font-bold">Get Zyenyo</p>
@@ -28,7 +28,7 @@ const Dashboard = () => {
                     </div>
                 </Link>
 
-                <Link className="flex flex-col justify-evenly hover:bg-zinc-800 ease-in p-6 gap-3 max-w-[350px] h-[180px] text-left border-2 border-white rounded-3xl " href="/" >
+                <Link className="flex flex-col justify-evenly hover:bg-zinc-700 ease-in p-6 gap-3 max-w-[350px] h-[180px] text-left border-2 border-white rounded-3xl " href="/" >
                     <CommandLineIcon className="h-8 w-8 text-[#F51A1F]" />
                     <div>
                         <p className="text-lg mb-1 font-bold">Commands</p>
@@ -36,7 +36,7 @@ const Dashboard = () => {
                     </div>
                 </Link>
 
-                <Link className="flex flex-col justify-evenly hover:bg-zinc-800 ease-in p-6 gap-3 max-w-[350px] h-[180px] text-left border-2 border-white rounded-3xl " href="/" >
+                <Link className="flex flex-col justify-evenly hover:bg-zinc-700 ease-in p-6 gap-3 max-w-[350px] h-[180px] text-left border-2 border-white rounded-3xl " href="/" >
                     <TrophyIcon className=" h-8 w-8 text-[#F51A1F]" />
                     <div>
                         <p className="text-lg mb-1 font-bold">Leaderboards</p>
@@ -44,7 +44,7 @@ const Dashboard = () => {
                     </div>
                 </Link>
 
-                <Link className="flex flex-col justify-evenly hover:bg-zinc-800 ease-in p-6 gap-3 max-w-[350px] h-[180px] text-left border-2 border-white rounded-3xl " href="/prompts" >
+                <Link className="flex flex-col justify-evenly hover:bg-zinc-700 ease-in p-6 gap-3 max-w-[350px] h-[180px] text-left border-2 border-white rounded-3xl " href="/prompts" >
                     <ChatBubbleLeftEllipsisIcon className=" h-8 w-8 text-[#F51A1F]" />
                     <div>
                         <p className="text-lg mb-1 font-bold">Prompts</p>
