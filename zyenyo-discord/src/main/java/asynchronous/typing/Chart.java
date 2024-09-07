@@ -1,11 +1,27 @@
 package asynchronous.typing;
 
 import java.io.IOException;
+import java.io.File;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import java.util.LinkedHashMap;
+
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.EmbedBuilder;
+
+import org.jfree.chart.JFreeChart; 
+import org.jfree.chart.ChartFactory; 
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.ChartUtilities; 
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.chart.axis.CategoryLabelPositions;
+
+import java.awt.BasicStroke;
+
+import zyenyo.Database;
 
 
 public class Chart implements Runnable
@@ -18,12 +34,37 @@ public class Chart implements Runnable
     {
 		try
 		{
-			String jsonString = TypingApiHandler.requestData("chart/wpm/" + event.getAuthor().getId());
-			JSONObject json = (JSONObject) JSONValue.parse(jsonString);
 
-			event.getChannel().sendMessage(json.get("URL").toString())
-			.queue();
+			String id = event.getAuthor().getId();
+			LinkedHashMap<String, Integer> monthlyPlaycount = Database.playcount(id);
+
+			DefaultCategoryDataset lineChartDataset = new DefaultCategoryDataset();
+			monthlyPlaycount.forEach((monthStr, count) -> lineChartDataset.addValue(count, "playcount", monthStr));
+
+			JFreeChart lineChartObject = ChartFactory.createLineChart(
+					"Playcount","",
+					"",
+					lineChartDataset,PlotOrientation.VERTICAL,
+					true,true,false);
+			lineChartObject.removeLegend();
+
+			CategoryPlot plot = (CategoryPlot) lineChartObject.getPlot();
+
+			plot.getDomainAxis().setCategoryLabelPositions(
+					CategoryLabelPositions.UP_45);
+			plot.setDomainGridlinesVisible(true);
+			plot.setRangeGridlinesVisible(false);
+			plot.getRenderer().setSeriesStroke(0, new BasicStroke(2.0f));
+
+			int width = 640;    /* Width of the image */
+			int height = 380;   /* Height of the image */ 
+			File lineChart = new File( "LineChart.png" ); 
+			ChartUtilities.saveChartAsPNG(lineChart ,lineChartObject, width ,height);
+
+			EmbedBuilder embed = new EmbedBuilder().setTitle("Playcount").setImage("attachment://chart.png");
+			event.getChannel().sendMessageEmbeds( embed.build() ).addFile(lineChart, "chart.png").queue();
+
 		}
-		catch (IOException | InterruptedException e) {e.printStackTrace();}
+		catch (Exception e) {e.printStackTrace();}
 	}
 }

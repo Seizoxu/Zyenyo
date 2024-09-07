@@ -1,7 +1,20 @@
 package asynchronous.typing;
 
+import java.io.File;
+
 import java.awt.Color;
+import java.awt.BasicStroke;
+
 import java.util.concurrent.ExecutionException;
+import java.util.LinkedHashMap;
+
+import org.jfree.chart.JFreeChart; 
+import org.jfree.chart.ChartFactory; 
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.ChartUtilities; 
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.chart.axis.CategoryLabelPositions;
 
 import org.json.JSONObject;
 
@@ -77,6 +90,8 @@ public class TypeStats implements Runnable
 			double typingPoints = Double.parseDouble(json.get("weightedTp").toString());
 			double playtime = Double.parseDouble(json.get("playtime").toString());
 			String rank = getRank(averageWpm);
+
+			File chart = this.getChart();
 			
 			channel.sendMessageEmbeds(new EmbedBuilder()
 					.addField(title,
@@ -92,7 +107,8 @@ public class TypeStats implements Runnable
 									Math.floor(playtime / (1000 * 60 * 60)), Math.floor( (playtime / (1000 * 60))%60 ),
 									rank), false)
 					.setColor(new Color(180, 50, 80))
-					.build())
+					.setImage("attachment://chart.png")
+					.build()).addFile(chart, "chart.png")
 			.queue();
 		}
 		catch (InterruptedException | NumberFormatException e)
@@ -129,6 +145,42 @@ public class TypeStats implements Runnable
 		// personally, I aim for Integer.MAX_VALUE WPM on my tests
 		
 		return rank;
+	}
+	
+	//TODO: this can likely be abstracted when we want to generate other sorts of charts in the future.
+	private File getChart() {
+		try
+		{
+
+			LinkedHashMap<String, Integer> monthlyPlaycount = Database.playcount(idStr);
+
+			DefaultCategoryDataset lineChartDataset = new DefaultCategoryDataset();
+			monthlyPlaycount.forEach((monthStr, count) -> lineChartDataset.addValue(count, "playcount", monthStr));
+
+			JFreeChart lineChartObject = ChartFactory.createLineChart(
+					"Playcount","",
+					"",
+					lineChartDataset,PlotOrientation.VERTICAL,
+					true,true,false);
+			lineChartObject.removeLegend();
+
+			CategoryPlot plot = (CategoryPlot) lineChartObject.getPlot();
+
+			plot.getDomainAxis().setCategoryLabelPositions(
+					CategoryLabelPositions.UP_45);
+			plot.setDomainGridlinesVisible(true);
+			plot.setRangeGridlinesVisible(false);
+			plot.getRenderer().setSeriesStroke(0, new BasicStroke(2.0f));
+
+			int width = 640;    /* Width of the image */
+			int height = 380;   /* Height of the image */ 
+			File lineChart = new File( "LineChart.png" ); 
+			ChartUtilities.saveChartAsPNG(lineChart ,lineChartObject, width ,height);
+			return lineChart;
+		}
+		catch (Exception e) {e.printStackTrace();}
+
+		return null;
 	}
 
 }
