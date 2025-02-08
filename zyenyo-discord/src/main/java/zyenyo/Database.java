@@ -325,7 +325,7 @@ public class Database
 				Aggregates.group("$prompt", Accumulators.first("document", "$$ROOT")),
 				Aggregates.replaceRoot("$document"),
 				Aggregates.sort(descending("tp")),
-				Aggregates.limit(numTops), // Limit before sort, since we want to sort the top 100, not everything.
+				Aggregates.limit(numTops),
 				(isDescending) ? Aggregates.sort(descending(sort)) : Aggregates.sort(ascending(sort))
 				));
 		

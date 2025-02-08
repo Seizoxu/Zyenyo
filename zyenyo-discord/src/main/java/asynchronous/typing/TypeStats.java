@@ -42,6 +42,7 @@ public class TypeStats implements Runnable
 		this.channel = event.getChannel();
 		this.args = args;
 	}
+	//TODO: Add a sendHelp here for whenever this command takes further arguments.
 	
 	@Override
 	public void run()
