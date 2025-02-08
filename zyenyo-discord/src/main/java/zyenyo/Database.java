@@ -316,7 +316,7 @@ public class Database
 	 * @param isDescending
 	 * @return AggregateIterable<Document>
 	 */
-	public static AggregateIterable<Document> getTopPlays(String discordId, String sort, Boolean isDescending)
+	public static AggregateIterable<Document> getTopPlays(String discordId, String sort, int numTops, Boolean isDescending)
 	{
 		AggregateIterable<Document> playsList = testsV2.aggregate(Arrays.asList(
 				Aggregates.match(Filters.eq("discordId", discordId)),
@@ -325,7 +325,7 @@ public class Database
 				Aggregates.group("$prompt", Accumulators.first("document", "$$ROOT")),
 				Aggregates.replaceRoot("$document"),
 				Aggregates.sort(descending("tp")),
-				Aggregates.limit(100), // Limit before sort, since we want to sort the top 100, not everything.
+				Aggregates.limit(numTops),
 				(isDescending) ? Aggregates.sort(descending(sort)) : Aggregates.sort(ascending(sort))
 				));
 		

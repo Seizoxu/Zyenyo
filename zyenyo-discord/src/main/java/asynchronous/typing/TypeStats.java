@@ -1,24 +1,29 @@
 package asynchronous.typing;
 
-import java.io.File;
-
-import java.awt.Color;
 import java.awt.BasicStroke;
-
-import java.util.concurrent.ExecutionException;
+import java.awt.Color;
+import java.io.File;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.jfree.chart.JFreeChart; 
-import org.jfree.chart.ChartFactory; 
+import org.bson.Document;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.ChartUtilities; 
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.chart.axis.CategoryLabelPositions;
-
 import org.json.JSONObject;
 
-import dataStructures.InfoCard;
+import com.mongodb.client.AggregateIterable;
+
+import dataStructures.TypeStatsScope;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -30,15 +35,14 @@ public class TypeStats implements Runnable
 	private MessageChannel channel;
 	private String idStr;
 	private String[] args;
-	private boolean requestGlobal = false;
-	private Runnable sendHelp = new Runnable()
-		{@Override public void run() {channel.sendMessageEmbeds(InfoCard.INCORRECT_SYNTAX.build()).queue();}};
+	private TypeStatsScope scope = TypeStatsScope.RECENT;
 	public TypeStats(MessageReceivedEvent event, String[] args)
 	{
 		this.event = event;
 		this.channel = event.getChannel();
 		this.args = args;
 	}
+	//TODO: Add a sendHelp here for whenever this command takes further arguments.
 	
 	@Override
 	public void run()
@@ -48,30 +52,29 @@ public class TypeStats implements Runnable
 			channel.sendTyping().queue();
 			
 			// Get command parameters.
-			if (args.length == 1) {idStr = event.getAuthor().getId();}
-			else if (args.length == 2)
+			for (String cmd : args)
 			{
-				if (args[1].equals("-g"))
+				// Not using .getAsMention() to avoid replies being the primary mention.
+				Matcher matcher = Pattern.compile("<@\\d+>").matcher(cmd);
+				if (matcher.find())
 				{
-					idStr = event.getAuthor().getId();
-					requestGlobal = true;
+					idStr = event.getMessage().getMentionedMembers().get(0).getId();
 				}
-				else {idStr = args[1].subSequence(2, args[1].length()-1).toString();}
+				else {idStr = event.getAuthor().getId();}
+				
+				switch(cmd.toLowerCase())
+				{
+				case "-g":
+					scope = TypeStatsScope.GLOBAL;
+					break;
+				}
 			}
-			else if (args.length == 3 && args[2].equals("-g"))
-			{
-				idStr = args[1].subSequence(2, args[1].length()-1).toString();
-				requestGlobal = true;
-			}
-			else {sendHelp.run(); return;}
-			// Yes, the above line blocks the curr. thread, but this class is already another thread,
-			// and it doesn't need to go further.
 			
 			Long id = Long.parseLong(idStr); // Used for error checking; will change later.
 			String testsTaken="", title;
 			JSONObject json;
 			
-			if (requestGlobal)
+			if (scope == TypeStatsScope.GLOBAL)
 			{
 				json = new JSONObject(Database.getGlobalStats(idStr));
 				testsTaken = String.format("Tests Taken: **`%s`**%n", json.get("tests").toString());
@@ -106,6 +109,8 @@ public class TypeStats implements Runnable
 									testsTaken, typingPoints, bestWpm, averageWpm, deviation, averageAcc,
 									Math.floor(playtime / (1000 * 60 * 60)), Math.floor( (playtime / (1000 * 60))%60 ),
 									rank), false)
+					.addField("WPM Breakdown",
+							wpmRange(), false)
 					.setColor(new Color(180, 50, 80))
 					.setImage("attachment://chart.png")
 					.build()).addFile(chart, "chart.png")
@@ -182,5 +187,29 @@ public class TypeStats implements Runnable
 
 		return null;
 	}
+	
+	
+	/**
+	 * Calculates and returns the count of each WPM range the user has hit in every prompt.
+	 * @return String
+	 */
+	private String wpmRange()
+	{
+		StringBuilder wpmBreakdown = new StringBuilder();
+		AggregateIterable<Document> topPlays = Database.getTopPlays(idStr, "wpm", Integer.MAX_VALUE, true);
+		Map<Integer, Integer> buckets = new TreeMap<>(Collections.reverseOrder());
+		
+		for (Document currentPlay : topPlays)
+		{
+			int wpm = (int) (Math.floor(currentPlay.getDouble("wpm") / 10) * 10);
+			buckets.merge(wpm, 1, Integer::sum);
+		}
+		
+		buckets.forEach(
+				(wpm, count) -> 
+				wpmBreakdown.append(String.format("**`%" + 3 + "d+ WPM:`** %d\n", wpm, count))
+				);
 
+		return wpmBreakdown.toString();
+	}
 }

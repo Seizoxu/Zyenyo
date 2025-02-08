@@ -78,7 +78,7 @@ public class TypeTop implements Runnable
 			}
 		}
 		
-		AggregateIterable<Document> plays = Database.getTopPlays(userId, sortBy, isDescending);
+		AggregateIterable<Document> plays = Database.getTopPlays(userId, sortBy, 100, isDescending);
 
 		EmbedBuilder embed = new EmbedBuilder()
 				.setTitle("TypeTop for " + messageAuthorName);
