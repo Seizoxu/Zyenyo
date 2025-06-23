@@ -19,7 +19,6 @@ public class RefreshUsers implements Runnable
 	@Override
 	public void run()
 	{
-		String args[] = event.getMessage().getContentRaw().split("\\s+");
 		channel = event.getChannel();
 		
 		try

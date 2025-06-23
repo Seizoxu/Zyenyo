@@ -1,19 +1,15 @@
 package zyenyo;
 
-import static com.mongodb.client.model.Sorts.descending;
 import static com.mongodb.client.model.Sorts.ascending;
+import static com.mongodb.client.model.Sorts.descending;
 
 import java.time.Instant;
-import java.time.Period;
 import java.time.ZoneId;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -36,9 +32,9 @@ import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.InsertOneResult;
+import com.mongodb.client.result.UpdateResult;
 import com.mongodb.event.CommandFailedEvent;
 import com.mongodb.event.CommandListener;
-import com.mongodb.client.result.UpdateResult;
 
 import dataStructures.AddTestResult;
 import dataStructures.LeaderboardConfig;

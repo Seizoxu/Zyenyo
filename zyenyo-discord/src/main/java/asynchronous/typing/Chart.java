@@ -1,26 +1,19 @@
 package asynchronous.typing;
 
-import java.io.IOException;
+import java.awt.BasicStroke;
 import java.io.File;
-
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
 import java.util.LinkedHashMap;
 
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.EmbedBuilder;
-
-import org.jfree.chart.JFreeChart; 
-import org.jfree.chart.ChartFactory; 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.ChartUtilities; 
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.chart.axis.CategoryLabelPositions;
 
-import java.awt.BasicStroke;
-
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import zyenyo.Database;
 
 

@@ -1,7 +1,5 @@
 package asynchronous.typing;
 
-import java.time.Instant;
-
 import org.bson.Document;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -38,7 +36,6 @@ public class CompareTest implements Runnable
 				idStr = event.getAuthor().getId();
 			}
 
-			String messageAuthorName = event.getAuthor().getName();
 			String channelID = event.getChannel().getId();
 
 			Document stats = Database.channelCompare(channelID, idStr);
