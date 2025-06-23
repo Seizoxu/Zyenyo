@@ -44,7 +44,6 @@ public class LeaderboardConfig {
 						this.lbStatistic = "totalTp";
 						this.collection = old ?"users" : "usersv2";
 						this.accumulators.add(Accumulators.sum(this.lbStatistic, "$" + this.lbStatistic));
-						this.accumulators.add(Accumulators.first("userTag", "$userTag"));
 						break;
 					case AVERAGE:
 						this.accumulators.add(Accumulators.avg(this.lbStatistic, "$" + this.lbStatistic));

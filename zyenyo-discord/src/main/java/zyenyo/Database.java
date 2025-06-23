@@ -15,6 +15,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -28,6 +29,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.BsonField;
 import com.mongodb.client.model.Field;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Indexes;
@@ -277,12 +279,16 @@ public class Database
 	public static AggregateIterable<Document> getLeaderboards(LeaderboardConfig lbConfig) {
 		MongoCollection<Document> collection = client.getDatabase(DB_NAME).getCollection(lbConfig.getCollection());
 
+		List<BsonField> config = lbConfig.getAccumulationStrategies();
+		config.add(Accumulators.first("userTag", "$userData.userTag"));
+
 		return collection.aggregate(Arrays.asList(
 			Aggregates.match(lbConfig.getFiltrationStrategy()),
 			Aggregates.lookup("usersv2", "discordId", "discordId", "userData"),
+			Aggregates.unwind("$userData"),
 			Aggregates.match(Filters.not(Filters.exists("userData.blacklisted"))),
 			Aggregates.group("$discordId", 
-				lbConfig.getAccumulationStrategies()
+					config
 					),
 			Aggregates.sort(descending(lbConfig.getStatistic()))
 		));
