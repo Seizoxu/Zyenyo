@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.4
-FROM rust:buster AS base
+FROM rust:1.83-bookworm AS base
 WORKDIR /code
 
 FROM base AS development
@@ -17,7 +17,7 @@ RUN sed -i 's#dummy.rs#src/main.rs#' Cargo.toml
 COPY src ./src
 RUN cargo build --release
 
-FROM debian:buster-slim AS production
+FROM debian:bookworm-slim AS production
 EXPOSE 8000
 COPY --from=builder /code/target/release/zyenyo-backend /zyenyo-backend
 CMD [ "/zyenyo-backend" ]
