@@ -8,34 +8,33 @@ import java.util.PriorityQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import dataStructures.DoubleRange;
-import dataStructures.IntegerRange;
 import dataStructures.LongestCommonSubstring;
 import dataStructures.Prompt;
-import dataStructures.StringSimilarityPair;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import zyenyo.BotConfig;
 
 /**
- * Constructs and returns a list of prompts.
+ * Constructs and returns a list of prompts. Optionally searches by string, filters by TR and length, and paginates.
  */
 public class TypeList implements Runnable
 {
-	private static final int NUM_PAGES = (BotConfig.NUM_PROMPTS / 10) + 1;
-	private static final int NUM_RESULTS = 10;
+	private record DoubleRange(double lowerBound, double upperBound) {}
+	private record IntegerRange(int lowerBound, int upperBound) {}
+
+	private static final int NUM_PAGES		= (BotConfig.NUM_PROMPTS / 10) + 1;
+	private static final int NUM_RESULTS	= 10;
+	private EmbedBuilder embed				= new EmbedBuilder();
+	private String embedDescription			= "";
+	private String argSearchString			= "";
+	private int argPageNumber				= 1;
+	private int totalPages					= NUM_PAGES;
+	private List<Prompt> filteredResults	= new ArrayList<>(BotConfig.promptList); // probably highly inefficient.
+
 	private MessageReceivedEvent event;
 	private String[] args;
-	
-	private EmbedBuilder embed = new EmbedBuilder();
-	private String embedDescription = "";
-	
-	private String argSearchString = "";
-	private int argPageNumber = 1;
-	private int totalPages = NUM_PAGES;
-	private IntegerRange lengthRange = null;
-	private DoubleRange trRange = null;
-	private List<Prompt> filteredResults = new ArrayList<>(BotConfig.promptList);
+	private IntegerRange lengthRange;
+	private DoubleRange trRange;
 	
 	public TypeList(MessageReceivedEvent event, String[] args)
 	{
@@ -50,7 +49,12 @@ public class TypeList implements Runnable
 		event.getChannel().sendTyping().queue();
 		
 		parseArguments();
-		filterPrompts();
+
+		// Page Filter has to be final.
+		trFilter();
+		lengthFilter();
+		searchFilter();
+		pageFilter();
 		
 		if (filteredResults.size() == 0)
 		{
@@ -105,7 +109,12 @@ public class TypeList implements Runnable
 
 					argPageNumber = pageNumberInt;
 				}
-				catch(NumberFormatException e) {e.printStackTrace();}
+				catch(NumberFormatException e)
+				{
+					// TODO: need proper error handling w/ enums; Exception extensions for users, RuntimeExceptions for devs.
+					event.getChannel().sendMessageFormat("[Syntax Error] | %s is not a valid integer.", args[i+1]);
+					return;
+				}
 				break;
 			case "-length": case "-l":
 				try
@@ -157,11 +166,17 @@ public class TypeList implements Runnable
 	}
 	
 	
-	private DoubleRange parseRange(String rangeString, boolean isLength)
+	/**
+	 * Parses the range String given.
+	 * @param rangeString: The string which contains the range to be parsed (ex: ">4.5", "0.94-1.3", "<453" etc).
+	 * @param isDiscrete: is a discrete value (integer), rather than continuous (float).
+	 * @return
+	 */
+	private DoubleRange parseRange(String rangeString, boolean isDiscrete)
 	{
 		if (rangeString.isBlank()) {return null;}
 		
-		double addValue =  (isLength) ? 50d : 0.1d;
+		double addValue =  (isDiscrete) ? 50d : 0.1d;
 		Pattern pattern = Pattern.compile("([<>]?)([0-9]+(?:\\.?[0-9]+)?)\\-?([0-9]+(?:\\.?[0-9]+)?)?");
 		Matcher matcher = pattern.matcher(rangeString);
 		
@@ -196,29 +211,14 @@ public class TypeList implements Runnable
 	}
 	
 	
-	/**
-	 * Searches through the prompts for the search string.
-	 * @param promptOffset
-	 * @return An n=10 List of filtered/sorted prompts.
-	 */
-	private void filterPrompts()
-	{
-		// Page Filter has to be final.
-		trFilter();
-		lengthFilter();
-		searchFilter();
-		pageFilter();
-	}
-	
-	
 	private void searchFilter()
 	{
+		record StringSimilarityPair(int id, double similarityScore) {}
+
 		if (argSearchString.isBlank()) {return;}
 		
 		embedDescription += String.format("`Search String:` %s%n", argSearchString);
-		
-		PriorityQueue<StringSimilarityPair> relevantResults = new PriorityQueue<>(
-				Comparator.comparingDouble(p -> -p.similarityScore));
+		PriorityQueue<StringSimilarityPair> relevantResults = new PriorityQueue<>(Comparator.comparingDouble(p -> -p.similarityScore()));
 		for (Prompt prompt : filteredResults)
 		{
 			String promptTitleAndBody = prompt.title() + " " + prompt.body();
@@ -232,7 +232,7 @@ public class TypeList implements Runnable
 		StringSimilarityPair s;
 		while((s = relevantResults.poll()) != null)
 		{
-			Prompt prompt = BotConfig.promptList.get(s.id);
+			Prompt prompt = BotConfig.promptList.get(s.id());
 			filteredResults.add(prompt);
 		}
 	}
