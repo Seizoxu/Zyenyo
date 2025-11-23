@@ -222,10 +222,14 @@ public class TypeList implements Runnable
 		for (Prompt prompt : filteredResults)
 		{
 			String promptTitleAndBody = prompt.title() + " " + prompt.body();
-			double similarityScore = (double)(LongestCommonSubstring.find(argSearchString, promptTitleAndBody).length())
-					/ (double)(promptTitleAndBody.length());
+			double similarityScore = (double)
+					LongestCommonSubstring.find(argSearchString.toLowerCase(), promptTitleAndBody.toLowerCase()).length()
+					/ argSearchString.length();
 
-			relevantResults.offer(new StringSimilarityPair(prompt.number(), similarityScore));
+			if (similarityScore > 0)
+			{
+				relevantResults.offer(new StringSimilarityPair(prompt.number(), similarityScore));
+			}
 		}
 		
 		filteredResults = new ArrayList<Prompt>(relevantResults.size());
