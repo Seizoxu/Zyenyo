@@ -11,7 +11,7 @@ path = "src/main.rs"
 
 [dependencies]
 actix-web = "4"
-mongodb = "2"
+mongodb = "3"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 env_logger = "0.10.0"
